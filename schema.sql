@@ -3,7 +3,7 @@
 -- REFERENCE SCHEMA — validated against PostgreSQL 16.
 --
 -- NOTE: This file is NOT applied at runtime. Alembic owns the live
--- schema (see README). Keep this as the reference the SQLAlchemy
+-- schema (see ARCHITECTURE.md). Keep this as the reference the SQLAlchemy
 -- models must reproduce faithfully — every CHECK, FK ON DELETE policy
 -- and default here must appear in the models and their migrations.
 -- The `user` table is intentionally absent below; it was added when
