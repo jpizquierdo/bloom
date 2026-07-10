@@ -8,7 +8,7 @@ from decimal import Decimal
 from typing import Final
 
 # Brew-method categories. These mirror the CHECK constraint on
-# ``brew_method.category`` in schema.sql.
+# ``brew_method.category`` (see bloom/db/models/brew_method.py).
 CATEGORY_ESPRESSO: Final = "espresso"
 CATEGORY_FILTER: Final = "filter"
 CATEGORY_IMMERSION: Final = "immersion"

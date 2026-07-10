@@ -71,7 +71,6 @@ bloom/
 ├── frontend/                  # reserved — empty for now
 ├── docker/docker-compose.yml
 ├── docs/ARCHITECTURE.md       # this file
-├── schema.sql                 # reference schema (not applied at runtime)
 └── README.md
 ```
 
@@ -137,9 +136,13 @@ user  1 ──< bean  1 ──< brew >── 1  brew_method
 | `brew`        | A single extraction: the objective parameters. Central entity.      |
 | `tasting`     | A subjective evaluation of a brew (1:N — a brew can have several).   |
 
-The live schema is owned by **Alembic migrations**. `schema.sql` is the reference from the
-design phase (pre-`user`) that the ORM models reproduce faithfully; it is **not** applied at
-runtime.
+The live schema is owned by **Alembic migrations** (`alembic/versions/`); the ORM models in
+`bloom/db/models/` are the source of truth for each table's shape. To eyeball the current
+schema as plain SQL, dump it straight from the database — always accurate, never drifts:
+
+```bash
+docker exec bloom-db pg_dump -U bloom -d bloom --schema-only
+```
 
 ---
 
