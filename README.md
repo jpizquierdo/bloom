@@ -14,8 +14,8 @@ directory is reserved for later and is out of scope for now.
 - [x] Data model designed and validated against PostgreSQL 16
 - [x] Domain calculation layer specified (see [Domain logic](#domain-logic))
 - [x] Local Postgres via Docker
-- [ ] Backend implementation (FastAPI + SQLAlchemy + Alembic) — in progress
-- [ ] User accounts with roles (admin / standard)
+- [x] Backend implementation (FastAPI + SQLAlchemy + Alembic)
+- [x] User accounts with roles (admin / standard)
 - [ ] Frontend — not started, reserved for the future
 
 ---
@@ -164,6 +164,24 @@ postgresql+psycopg://bloom:bloom@localhost:5432/bloom
 > The original `schema.sql` from the design phase is kept only as a reference for the
 > initial migration; the database of record is built by `alembic upgrade head`.
 
+### Configuration
+
+Settings are read from environment variables, or a local `.env` file — copy
+`.env.example` to `.env` and adjust. Key variables:
+
+| Variable | Purpose |
+|----------|---------|
+| `DATABASE_URL` | Postgres connection string. |
+| `JWT_SECRET` | Signing key for access tokens — **set a strong value in production**. |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Access-token lifetime (default 60). |
+| `BLOOM_ADMIN_EMAIL` / `BLOOM_ADMIN_PASSWORD` | First admin, created on startup if absent. |
+
+**First admin & registration:** set `BLOOM_ADMIN_EMAIL` and `BLOOM_ADMIN_PASSWORD`
+before the first run — the admin account is bootstrapped on startup if it does not
+already exist. There is no public sign-up: admins create further accounts via
+`POST /users` (new users default to the `user` role). Authenticate at
+`POST /auth/token` (OAuth2 password flow) using the email as the username.
+
 ---
 
 ## Data model
@@ -246,8 +264,9 @@ possible future upgrade.
   - `bean` → `brew` → `tasting`: **CASCADE**.
   - `brew.method_id`: **RESTRICT** (a method in use cannot be deleted).
   - `brew.grinder_id`: **SET NULL** (deleting a grinder preserves brew history).
-  - `user` → `bean`: decision pending — likely **RESTRICT** or soft-delete, so deleting
-    an account never silently destroys brew history. To be finalised in the user migration.
+  - `user` → `bean`: **RESTRICT**, paired with **soft-delete** of users (an
+    `is_active` flag). Accounts are never hard-deleted, so brew history is never
+    silently destroyed.
 
 All constraints, both delete policies, and the aggregate query were executed against
 PostgreSQL 16 during design and behaved as documented.
