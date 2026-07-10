@@ -2,7 +2,7 @@
 
 The design record for Bloom's backend: the data model, the layering rule, and the
 rationale behind each decision. This is the "why" document — for how to **run** the
-project, see [`README.md`](README.md).
+project, see [`README.md`](../README.md).
 
 > Where docs and code disagree, the code and its Alembic migrations win; this file is
 > kept in sync with them.
@@ -70,8 +70,8 @@ bloom/
 │   └── api/                   # endpoint tests against a disposable test DB
 ├── frontend/                  # reserved — empty for now
 ├── docker/docker-compose.yml
+├── docs/ARCHITECTURE.md       # this file
 ├── schema.sql                 # reference schema (not applied at runtime)
-├── ARCHITECTURE.md            # this file
 └── README.md
 ```
 

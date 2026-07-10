@@ -20,5 +20,5 @@ Guidance for AI assistants working in this repository.
   as pure functions. `domain/` never imports ORM/FastAPI/session; routes contain no
   SQL; repositories are the only DB-access layer.
 - Typed SQLAlchemy 2.x (`Mapped[...]`), Pydantic v2, FastAPI dependency injection.
-- See `ARCHITECTURE.md` for the architecture, data model, and design decisions
+- See `docs/ARCHITECTURE.md` for the architecture, data model, and design decisions
   (source of truth). `README.md` covers how to run and use the project.

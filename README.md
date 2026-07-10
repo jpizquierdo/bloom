@@ -6,7 +6,7 @@ so you can find what actually makes a good cup repeatable.
 
 This repository is the **backend REST API and data layer** (FastAPI + PostgreSQL). A
 `frontend/` directory is reserved for later. For the design rationale and data model, see
-[`ARCHITECTURE.md`](ARCHITECTURE.md).
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Stack
 
@@ -95,8 +95,8 @@ tests/        pytest (domain/ + api/)
 docker/       docker-compose for Postgres
 ```
 
-See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the full layering rule, data model, and
-design decisions.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full layering rule, data model,
+and design decisions.
 
 ## Status
 
