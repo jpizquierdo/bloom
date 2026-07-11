@@ -25,12 +25,12 @@ def test_shared_bean_readable_by_other_user(client, bob_headers, alice_stack):
     assert client.get(f"/beans/{alice_stack['bean']}", headers=bob_headers).status_code == 200
 
 
-def test_other_user_cannot_read_brew_or_tasting(client, bob_headers, alice_stack):
-    # Brews and tastings remain private to their author.
-    assert client.get(f"/brews/{alice_stack['brew']}", headers=bob_headers).status_code == 404
+def test_shared_brew_and_tasting_readable_by_other_user(client, bob_headers, alice_stack):
+    # Brews and their tastings are a shared log: bob can read alice's.
+    assert client.get(f"/brews/{alice_stack['brew']}", headers=bob_headers).status_code == 200
     assert (
         client.get(f"/tastings/{alice_stack['tasting']}", headers=bob_headers).status_code
-        == 404
+        == 200
     )
 
 
@@ -45,23 +45,49 @@ def test_other_user_can_brew_on_shared_bean(client, bob_headers, alice_stack, lo
     assert resp.json()["user_id"] == users["bob"].id
 
 
-def test_brew_visibility_follows_author(client, alice_headers, bob_headers, alice_stack, lookups):
+def test_brew_log_is_shared(client, alice_headers, bob_headers, alice_stack, lookups):
     bob_brew_id = client.post(
         "/brews",
         headers=bob_headers,
         json={"bean_id": alice_stack["bean"], "method_id": lookups["filter"]["id"], "dose_grams": "15"},
     ).json()["id"]
 
-    alice_brews = {b["id"] for b in client.get("/brews", headers=alice_headers).json()}
-    bob_brews = {b["id"] for b in client.get("/brews", headers=bob_headers).json()}
+    alice_view = {b["id"] for b in client.get("/brews", headers=alice_headers).json()}
+    bob_view = {b["id"] for b in client.get("/brews", headers=bob_headers).json()}
 
-    # Each sees only their own brews, even on a shared bean.
-    assert alice_brews == {alice_stack["brew"]}
-    assert bob_brews == {bob_brew_id}
+    # Everyone sees the whole shared brew log.
+    assert alice_view == bob_view == {alice_stack["brew"], bob_brew_id}
 
 
-def test_bob_sees_no_brews_when_he_authored_none(client, bob_headers, alice_stack):
-    assert client.get("/brews", headers=bob_headers).json() == []
+def test_non_author_cannot_edit_or_delete_brew(client, bob_headers, alice_stack):
+    assert (
+        client.patch(
+            f"/brews/{alice_stack['brew']}", headers=bob_headers, json={"notes": "hi"}
+        ).status_code
+        == 403
+    )
+    assert client.delete(f"/brews/{alice_stack['brew']}", headers=bob_headers).status_code == 403
+
+
+def test_multiple_users_can_taste_the_same_brew(
+    client, alice_headers, bob_headers, alice_stack, users
+):
+    # alice_stack already has alice's tasting on the brew; bob adds his own.
+    resp = client.post(
+        f"/brews/{alice_stack['brew']}/tastings", headers=bob_headers, json={"overall": 6}
+    )
+    assert resp.status_code == 201
+    assert resp.json()["user_id"] == users["bob"].id
+
+    tastings = client.get(f"/brews/{alice_stack['brew']}/tastings", headers=alice_headers).json()
+    authors = {t["user_id"] for t in tastings}
+    assert authors == {users["alice"].id, users["bob"].id}
+
+
+def test_non_author_cannot_edit_or_delete_tasting(client, bob_headers, alice_stack):
+    tid = alice_stack["tasting"]
+    assert client.patch(f"/tastings/{tid}", headers=bob_headers, json={"overall": 3}).status_code == 403
+    assert client.delete(f"/tastings/{tid}", headers=bob_headers).status_code == 403
 
 
 def test_admin_sees_all(client, admin_headers, alice_stack):

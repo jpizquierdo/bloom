@@ -37,3 +37,4 @@ class TastingRead(TastingBase):
 
     id: int
     brew_id: int
+    user_id: int  # who tasted

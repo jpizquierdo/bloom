@@ -12,15 +12,11 @@ def get(db: Session, brew_id: int) -> Brew | None:
     return db.get(Brew, brew_id)
 
 
-def list_for_user(db: Session, user_id: int | None) -> list[Brew]:
-    """List brews (most recent first), scoped to their author.
-
-    ``user_id`` of ``None`` returns every brew (admin view).
-    """
-    stmt = select(Brew).order_by(Brew.brewed_at.desc())
-    if user_id is not None:
-        stmt = stmt.where(Brew.user_id == user_id)
-    return list(db.execute(stmt).scalars().all())
+def list_all(db: Session) -> list[Brew]:
+    """List every brew (most recent first) — brews are a shared log."""
+    return list(
+        db.execute(select(Brew).order_by(Brew.brewed_at.desc())).scalars().all()
+    )
 
 
 def add(db: Session, **fields: Any) -> Brew:

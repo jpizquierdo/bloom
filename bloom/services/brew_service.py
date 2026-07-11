@@ -11,7 +11,7 @@ from bloom.repositories import brews as brews_repo
 from bloom.schemas.brew import BrewCreate, BrewRead, BrewUpdate, ExtractionDiagnosticsRead
 from bloom.services import bean_service, lookups_service
 from bloom.services.access import owns_or_admin
-from bloom.services.errors import NotFoundError
+from bloom.services.errors import ForbiddenError, NotFoundError
 
 
 def serialize(brew: Brew) -> BrewRead:
@@ -31,16 +31,24 @@ def serialize(brew: Brew) -> BrewRead:
     return read
 
 
-def list_brews(db: Session, user: User) -> list[Brew]:
-    """List brews the user may see: their own (via bean), or all for an admin."""
-    return brews_repo.list_for_user(db, None if user.role == "admin" else user.id)
+def list_brews(db: Session) -> list[Brew]:
+    """List all brews — the brew log is shared across the instance."""
+    return brews_repo.list_all(db)
 
 
-def get_brew(db: Session, brew_id: int, user: User) -> Brew:
-    """Fetch a brew the user may access (its author, or an admin), else 404."""
+def get_brew(db: Session, brew_id: int) -> Brew:
+    """Fetch a brew (any user may read any brew), else raise NotFoundError."""
     brew = brews_repo.get(db, brew_id)
-    if brew is None or not owns_or_admin(user, brew.user_id):
+    if brew is None:
         raise NotFoundError("Brew not found")
+    return brew
+
+
+def get_owned_brew(db: Session, brew_id: int, user: User) -> Brew:
+    """Fetch a brew the user may modify (its author or an admin), else 404/403."""
+    brew = get_brew(db, brew_id)
+    if not owns_or_admin(user, brew.user_id):
+        raise ForbiddenError("You are not the author of this brew")
     return brew
 
 

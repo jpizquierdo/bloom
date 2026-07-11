@@ -23,6 +23,7 @@ from bloom.db.base import Base
 
 if TYPE_CHECKING:
     from bloom.db.models.brew import Brew
+    from bloom.db.models.user import User
 
 # The 1-10 scored attributes shared by every tasting.
 _SCORE_COLUMNS = (
@@ -37,7 +38,9 @@ _SCORE_COLUMNS = (
 
 
 class Tasting(Base):
-    """A subjective evaluation of a brew; a brew may have several (1:N)."""
+    """A subjective evaluation of a brew; a brew may have several (1:N), and
+    different users may each score the same brew (6B). ``user_id`` records who
+    tasted."""
 
     __tablename__ = "tasting"
     __table_args__ = (
@@ -48,11 +51,16 @@ class Tasting(Base):
             for column in _SCORE_COLUMNS
         ),
         Index("idx_tasting_brew_id", "brew_id"),
+        Index("idx_tasting_user_id", "user_id"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     brew_id: Mapped[int] = mapped_column(
         ForeignKey("brew.id", ondelete="CASCADE"), nullable=False
+    )
+    # Who tasted. RESTRICT pairs with user soft-delete.
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="RESTRICT"), nullable=False
     )
     aroma: Mapped[int | None] = mapped_column(SmallInteger)
     acidity: Mapped[int | None] = mapped_column(SmallInteger)
@@ -70,3 +78,4 @@ class Tasting(Base):
     )
 
     brew: Mapped["Brew"] = relationship(back_populates="tastings")
+    author: Mapped["User"] = relationship()

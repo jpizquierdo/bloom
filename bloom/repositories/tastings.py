@@ -17,8 +17,8 @@ def list_for_brew(db: Session, brew_id: int) -> list[Tasting]:
     return list(db.execute(stmt).scalars().all())
 
 
-def add(db: Session, *, brew_id: int, **fields: Any) -> Tasting:
-    tasting = Tasting(brew_id=brew_id, **fields)
+def add(db: Session, *, brew_id: int, user_id: int, **fields: Any) -> Tasting:
+    tasting = Tasting(brew_id=brew_id, user_id=user_id, **fields)
     db.add(tasting)
     db.flush()
     return tasting

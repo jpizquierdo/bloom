@@ -1,4 +1,9 @@
-"""Tasting business logic; ownership is resolved through the parent brew's bean."""
+"""Tasting business logic.
+
+Brews are a shared log, so anyone may taste any brew and read its tastings; a
+tasting records its author (``tasting.user_id``) and only that author (or an
+admin) may edit or delete it.
+"""
 
 from sqlalchemy.orm import Session
 
@@ -8,30 +13,38 @@ from bloom.repositories import tastings as tastings_repo
 from bloom.schemas.tasting import TastingCreate, TastingUpdate
 from bloom.services import brew_service
 from bloom.services.access import owns_or_admin
-from bloom.services.errors import NotFoundError
+from bloom.services.errors import ForbiddenError, NotFoundError
 
 
-def list_for_brew(db: Session, brew_id: int, user: User) -> list[Tasting]:
-    """List a brew's tastings, after confirming the user may see the brew."""
-    brew_service.get_brew(db, brew_id, user)  # raises NotFoundError if inaccessible
+def list_for_brew(db: Session, brew_id: int) -> list[Tasting]:
+    """List a brew's tastings (shared), after confirming the brew exists."""
+    brew_service.get_brew(db, brew_id)  # 404 if the brew does not exist
     return tastings_repo.list_for_brew(db, brew_id)
 
 
-def get_tasting(db: Session, tasting_id: int, user: User) -> Tasting:
-    """Fetch a tasting the user may access (via the brew's author), else 404."""
+def get_tasting(db: Session, tasting_id: int) -> Tasting:
+    """Fetch a tasting (any user may read any tasting), else 404."""
     tasting = tastings_repo.get(db, tasting_id)
-    if tasting is None or not owns_or_admin(user, tasting.brew.user_id):
+    if tasting is None:
         raise NotFoundError("Tasting not found")
+    return tasting
+
+
+def get_owned_tasting(db: Session, tasting_id: int, user: User) -> Tasting:
+    """Fetch a tasting the user may modify (its author or an admin), else 404/403."""
+    tasting = get_tasting(db, tasting_id)
+    if not owns_or_admin(user, tasting.user_id):
+        raise ForbiddenError("You are not the author of this tasting")
     return tasting
 
 
 def create_tasting(
     db: Session, brew_id: int, data: TastingCreate, user: User
 ) -> Tasting:
-    """Add a tasting to a brew the user owns (or any brew, for an admin)."""
-    brew_service.get_brew(db, brew_id, user)  # authorize against the brew
+    """Add a tasting (authored by ``user``) to any existing brew."""
+    brew_service.get_brew(db, brew_id)  # 404 if the brew does not exist
     tasting = tastings_repo.add(
-        db, brew_id=brew_id, **data.model_dump(exclude_none=True)
+        db, brew_id=brew_id, user_id=user.id, **data.model_dump(exclude_none=True)
     )
     db.commit()
     db.refresh(tasting)
