@@ -74,9 +74,9 @@ curl http://localhost:8000/auth/me -H "Authorization: Bearer <token>"
 | Tastings | `POST/GET /brews/{id}/tastings`, `GET/PATCH/DELETE /tastings/{id}` |
 | Lookups | `GET /brew-methods`, `GET /equipment` (create is admin-only) |
 
-Beans are **shared**: any user can see them and brew from any bean, but only a bean's owner
-(or an admin) can edit or delete it. Brews and tastings are **private to their author**;
-admins see everything. Interactive docs are served at `/docs`.
+Bloom is a **shared log**: any authenticated user can read all beans, brews and tastings,
+add beans, brew from any bean, and taste any brew. Each row records who created it, and only
+that creator (or an admin) can edit or delete it. Interactive docs are served at `/docs`.
 
 ## Tests
 

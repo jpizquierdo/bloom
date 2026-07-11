@@ -94,8 +94,8 @@ Bloom is multi-user with two roles:
 
 | Role       | Capabilities                                                                 |
 |------------|------------------------------------------------------------------------------|
-| **admin**  | Everything a standard user can do, plus manage users (create, promote/demote, deactivate) and manage shared lookup data (`brew_method`, `equipment`). Sees all brews and tastings. |
-| **user**   | Add beans (shared with everyone) and brew from any bean; manage their own beans, brews and tastings. Read shared lookup data. |
+| **admin**  | Everything a standard user can do, plus manage users (create, promote/demote, deactivate) and manage shared lookup data (`brew_method`, `equipment`). May edit/delete anyone's data. |
+| **user**   | Add beans, brew from any bean, and taste any brew — all shared and readable by everyone. May edit/delete only their own beans, brews and tastings. Read shared lookup data. |
 
 Design points:
 
@@ -104,15 +104,14 @@ Design points:
 - The **first admin is bootstrapped on startup from env vars**
   (`BLOOM_ADMIN_EMAIL` / `BLOOM_ADMIN_PASSWORD`), created only if it does not exist.
   There is **no public sign-up**: admins create further accounts, which default to `user`.
-- **Beans are shared** across the instance (household model, 11A). Any authenticated user
-  can read every bean and brew from any of them; only the bean's **owner** (`bean.user_id`)
-  or an admin may edit or delete it — a non-owner write returns `403`.
-- **Brews are owned by their author** (`brew.user_id` — who prepared the brew, independent
-  of who owns the bean). Brews and tastings (via their brew) are private to that author;
-  admins see all. Cross-user access to a private resource returns `404` (existence is not
-  leaked).
-- **Users are soft-deleted** via an `is_active` flag — never hard-deleted — so brew
-  history is always preserved.
+- **Everything is a shared log** (household/café model, 11A). Any authenticated user can
+  read all beans, brews and tastings, and can add beans, brew from any bean, and taste any
+  brew. Each row records who created it — `bean.user_id` (owner), `brew.user_id` (author),
+  `tasting.user_id` (taster) — and **only that creator (or an admin) may edit or delete it**
+  (a non-creator write returns `403`). Because tastings carry their taster, several people
+  can each score the same brew (realizing 6B).
+- **Users are soft-deleted** via an `is_active` flag — never hard-deleted — so history is
+  always preserved.
 - Auth is JWT via the OAuth2 password flow (access token only). Passwords are hashed with
   **argon2id**, never stored in plain text.
 
@@ -123,26 +122,31 @@ Design points:
 Six tables. `brew` is the central, highest-volume entity.
 
 ```
-user  1 ──< bean  1 ──< brew >── 1  brew_method
-  │                       │
-  └──< brew (author)      │  (grinder, nullable)
-                   equipment ──1
-                          │
-                   brew  1 ──< tasting
+Entities:
+    bean 1 ──< brew >── 1 brew_method
+                 │  └─── 1 equipment   (grinder, nullable)
+                 │
+                 └──< tasting          (1:N)
+
+Ownership (who created each row):
+    user 1 ──< bean       (owner)
+    user 1 ──< brew       (author)
+    user 1 ──< tasting    (taster)
 ```
 
-A `user` owns the beans they add (`bean.user_id`, shared for reading/brewing) and authors
-brews (`brew.user_id`). A brew therefore has two people attached: the bean's owner (who
-bought the bag) and the brew's author (who prepared it) — often different.
+Every row carries who created it: `bean.user_id` (owner), `brew.user_id` (author) and
+`tasting.user_id` (taster). These are often different people — one member buys a bag
+(bean owner), another brews from it (brew author), and several may score that brew
+(tasters).
 
 | Table         | Purpose                                                             |
 |---------------|---------------------------------------------------------------------|
-| `user`        | Accounts with a role (`admin` / `user`). Owns beans; authors brews. |
-| `bean`        | A physical bag/lot of coffee. Shared across the instance; `user_id` is the owner. |
+| `user`        | Accounts with a role (`admin` / `user`). Owns beans, authors brews, makes tastings. |
+| `bean`        | A physical bag/lot of coffee. Shared; `user_id` is the owner.        |
 | `brew_method` | Lookup: V60, Espresso, AeroPress… with a category.                  |
 | `equipment`   | Grinders, machines, kettles — one table, `type` discriminator.      |
 | `brew`        | A single extraction: the objective parameters. Central entity; `user_id` is the author. |
-| `tasting`     | A subjective evaluation of a brew (1:N — a brew can have several).   |
+| `tasting`     | A subjective evaluation of a brew (1:N — several per brew, by different users); `user_id` is the taster. |
 
 The live schema is owned by **Alembic migrations** (`alembic/versions/`); the ORM models in
 `bloom/db/models/` are the source of truth for each table's shape. To eyeball the current
@@ -182,7 +186,8 @@ Grinders, machines and kettles share enough shape. `brew` references it as `grin
 
 ### 6B — `tasting` is 1:N with `brew`
 Same extraction can be scored by more than one person, or re-tasted as it cools. Keeping
-tasting separate keeps objective parameters clean from subjective scores.
+tasting separate keeps objective parameters clean from subjective scores. Each tasting
+records its taster (`tasting.user_id`), so several users can score the same brew (see 11A).
 
 ### 7A — `grind_setting` as `TEXT`, not numeric
 Every grinder has its own scale; a number would lose meaning across grinders.
@@ -197,25 +202,31 @@ possible future upgrade.
 ### 10A — Full entity set from day one
 `user`, `bean`, `brew`, `tasting`, `brew_method`, `equipment` all present from the start.
 
-### 11A — Shared beans, author-owned brews (household model)
-A single bag is shared by everyone on the instance: a household buys one bag and each member
-brews from it. So beans are readable and brewable by any authenticated user (only the owner
-edits/deletes them), and each `brew` records its own **author** (`brew.user_id`) — separate
-from the bean's owner.
+### 11A — Shared log, creator-owned rows (household / café model)
+The instance is a single shared log — a household, or a café bar with several baristas.
+Every authenticated user can **read** all beans, brews and tastings; can **add** beans,
+brew from any bean, and taste any brew; and may **edit/delete only what they created**
+(a non-creator write returns `403`). Each row records its creator: `bean.user_id` (owner),
+`brew.user_id` (author), `tasting.user_id` (taster).
 
-This reopened an earlier call: originally `user_id` lived only on `bean` and a brew's owner
-was derived through it. That made "my partner brews from my bag" impossible to attribute
-correctly, so `brew` regained its own `user_id`. Alternative considered: a full `household`
-grouping entity — deferred as overkill for a small, trusted, self-hosted instance; it is the
-natural next step if per-group isolation is ever needed.
+This evolved in two steps:
+- Originally `user_id` lived only on `bean` and a brew's owner was derived through it — which
+  made "my partner brews from my bag" impossible to attribute. So beans became shared and
+  `brew` gained its own author (`brew.user_id`).
+- Then, so that several baristas can each score the same pour, brews were opened for reading
+  by anyone and `tasting` gained its own `user_id` (the taster), realizing 6B.
+
+Alternative considered: a full `household`/`team` grouping entity to isolate one group from
+another — deferred as overkill for a small, trusted, self-hosted instance; it is the natural
+next step if per-group isolation is ever needed.
 
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
 - **First admin via env vars on startup**; further accounts are admin-created and default
   to `user` (no public registration).
 - **JWT / OAuth2 password flow**, access token only; passwords hashed with argon2id.
-- **Shared beans** (read + brew by anyone; owner-only edit/delete); **brews/tastings owned
-  by the brew's author** (`brew.user_id`).
+- **Shared read across the instance**; **each row edited/deleted only by its creator** (or an
+  admin), tracked by `bean.user_id` / `brew.user_id` / `tasting.user_id`.
 - **Soft-delete** of users (`is_active`) instead of hard deletion.
 
 ### Cross-cutting choices
@@ -227,9 +238,9 @@ natural next step if per-group isolation is ever needed.
     bean removes *every* user's brews on it (only the owner can trigger this).
   - `brew.method_id`: **RESTRICT** (a method in use cannot be deleted).
   - `brew.grinder_id`: **SET NULL** (deleting a grinder preserves brew history).
-  - `user` → `bean` and `user` → `brew` (author): **RESTRICT**, paired with **soft-delete**
-    of users (an `is_active` flag). Accounts are never hard-deleted, so history is never
-    silently destroyed.
+  - `user` → `bean` (owner), `user` → `brew` (author), `user` → `tasting` (taster): all
+    **RESTRICT**, paired with **soft-delete** of users (an `is_active` flag). Accounts are
+    never hard-deleted, so history is never silently destroyed.
 
 All constraints and delete policies were executed against PostgreSQL 16 during design and
 behave as documented.
