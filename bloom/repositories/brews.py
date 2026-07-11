@@ -19,6 +19,14 @@ def list_all(db: Session) -> list[Brew]:
     )
 
 
+def list_for_author(db: Session, user_id: int) -> list[Brew]:
+    """List brews authored by ``user_id`` (most recent first)."""
+    stmt = (
+        select(Brew).where(Brew.user_id == user_id).order_by(Brew.brewed_at.desc())
+    )
+    return list(db.execute(stmt).scalars().all())
+
+
 def add(db: Session, **fields: Any) -> Brew:
     brew = Brew(**fields)
     db.add(brew)

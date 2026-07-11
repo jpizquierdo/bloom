@@ -59,6 +59,22 @@ def test_brew_log_is_shared(client, alice_headers, bob_headers, alice_stack, loo
     assert alice_view == bob_view == {alice_stack["brew"], bob_brew_id}
 
 
+def test_mine_filter_returns_only_own_brews(client, alice_headers, bob_headers, alice_stack, lookups):
+    bob_brew_id = client.post(
+        "/brews",
+        headers=bob_headers,
+        json={"bean_id": alice_stack["bean"], "method_id": lookups["filter"]["id"], "dose_grams": "15"},
+    ).json()["id"]
+
+    # Default: the whole shared log.
+    assert len(client.get("/brews", headers=alice_headers).json()) == 2
+    # ?mine=true: only the caller's own brews.
+    alice_mine = {b["id"] for b in client.get("/brews?mine=true", headers=alice_headers).json()}
+    bob_mine = {b["id"] for b in client.get("/brews?mine=true", headers=bob_headers).json()}
+    assert alice_mine == {alice_stack["brew"]}
+    assert bob_mine == {bob_brew_id}
+
+
 def test_non_author_cannot_edit_or_delete_brew(client, bob_headers, alice_stack):
     assert (
         client.patch(

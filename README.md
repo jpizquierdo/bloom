@@ -70,7 +70,7 @@ curl http://localhost:8000/auth/me -H "Authorization: Bearer <token>"
 | Auth | `POST /auth/token`, `GET /auth/me` |
 | Users (admin) | `POST /users`, `GET /users`, `PATCH /users/{id}` |
 | Beans | `POST/GET /beans`, `GET/PATCH/DELETE /beans/{id}` |
-| Brews | `POST/GET /brews`, `GET/PATCH/DELETE /brews/{id}` |
+| Brews | `POST/GET /brews` (`?mine=true` for your own), `GET/PATCH/DELETE /brews/{id}` |
 | Tastings | `POST/GET /brews/{id}/tastings`, `GET/PATCH/DELETE /tastings/{id}` |
 | Lookups | `GET /brew-methods`, `GET /equipment` (create is admin-only) |
 

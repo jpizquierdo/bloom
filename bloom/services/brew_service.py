@@ -31,8 +31,11 @@ def serialize(brew: Brew) -> BrewRead:
     return read
 
 
-def list_brews(db: Session) -> list[Brew]:
-    """List all brews — the brew log is shared across the instance."""
+def list_brews(db: Session, user: User, mine: bool = False) -> list[Brew]:
+    """List brews. By default the whole shared log; ``mine`` restricts to the
+    user's own (authored) brews."""
+    if mine:
+        return brews_repo.list_for_author(db, user.id)
     return brews_repo.list_all(db)
 
 
