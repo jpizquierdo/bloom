@@ -29,6 +29,14 @@ def test_beans_are_shared_across_users(client, alice_headers, bob_headers):
     assert names == {"Alice bean", "Bob bean"}
 
 
+def test_mine_filter_returns_only_own_beans(client, alice_headers, bob_headers):
+    _make_bean(client, alice_headers, name="Alice bean")
+    _make_bean(client, bob_headers, name="Bob bean")
+
+    mine = {b["name"] for b in client.get("/beans?mine=true", headers=alice_headers).json()}
+    assert mine == {"Alice bean"}
+
+
 def test_non_owner_can_read_but_not_modify_bean(client, alice_headers, bob_headers):
     bean_id = _make_bean(client, alice_headers).json()["id"]
     # A non-owner can read a shared bean...

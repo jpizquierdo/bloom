@@ -17,6 +17,12 @@ def list_all(db: Session) -> list[Bean]:
     return list(db.execute(select(Bean).order_by(Bean.id)).scalars().all())
 
 
+def list_for_owner(db: Session, user_id: int) -> list[Bean]:
+    """List beans owned by ``user_id``."""
+    stmt = select(Bean).where(Bean.user_id == user_id).order_by(Bean.id)
+    return list(db.execute(stmt).scalars().all())
+
+
 def add(db: Session, *, user_id: int, **fields: Any) -> Bean:
     bean = Bean(user_id=user_id, **fields)
     db.add(bean)

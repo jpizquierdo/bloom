@@ -25,6 +25,14 @@ def list_tastings(brew_id: int, db: DbSession, _user: CurrentUser) -> list[Tasti
     return tasting_service.list_for_brew(db, brew_id)
 
 
+@router.get("/tastings", response_model=list[TastingRead])
+def list_all_tastings(
+    db: DbSession, user: CurrentUser, mine: bool = False
+) -> list[TastingRead]:
+    # Shared tasting log by default; ?mine=true restricts to your own tastings.
+    return tasting_service.list_tastings(db, user, mine=mine)
+
+
 @router.get("/tastings/{tasting_id}", response_model=TastingRead)
 def get_tasting(tasting_id: int, db: DbSession, _user: CurrentUser) -> TastingRead:
     return tasting_service.get_tasting(db, tasting_id)

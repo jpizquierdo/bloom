@@ -10,8 +10,10 @@ from bloom.services.access import owns_or_admin
 from bloom.services.errors import ForbiddenError, NotFoundError
 
 
-def list_beans(db: Session) -> list[Bean]:
-    """List all beans — beans are shared across the instance."""
+def list_beans(db: Session, user: User, mine: bool = False) -> list[Bean]:
+    """List beans. By default all (shared); ``mine`` restricts to the user's own."""
+    if mine:
+        return beans_repo.list_for_owner(db, user.id)
     return beans_repo.list_all(db)
 
 

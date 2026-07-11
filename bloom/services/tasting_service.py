@@ -22,6 +22,14 @@ def list_for_brew(db: Session, brew_id: int) -> list[Tasting]:
     return tastings_repo.list_for_brew(db, brew_id)
 
 
+def list_tastings(db: Session, user: User, mine: bool = False) -> list[Tasting]:
+    """List tastings. By default the whole shared log; ``mine`` restricts to
+    the user's own (tastings they made)."""
+    if mine:
+        return tastings_repo.list_for_user(db, user.id)
+    return tastings_repo.list_all(db)
+
+
 def get_tasting(db: Session, tasting_id: int) -> Tasting:
     """Fetch a tasting (any user may read any tasting), else 404."""
     tasting = tastings_repo.get(db, tasting_id)

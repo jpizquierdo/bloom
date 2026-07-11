@@ -15,9 +15,9 @@ def create_bean(data: BeanCreate, db: DbSession, user: CurrentUser) -> BeanRead:
 
 
 @router.get("", response_model=list[BeanRead])
-def list_beans(db: DbSession, _user: CurrentUser) -> list[BeanRead]:
-    # Beans are shared: any authenticated user sees them all.
-    return bean_service.list_beans(db)
+def list_beans(db: DbSession, user: CurrentUser, mine: bool = False) -> list[BeanRead]:
+    # Shared by default; ?mine=true restricts to beans you own.
+    return bean_service.list_beans(db, user, mine=mine)
 
 
 @router.get("/{bean_id}", response_model=BeanRead)

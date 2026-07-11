@@ -100,6 +100,21 @@ def test_multiple_users_can_taste_the_same_brew(
     assert authors == {users["alice"].id, users["bob"].id}
 
 
+def test_mine_filter_returns_only_own_tastings(client, alice_headers, bob_headers, alice_stack):
+    # alice_stack already has alice's tasting; bob adds his own on the same brew.
+    bob_tasting_id = client.post(
+        f"/brews/{alice_stack['brew']}/tastings", headers=bob_headers, json={"overall": 5}
+    ).json()["id"]
+
+    # Default: the whole shared tasting log.
+    assert len(client.get("/tastings", headers=alice_headers).json()) == 2
+    # ?mine=true: only the caller's own tastings.
+    alice_mine = {t["id"] for t in client.get("/tastings?mine=true", headers=alice_headers).json()}
+    bob_mine = {t["id"] for t in client.get("/tastings?mine=true", headers=bob_headers).json()}
+    assert alice_mine == {alice_stack["tasting"]}
+    assert bob_mine == {bob_tasting_id}
+
+
 def test_non_author_cannot_edit_or_delete_tasting(client, bob_headers, alice_stack):
     tid = alice_stack["tasting"]
     assert client.patch(f"/tastings/{tid}", headers=bob_headers, json={"overall": 3}).status_code == 403
