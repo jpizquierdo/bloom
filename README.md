@@ -74,8 +74,9 @@ curl http://localhost:8000/auth/me -H "Authorization: Bearer <token>"
 | Tastings | `POST/GET /brews/{id}/tastings`, `GET/PATCH/DELETE /tastings/{id}` |
 | Lookups | `GET /brew-methods`, `GET /equipment` (create is admin-only) |
 
-Users only see and edit their own beans/brews/tastings; admins see everything. Interactive
-docs are served at `/docs`.
+Beans are **shared**: any user can see them and brew from any bean, but only a bean's owner
+(or an admin) can edit or delete it. Brews and tastings are **private to their author**;
+admins see everything. Interactive docs are served at `/docs`.
 
 ## Tests
 
