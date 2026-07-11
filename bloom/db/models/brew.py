@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from bloom.db.models.brew_method import BrewMethod
     from bloom.db.models.equipment import Equipment
     from bloom.db.models.tasting import Tasting
+    from bloom.db.models.user import User
 
 
 class Brew(Base):
@@ -35,6 +36,9 @@ class Brew(Base):
     ``ratio`` is never stored (computed in the domain layer). ``tds_percent``
     and ``extraction_yield_percent`` are real refractometer measurements; EY is
     computed once at write time when only TDS is provided.
+
+    ``user_id`` is the **author** — who prepared this brew. Beans are shared
+    across the instance, so the author is not necessarily the bean's owner.
     """
 
     __tablename__ = "brew"
@@ -49,10 +53,15 @@ class Brew(Base):
         ),
         Index("idx_brew_bean_id", "bean_id"),
         Index("idx_brew_method_id", "method_id"),
+        Index("idx_brew_user_id", "user_id"),
         Index("idx_brew_brewed_at", text("brewed_at DESC")),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    # Author: who prepared the brew. RESTRICT pairs with user soft-delete.
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="RESTRICT"), nullable=False
+    )
     bean_id: Mapped[int] = mapped_column(
         ForeignKey("bean.id", ondelete="CASCADE"), nullable=False
     )
@@ -82,6 +91,7 @@ class Brew(Base):
 
     notes: Mapped[str | None] = mapped_column(Text)
 
+    author: Mapped["User"] = relationship()
     bean: Mapped["Bean"] = relationship(back_populates="brews")
     method: Mapped["BrewMethod"] = relationship()
     grinder: Mapped["Equipment | None"] = relationship()

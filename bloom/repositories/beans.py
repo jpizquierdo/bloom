@@ -12,12 +12,9 @@ def get(db: Session, bean_id: int) -> Bean | None:
     return db.get(Bean, bean_id)
 
 
-def list_for_user(db: Session, user_id: int | None) -> list[Bean]:
-    """List beans, filtered to ``user_id`` unless it is ``None`` (admin: all)."""
-    stmt = select(Bean).order_by(Bean.id)
-    if user_id is not None:
-        stmt = stmt.where(Bean.user_id == user_id)
-    return list(db.execute(stmt).scalars().all())
+def list_all(db: Session) -> list[Bean]:
+    """List every bean — beans are shared across the instance."""
+    return list(db.execute(select(Bean).order_by(Bean.id)).scalars().all())
 
 
 def add(db: Session, *, user_id: int, **fields: Any) -> Bean:

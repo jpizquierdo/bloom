@@ -20,11 +20,13 @@ def alice_stack(client, alice_headers, lookups):
     return {"bean": bean_id, "brew": brew_id, "tasting": tasting_id}
 
 
-def test_other_user_cannot_read_bean(client, bob_headers, alice_stack):
-    assert client.get(f"/beans/{alice_stack['bean']}", headers=bob_headers).status_code == 404
+def test_shared_bean_readable_by_other_user(client, bob_headers, alice_stack):
+    # Beans are shared: bob can read alice's bean.
+    assert client.get(f"/beans/{alice_stack['bean']}", headers=bob_headers).status_code == 200
 
 
 def test_other_user_cannot_read_brew_or_tasting(client, bob_headers, alice_stack):
+    # Brews and tastings remain private to their author.
     assert client.get(f"/brews/{alice_stack['brew']}", headers=bob_headers).status_code == 404
     assert (
         client.get(f"/tastings/{alice_stack['tasting']}", headers=bob_headers).status_code
@@ -32,16 +34,33 @@ def test_other_user_cannot_read_brew_or_tasting(client, bob_headers, alice_stack
     )
 
 
-def test_other_user_cannot_brew_on_foreign_bean(client, bob_headers, alice_stack, lookups):
+def test_other_user_can_brew_on_shared_bean(client, bob_headers, alice_stack, lookups, users):
+    # bob brews from alice's (shared) bean; the brew is authored by bob.
     resp = client.post(
         "/brews",
         headers=bob_headers,
         json={"bean_id": alice_stack["bean"], "method_id": lookups["filter"]["id"], "dose_grams": "15"},
     )
-    assert resp.status_code == 404
+    assert resp.status_code == 201
+    assert resp.json()["user_id"] == users["bob"].id
 
 
-def test_bob_sees_no_brews(client, bob_headers, alice_stack):
+def test_brew_visibility_follows_author(client, alice_headers, bob_headers, alice_stack, lookups):
+    bob_brew_id = client.post(
+        "/brews",
+        headers=bob_headers,
+        json={"bean_id": alice_stack["bean"], "method_id": lookups["filter"]["id"], "dose_grams": "15"},
+    ).json()["id"]
+
+    alice_brews = {b["id"] for b in client.get("/brews", headers=alice_headers).json()}
+    bob_brews = {b["id"] for b in client.get("/brews", headers=bob_headers).json()}
+
+    # Each sees only their own brews, even on a shared bean.
+    assert alice_brews == {alice_stack["brew"]}
+    assert bob_brews == {bob_brew_id}
+
+
+def test_bob_sees_no_brews_when_he_authored_none(client, bob_headers, alice_stack):
     assert client.get("/brews", headers=bob_headers).json() == []
 
 

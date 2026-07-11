@@ -37,21 +37,23 @@ def list_brews(db: Session, user: User) -> list[Brew]:
 
 
 def get_brew(db: Session, brew_id: int, user: User) -> Brew:
-    """Fetch a brew the user may access (via its bean's owner), else 404."""
+    """Fetch a brew the user may access (its author, or an admin), else 404."""
     brew = brews_repo.get(db, brew_id)
-    if brew is None or not owns_or_admin(user, brew.bean.user_id):
+    if brew is None or not owns_or_admin(user, brew.user_id):
         raise NotFoundError("Brew not found")
     return brew
 
 
 def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
-    """Create a brew after validating referenced rows and computing EY.
+    """Create a brew (authored by ``user``) after validating refs and computing EY.
 
-    Extraction yield is stored once at write time when only TDS was measured
-    (and beverage mass is known); an explicitly provided value is kept as-is.
+    Beans are shared, so a brew may be made from any existing bean; ``user`` is
+    recorded as the author. Extraction yield is stored once at write time when
+    only TDS was measured (and beverage mass is known); an explicit value is kept.
     """
-    # Validate references and ownership (each raises NotFoundError on failure).
-    bean_service.get_bean(db, data.bean_id, user)
+    # Validate references (each raises NotFoundError on failure). The bean only
+    # needs to exist — beans are shared, not owned per-brew.
+    bean_service.get_bean(db, data.bean_id)
     lookups_service.get_brew_method(db, data.method_id)
     if data.grinder_id is not None:
         lookups_service.get_equipment(db, data.grinder_id)
@@ -66,7 +68,7 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
     else:
         payload.pop("extraction_yield_percent", None)
 
-    brew = brews_repo.add(db, **payload)
+    brew = brews_repo.add(db, user_id=user.id, **payload)
     db.commit()
     db.refresh(brew)
     return brew

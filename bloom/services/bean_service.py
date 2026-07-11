@@ -7,19 +7,27 @@ from bloom.db.models.user import User
 from bloom.repositories import beans as beans_repo
 from bloom.schemas.bean import BeanCreate, BeanUpdate
 from bloom.services.access import owns_or_admin
-from bloom.services.errors import NotFoundError
+from bloom.services.errors import ForbiddenError, NotFoundError
 
 
-def list_beans(db: Session, user: User) -> list[Bean]:
-    """List beans the user may see: their own, or all for an admin."""
-    return beans_repo.list_for_user(db, None if user.role == "admin" else user.id)
+def list_beans(db: Session) -> list[Bean]:
+    """List all beans — beans are shared across the instance."""
+    return beans_repo.list_all(db)
 
 
-def get_bean(db: Session, bean_id: int, user: User) -> Bean:
-    """Fetch a bean the user may access, else raise NotFoundError."""
+def get_bean(db: Session, bean_id: int) -> Bean:
+    """Fetch a bean (any user may read any bean), else raise NotFoundError."""
     bean = beans_repo.get(db, bean_id)
-    if bean is None or not owns_or_admin(user, bean.user_id):
+    if bean is None:
         raise NotFoundError("Bean not found")
+    return bean
+
+
+def get_owned_bean(db: Session, bean_id: int, user: User) -> Bean:
+    """Fetch a bean the user may modify (owner or admin), else 404/403."""
+    bean = get_bean(db, bean_id)
+    if not owns_or_admin(user, bean.user_id):
+        raise ForbiddenError("You do not own this bean")
     return bean
 
 

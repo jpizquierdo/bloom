@@ -18,9 +18,9 @@ def list_for_brew(db: Session, brew_id: int, user: User) -> list[Tasting]:
 
 
 def get_tasting(db: Session, tasting_id: int, user: User) -> Tasting:
-    """Fetch a tasting the user may access (via brew → bean owner), else 404."""
+    """Fetch a tasting the user may access (via the brew's author), else 404."""
     tasting = tastings_repo.get(db, tasting_id)
-    if tasting is None or not owns_or_admin(user, tasting.brew.bean.user_id):
+    if tasting is None or not owns_or_admin(user, tasting.brew.user_id):
         raise NotFoundError("Tasting not found")
     return tasting
 

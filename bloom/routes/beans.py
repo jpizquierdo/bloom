@@ -15,25 +15,26 @@ def create_bean(data: BeanCreate, db: DbSession, user: CurrentUser) -> BeanRead:
 
 
 @router.get("", response_model=list[BeanRead])
-def list_beans(db: DbSession, user: CurrentUser) -> list[BeanRead]:
-    return bean_service.list_beans(db, user)
+def list_beans(db: DbSession, _user: CurrentUser) -> list[BeanRead]:
+    # Beans are shared: any authenticated user sees them all.
+    return bean_service.list_beans(db)
 
 
 @router.get("/{bean_id}", response_model=BeanRead)
-def get_bean(bean_id: int, db: DbSession, user: CurrentUser) -> BeanRead:
-    return bean_service.get_bean(db, bean_id, user)
+def get_bean(bean_id: int, db: DbSession, _user: CurrentUser) -> BeanRead:
+    return bean_service.get_bean(db, bean_id)
 
 
 @router.patch("/{bean_id}", response_model=BeanRead)
 def update_bean(
     bean_id: int, data: BeanUpdate, db: DbSession, user: CurrentUser
 ) -> BeanRead:
-    bean = bean_service.get_bean(db, bean_id, user)
+    bean = bean_service.get_owned_bean(db, bean_id, user)
     return bean_service.update_bean(db, bean, data)
 
 
 @router.delete("/{bean_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_bean(bean_id: int, db: DbSession, user: CurrentUser) -> Response:
-    bean = bean_service.get_bean(db, bean_id, user)
+    bean = bean_service.get_owned_bean(db, bean_id, user)
     bean_service.delete_bean(db, bean)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -20,12 +20,27 @@ def test_create_and_get_bean(client, alice_headers, users):
     assert got.json()["name"] == "Kenya AA"
 
 
-def test_list_returns_only_own_beans(client, alice_headers, bob_headers):
+def test_beans_are_shared_across_users(client, alice_headers, bob_headers):
     _make_bean(client, alice_headers, name="Alice bean")
     _make_bean(client, bob_headers, name="Bob bean")
 
-    alice_list = client.get("/beans", headers=alice_headers).json()
-    assert [b["name"] for b in alice_list] == ["Alice bean"]
+    # Beans are shared: every authenticated user sees them all.
+    names = {b["name"] for b in client.get("/beans", headers=alice_headers).json()}
+    assert names == {"Alice bean", "Bob bean"}
+
+
+def test_non_owner_can_read_but_not_modify_bean(client, alice_headers, bob_headers):
+    bean_id = _make_bean(client, alice_headers).json()["id"]
+    # A non-owner can read a shared bean...
+    assert client.get(f"/beans/{bean_id}", headers=bob_headers).status_code == 200
+    # ...but cannot edit or delete it.
+    assert (
+        client.patch(
+            f"/beans/{bean_id}", headers=bob_headers, json={"is_finished": True}
+        ).status_code
+        == 403
+    )
+    assert client.delete(f"/beans/{bean_id}", headers=bob_headers).status_code == 403
 
 
 def test_update_bean(client, alice_headers):

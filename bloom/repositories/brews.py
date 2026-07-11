@@ -5,7 +5,6 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from bloom.db.models.bean import Bean
 from bloom.db.models.brew import Brew
 
 
@@ -14,13 +13,13 @@ def get(db: Session, brew_id: int) -> Brew | None:
 
 
 def list_for_user(db: Session, user_id: int | None) -> list[Brew]:
-    """List brews (most recent first), scoped to an owner via the parent bean.
+    """List brews (most recent first), scoped to their author.
 
     ``user_id`` of ``None`` returns every brew (admin view).
     """
     stmt = select(Brew).order_by(Brew.brewed_at.desc())
     if user_id is not None:
-        stmt = stmt.join(Bean, Brew.bean_id == Bean.id).where(Bean.user_id == user_id)
+        stmt = stmt.where(Brew.user_id == user_id)
     return list(db.execute(stmt).scalars().all())
 
 

@@ -42,6 +42,7 @@ class BrewRead(BrewBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    user_id: int  # author — who prepared the brew
     bean_id: int
     method_id: int
     dose_grams: Decimal

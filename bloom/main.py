@@ -12,7 +12,7 @@ from bloom.core.dependencies import get_db
 from bloom.db.session import SessionLocal
 from bloom.routes import auth, beans, brew_methods, brews, equipment, tastings, users
 from bloom.services import auth_service
-from bloom.services.errors import NotFoundError
+from bloom.services.errors import ForbiddenError, NotFoundError
 
 
 @asynccontextmanager
@@ -33,6 +33,10 @@ def create_app() -> FastAPI:
     @app.exception_handler(NotFoundError)
     async def _not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
         return JSONResponse(status_code=404, content={"detail": str(exc) or "Not found"})
+
+    @app.exception_handler(ForbiddenError)
+    async def _forbidden_handler(request: Request, exc: ForbiddenError) -> JSONResponse:
+        return JSONResponse(status_code=403, content={"detail": str(exc) or "Forbidden"})
 
     @app.get("/health", tags=["system"])
     def health(db: Session = Depends(get_db)) -> dict[str, str]:

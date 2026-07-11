@@ -48,6 +48,9 @@ def engine():
     admin_engine.dispose()
 
     engine = create_engine(_test_database_url())
+    # Recreate the schema from the current models so the test DB never drifts
+    # (create_all alone would not pick up columns added since a previous run).
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     yield engine
     engine.dispose()
