@@ -15,9 +15,14 @@ logger = get_logger(__name__)
 def authenticate(db: Session, email: str, password: str) -> User | None:
     """Return the user if credentials are valid and the account is active."""
     user = users_repo.get_by_email(db, email)
-    if user is None or not user.is_active:
+    if user is None:
+        logger.warning("Failed login: unknown email %s", email)
+        return None
+    if not user.is_active:
+        logger.warning("Failed login: inactive user %s (%s)", user.id, email)
         return None
     if not verify_password(password, user.hashed_password):
+        logger.warning("Failed login: wrong password for user %s (%s)", user.id, email)
         return None
     return user
 
