@@ -19,6 +19,8 @@ Guidance for AI assistants working in this repository.
   behind a non-obvious choice, not the *what*. Do not restate what the line plainly does.
 - No header/banner comments describing a file's purpose (a module docstring is enough),
   and no step-numbering narration (`# 1)`, `# 2)`). Match the surrounding file's density.
+- **Tests are an exception**: verbose, explanatory comments (expected values, intent of
+  each case) are welcome there. This rule targets production code.
 
 ## Project conventions
 
