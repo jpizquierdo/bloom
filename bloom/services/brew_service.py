@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
+from bloom.core.logger import get_logger
 from bloom.db.models.brew import Brew
 from bloom.db.models.user import User
 from bloom.domain.calculations import brew_ratio, classify_extraction, extraction_yield
@@ -12,6 +13,8 @@ from bloom.schemas.brew import BrewCreate, BrewRead, BrewUpdate, ExtractionDiagn
 from bloom.services import bean_service, lookups_service
 from bloom.services.access import owns_or_admin
 from bloom.services.errors import ForbiddenError, NotFoundError
+
+logger = get_logger(__name__)
 
 
 def serialize(brew: Brew) -> BrewRead:
@@ -81,6 +84,7 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
     brew = brews_repo.add(db, user_id=user.id, **payload)
     db.commit()
     db.refresh(brew)
+    logger.info("Brew %s created by user %s (bean %s)", brew.id, user.id, brew.bean_id)
     return brew
 
 

@@ -2,12 +2,15 @@
 
 from sqlalchemy.orm import Session
 
+from bloom.core.logger import get_logger
 from bloom.db.models.bean import Bean
 from bloom.db.models.user import User
 from bloom.repositories import beans as beans_repo
 from bloom.schemas.bean import BeanCreate, BeanUpdate
 from bloom.services.access import owns_or_admin
 from bloom.services.errors import ForbiddenError, NotFoundError
+
+logger = get_logger(__name__)
 
 
 def list_beans(db: Session, user: User, mine: bool = False) -> list[Bean]:
@@ -38,6 +41,7 @@ def create_bean(db: Session, data: BeanCreate, user: User) -> Bean:
     bean = beans_repo.add(db, user_id=user.id, **data.model_dump())
     db.commit()
     db.refresh(bean)
+    logger.info("Bean %s (%s) created by user %s", bean.id, bean.name, user.id)
     return bean
 
 

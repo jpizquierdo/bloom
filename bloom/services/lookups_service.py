@@ -6,11 +6,14 @@ route layer.
 
 from sqlalchemy.orm import Session
 
+from bloom.core.logger import get_logger
 from bloom.db.models.brew_method import BrewMethod
 from bloom.db.models.equipment import Equipment
 from bloom.repositories import lookups as lookups_repo
 from bloom.schemas.lookups import BrewMethodCreate, EquipmentCreate
 from bloom.services.errors import NotFoundError
+
+logger = get_logger(__name__)
 
 
 def list_brew_methods(db: Session) -> list[BrewMethod]:
@@ -50,4 +53,5 @@ def create_equipment(db: Session, data: EquipmentCreate) -> Equipment:
     )
     db.commit()
     db.refresh(equipment)
+    logger.info("Equipment %s (%s '%s') created", equipment.id, equipment.type, equipment.name)
     return equipment

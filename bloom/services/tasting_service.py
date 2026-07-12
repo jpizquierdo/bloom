@@ -7,6 +7,7 @@ admin) may edit or delete it.
 
 from sqlalchemy.orm import Session
 
+from bloom.core.logger import get_logger
 from bloom.db.models.tasting import Tasting
 from bloom.db.models.user import User
 from bloom.repositories import tastings as tastings_repo
@@ -14,6 +15,8 @@ from bloom.schemas.tasting import TastingCreate, TastingUpdate
 from bloom.services import brew_service
 from bloom.services.access import owns_or_admin
 from bloom.services.errors import ForbiddenError, NotFoundError
+
+logger = get_logger(__name__)
 
 
 def list_for_brew(db: Session, brew_id: int) -> list[Tasting]:
@@ -56,6 +59,7 @@ def create_tasting(
     )
     db.commit()
     db.refresh(tasting)
+    logger.info("Tasting %s created by user %s (brew %s)", tasting.id, user.id, brew_id)
     return tasting
 
 
