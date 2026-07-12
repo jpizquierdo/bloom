@@ -27,16 +27,17 @@ docker compose -f docker/docker-compose.yml up -d
 # 2. Install dependencies
 uv sync
 
-# 3. Apply migrations
-uv run alembic upgrade head
-
-# 4. Configure the first admin (created on startup if it doesn't exist)
+# 3. Configure (copy and edit; set BLOOM_ADMIN_EMAIL / BLOOM_ADMIN_PASSWORD)
 cp .env.example .env
-#   then set BLOOM_ADMIN_EMAIL and BLOOM_ADMIN_PASSWORD in .env
 
-# 5. Run the API — docs at http://localhost:8000/docs
+# 4. Run the API — docs at http://localhost:8000/docs
 uv run fastapi dev bloom/main.py     # or: uv run uvicorn bloom.main:app --reload
 ```
+
+On startup Bloom waits for the database, applies any pending migrations
+(`alembic upgrade head`), and bootstraps the first admin — so there is no separate
+migration step. Bloom runs as a **single instance**, which makes migrating in-process
+simple and safe. To run migrations by hand you can still use `uv run alembic upgrade head`.
 
 > `fastapi[standard]` ships the FastAPI CLI: `fastapi dev` (auto-reload) for development
 > and `fastapi run` for production. `uvicorn` is still available if you prefer it.

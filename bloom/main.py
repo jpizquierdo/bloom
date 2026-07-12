@@ -9,20 +9,19 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from bloom.core.dependencies import get_db
-from bloom.db.session import SessionLocal
+from bloom.db import init_db
 from bloom.routes import auth, beans, brew_methods, brews, equipment, tastings, users
-from bloom.services import auth_service
 from bloom.services.errors import ForbiddenError, NotFoundError
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Run startup tasks: bootstrap the configured first admin if needed."""
-    db = SessionLocal()
-    try:
-        auth_service.bootstrap_admin(db)
-    finally:
-        db.close()
+    """Run startup tasks: wait for the DB, migrate to head, bootstrap the admin.
+
+    Single-instance deployment, so migrating in-process is safe; the
+    ``db_is_at_head`` guard makes restarts cheap.
+    """
+    init_db.init_db()
     yield
 
 

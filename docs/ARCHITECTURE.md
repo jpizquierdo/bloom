@@ -101,9 +101,13 @@ Design points:
 
 - The role is a column on `user` (`role TEXT CHECK (role IN ('admin','user'))`), not a
   separate permissions table — two roles don't justify RBAC machinery yet.
-- The **first admin is bootstrapped on startup from env vars**
-  (`BLOOM_ADMIN_EMAIL` / `BLOOM_ADMIN_PASSWORD`), created only if it does not exist.
-  There is **no public sign-up**: admins create further accounts, which default to `user`.
+- **On startup** (FastAPI lifespan, see `bloom/db/init_db.py`) the app waits for the DB,
+  applies pending migrations (`alembic upgrade head`, guarded by a `db_is_at_head` check so
+  restarts are cheap), and bootstraps the admin. Bloom is deployed as a **single instance**,
+  so migrating in-process is simple and race-free — no separate migration Job needed.
+- The **first admin is bootstrapped from env vars** (`BLOOM_ADMIN_EMAIL` /
+  `BLOOM_ADMIN_PASSWORD`), created only if it does not exist. There is **no public sign-up**:
+  admins create further accounts, which default to `user`.
 - **Everything is a shared log** (household/café model, 11A). Any authenticated user can
   read all beans, brews and tastings, and can add beans, brew from any bean, and taste any
   brew. Each row records who created it — `bean.user_id` (owner), `brew.user_id` (author),
