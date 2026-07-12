@@ -18,7 +18,6 @@ def create_brew(data: BrewCreate, db: DbSession, user: CurrentUser) -> BrewRead:
 
 @router.get("", response_model=list[BrewRead])
 def list_brews(db: DbSession, user: CurrentUser, mine: bool = False) -> list[BrewRead]:
-    # Shared brew log by default; ?mine=true restricts to your own brews.
     brews = brew_service.list_brews(db, user, mine=mine)
     return [brew_service.serialize(brew) for brew in brews]
 

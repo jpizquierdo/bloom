@@ -29,7 +29,6 @@ def list_tastings(brew_id: int, db: DbSession, _user: CurrentUser) -> list[Tasti
 def list_all_tastings(
     db: DbSession, user: CurrentUser, mine: bool = False
 ) -> list[TastingRead]:
-    # Shared tasting log by default; ?mine=true restricts to your own tastings.
     return tasting_service.list_tastings(db, user, mine=mine)
 
 

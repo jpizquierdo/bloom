@@ -8,29 +8,18 @@ from alembic import context
 from bloom.core.config import get_settings
 from bloom.db.base import Base
 
-# Import the models package so every model is registered on Base.metadata
-# before autogenerate inspects it.
+# Registers every model on Base.metadata before autogenerate inspects it.
 import bloom.db.models  # noqa: F401
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
 
 # The database URL is owned by application settings, not alembic.ini.
 config.set_main_option("sqlalchemy.url", str(get_settings().SQLALCHEMY_DATABASE_URI))
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Model metadata for 'autogenerate' support.
 target_metadata = Base.metadata
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
 
 
 def run_migrations_offline() -> None:

@@ -99,8 +99,6 @@ def client(session_factory) -> TestClient:
     return TestClient(app)
 
 
-# --- Seeded users and auth helpers ------------------------------------------
-
 @pytest.fixture
 def users(db) -> dict:
     """Seed an admin and two standard users; return them by role/name."""

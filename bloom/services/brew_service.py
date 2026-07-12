@@ -62,8 +62,7 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
     recorded as the author. Extraction yield is stored once at write time when
     only TDS was measured (and beverage mass is known); an explicit value is kept.
     """
-    # Validate references (each raises NotFoundError on failure). The bean only
-    # needs to exist — beans are shared, not owned per-brew.
+    # The bean only needs to exist — beans are shared, not owned per-brew.
     bean_service.get_bean(db, data.bean_id)
     lookups_service.get_brew_method(db, data.method_id)
     if data.grinder_id is not None:

@@ -77,7 +77,6 @@ class Brew(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    # Inputs
     dose_grams: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
     yield_grams: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))
     water_grams: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))

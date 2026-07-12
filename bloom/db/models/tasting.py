@@ -25,7 +25,6 @@ if TYPE_CHECKING:
     from bloom.db.models.brew import Brew
     from bloom.db.models.user import User
 
-# The 1-10 scored attributes shared by every tasting.
 _SCORE_COLUMNS = (
     "aroma",
     "acidity",

@@ -21,19 +21,17 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # PostgreSQL connection parts
     POSTGRES_USER: str = "bloom"
     POSTGRES_PASSWORD: str = "bloom"
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "bloom"
 
-    # JWT / auth
     JWT_SECRET: str = "change-me-in-production"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
-    # First-admin bootstrap (created on startup if absent). Leave empty to skip.
+    # Leave empty to skip the first-admin bootstrap.
     BLOOM_ADMIN_EMAIL: str | None = None
     BLOOM_ADMIN_PASSWORD: str | None = None
 
