@@ -13,6 +13,13 @@ Guidance for AI assistants working in this repository.
     Claude" lines.
   - Commits should read as authored solely by the repository owner.
 
+## Code style
+
+- **Keep comments minimal.** Comment only what the code cannot say itself — the *why*
+  behind a non-obvious choice, not the *what*. Do not restate what the line plainly does.
+- No header/banner comments describing a file's purpose (a module docstring is enough),
+  and no step-numbering narration (`# 1)`, `# 2)`). Match the surrounding file's density.
+
 ## Project conventions
 
 - All code, comments, and identifiers in **English**.
