@@ -30,14 +30,16 @@ _ALL_TABLES = '"user", bean, brew, tasting, brew_method, equipment'
 
 
 def _test_database_url() -> str:
-    base = get_settings().database_url
+    base = str(get_settings().SQLALCHEMY_DATABASE_URI)
     return base.rsplit("/", 1)[0] + "/" + TEST_DB_NAME
 
 
 @pytest.fixture(scope="session")
 def engine():
     """Create the test database (if needed), build the schema, yield an engine."""
-    admin_engine = create_engine(get_settings().database_url, isolation_level="AUTOCOMMIT")
+    admin_engine = create_engine(
+        str(get_settings().SQLALCHEMY_DATABASE_URI), isolation_level="AUTOCOMMIT"
+    )
     with admin_engine.connect() as conn:
         exists = conn.execute(
             text("SELECT 1 FROM pg_database WHERE datname = :name"),

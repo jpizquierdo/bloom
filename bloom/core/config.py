@@ -2,6 +2,8 @@
 
 from functools import lru_cache
 
+from pydantic import PostgresDsn, computed_field
+from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,17 +21,34 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Database
-    database_url: str = "postgresql+psycopg://bloom:bloom@localhost:5432/bloom"
+    # PostgreSQL connection parts
+    POSTGRES_USER: str = "bloom"
+    POSTGRES_PASSWORD: str = "bloom"
+    POSTGRES_SERVER: str = "localhost"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_DB: str = "bloom"
 
     # JWT / auth
-    jwt_secret: str = "change-me-in-production"
-    jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
+    JWT_SECRET: str = "change-me-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
     # First-admin bootstrap (created on startup if absent). Leave empty to skip.
-    bloom_admin_email: str | None = None
-    bloom_admin_password: str | None = None
+    BLOOM_ADMIN_EMAIL: str | None = None
+    BLOOM_ADMIN_PASSWORD: str | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+        """SQLAlchemy/psycopg connection URL assembled from the parts above."""
+        return MultiHostUrl.build(
+            scheme="postgresql+psycopg",
+            username=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_SERVER,
+            port=self.POSTGRES_PORT,
+            path=self.POSTGRES_DB,
+        )
 
 
 @lru_cache

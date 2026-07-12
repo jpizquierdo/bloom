@@ -35,8 +35,11 @@ cp .env.example .env
 #   then set BLOOM_ADMIN_EMAIL and BLOOM_ADMIN_PASSWORD in .env
 
 # 5. Run the API — docs at http://localhost:8000/docs
-uv run uvicorn bloom.main:app --reload
+uv run fastapi dev bloom/main.py     # or: uv run uvicorn bloom.main:app --reload
 ```
+
+> `fastapi[standard]` ships the FastAPI CLI: `fastapi dev` (auto-reload) for development
+> and `fastapi run` for production. `uvicorn` is still available if you prefer it.
 
 ## Configuration
 
@@ -44,10 +47,14 @@ Settings come from environment variables or a local `.env` (copy `.env.example`)
 
 | Variable | Purpose |
 |----------|---------|
-| `DATABASE_URL` | Postgres connection string (default `postgresql+psycopg://bloom:bloom@localhost:5432/bloom`). |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` | Postgres credentials (default `bloom` / `bloom`). |
+| `POSTGRES_SERVER` / `POSTGRES_PORT` / `POSTGRES_DB` | Postgres host, port and database (default `localhost` / `5432` / `bloom`). |
 | `JWT_SECRET` | Access-token signing key — **set a strong value in production**. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Access-token lifetime (default 60). |
 | `BLOOM_ADMIN_EMAIL` / `BLOOM_ADMIN_PASSWORD` | First admin, bootstrapped on startup if absent. |
+
+The connection URL (`SQLALCHEMY_DATABASE_URI`) is assembled from these parts in
+`bloom/core/config.py`.
 
 ## Authentication
 

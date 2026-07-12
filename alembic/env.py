@@ -17,7 +17,7 @@ import bloom.db.models  # noqa: F401
 config = context.config
 
 # The database URL is owned by application settings, not alembic.ini.
-config.set_main_option("sqlalchemy.url", get_settings().database_url)
+config.set_main_option("sqlalchemy.url", str(get_settings().SQLALCHEMY_DATABASE_URI))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

@@ -31,8 +31,8 @@ def bootstrap_admin(db: Session) -> User | None:
     so it is safe to run on every boot.
     """
     settings = get_settings()
-    email = settings.bloom_admin_email
-    password = settings.bloom_admin_password
+    email = settings.BLOOM_ADMIN_EMAIL
+    password = settings.BLOOM_ADMIN_PASSWORD
     if not email or not password:
         return None
 

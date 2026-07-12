@@ -7,7 +7,7 @@ from bloom.core.config import get_settings
 
 _settings = get_settings()
 
-engine = create_engine(_settings.database_url, pool_pre_ping=True)
+engine = create_engine(str(_settings.SQLALCHEMY_DATABASE_URI), pool_pre_ping=True)
 
 SessionLocal = sessionmaker(
     bind=engine,

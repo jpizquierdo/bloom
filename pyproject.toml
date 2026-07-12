@@ -5,8 +5,7 @@ description = "Self-hosted specialty coffee tracking API"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.139.0",
-    "uvicorn[standard]>=0.51.0",
+    "fastapi[standard]>=0.139.0",
     "sqlalchemy>=2.0.51",
     "psycopg[binary]>=3.3.4",
     "alembic>=1.18.5",
