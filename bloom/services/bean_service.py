@@ -56,5 +56,7 @@ def update_bean(db: Session, bean: Bean, data: BeanUpdate) -> Bean:
 
 def delete_bean(db: Session, bean: Bean) -> None:
     """Delete an already-authorized bean (cascades to its brews/tastings)."""
+    bean_id = bean.id
     beans_repo.delete(db, bean)
     db.commit()
+    logger.info("Bean %s deleted", bean_id)

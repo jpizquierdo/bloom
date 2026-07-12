@@ -74,5 +74,7 @@ def update_tasting(db: Session, tasting: Tasting, data: TastingUpdate) -> Tastin
 
 def delete_tasting(db: Session, tasting: Tasting) -> None:
     """Delete an already-authorized tasting."""
+    tasting_id = tasting.id
     tastings_repo.delete(db, tasting)
     db.commit()
+    logger.info("Tasting %s deleted", tasting_id)

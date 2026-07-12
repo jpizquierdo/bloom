@@ -99,5 +99,7 @@ def update_brew(db: Session, brew: Brew, data: BrewUpdate) -> Brew:
 
 def delete_brew(db: Session, brew: Brew) -> None:
     """Delete an already-authorized brew (cascades to its tastings)."""
+    brew_id = brew.id
     brews_repo.delete(db, brew)
     db.commit()
+    logger.info("Brew %s deleted", brew_id)
