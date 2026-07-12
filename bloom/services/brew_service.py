@@ -64,7 +64,7 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
     only TDS was measured (and beverage mass is known); an explicit value is kept.
     """
     # The bean only needs to exist — beans are shared, not owned per-brew.
-    bean_service.get_bean(db, data.bean_id)
+    bean = bean_service.get_bean(db, data.bean_id)
     lookups_service.get_brew_method(db, data.method_id)
     if data.grinder_id is not None:
         lookups_service.get_equipment(db, data.grinder_id)
@@ -83,6 +83,8 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
     db.commit()
     db.refresh(brew)
     logger.info("Brew %s created by user %s (bean %s)", brew.id, user.id, brew.bean_id)
+    if bean.is_finished:
+        logger.warning("Brew %s created on a finished bean (%s)", brew.id, bean.id)
     return brew
 
 

@@ -10,6 +10,18 @@ def bean_id(client, alice_headers):
     ).json()["id"]
 
 
+def test_brew_on_finished_bean_is_allowed(client, alice_headers, lookups, bean_id):
+    # Marking a bag as finished does not block logging a brew (retroactive logging);
+    # the service only emits a warning.
+    client.patch(f"/beans/{bean_id}", headers=alice_headers, json={"is_finished": True})
+    resp = client.post(
+        "/brews",
+        headers=alice_headers,
+        json={"bean_id": bean_id, "method_id": lookups["filter"]["id"], "dose_grams": "15"},
+    )
+    assert resp.status_code == 201
+
+
 def test_extraction_yield_computed_and_stored(client, alice_headers, lookups, bean_id):
     resp = client.post(
         "/brews",
