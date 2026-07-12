@@ -224,6 +224,13 @@ Alternative considered: a full `household`/`team` grouping entity to isolate one
 another — deferred as overkill for a small, trusted, self-hosted instance; it is the natural
 next step if per-group isolation is ever needed.
 
+### 12A — Brewing from a finished bean is allowed (soft warning)
+`bean.is_finished` marks a used-up bag, but it is treated as **informational, not a hard
+constraint**. Creating a brew from a finished bean is permitted — you often finish a bag and
+only then log a brew you pulled earlier (retroactive logging) — and the brew service emits a
+`WARNING` (`Brew N created on a finished bean`) rather than rejecting the request. A hard
+block (409) was rejected as too rigid for a personal/café tracking app.
+
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
 - **First admin via env vars on startup**; further accounts are admin-created and default
