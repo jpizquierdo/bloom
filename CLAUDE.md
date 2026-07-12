@@ -21,6 +21,11 @@ Guidance for AI assistants working in this repository.
   and no step-numbering narration (`# 1)`, `# 2)`). Match the surrounding file's density.
 - **Tests are an exception**: verbose, explanatory comments (expected values, intent of
   each case) are welcome there. This rule targets production code.
+- **Public API docs are an exception**: every FastAPI route handler should have a concise
+  docstring — FastAPI surfaces it as the endpoint's description in the OpenAPI/Swagger docs.
+  Keep it short: what it does plus the access rule (shared / owner / admin). Likewise use
+  `Field(description=...)` / `summary=` where it improves the generated docs. Do **not**
+  strip these to be terse.
 
 ## Project conventions
 

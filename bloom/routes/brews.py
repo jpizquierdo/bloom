@@ -12,29 +12,38 @@ router = APIRouter(prefix="/brews", tags=["brews"])
 
 @router.post("", response_model=BrewRead, status_code=status.HTTP_201_CREATED)
 def create_brew(data: BrewCreate, db: DbSession, user: CurrentUser) -> BrewRead:
+    """Create a brew from any bean; you are recorded as its author.
+
+    Extraction yield is computed and stored when only TDS (and beverage mass) is
+    given. The response includes the computed brew ratio and control-chart diagnostics.
+    """
     brew = brew_service.create_brew(db, data, user)
     return brew_service.serialize(brew)
 
 
 @router.get("", response_model=list[BrewRead])
 def list_brews(db: DbSession, user: CurrentUser, mine: bool = False) -> list[BrewRead]:
+    """List the shared brew log. Use `?mine=true` to return only your own brews."""
     brews = brew_service.list_brews(db, user, mine=mine)
     return [brew_service.serialize(brew) for brew in brews]
 
 
 @router.get("/{brew_id}", response_model=BrewRead)
 def get_brew(brew_id: int, db: DbSession, _user: CurrentUser) -> BrewRead:
+    """Get a brew by id (any authenticated user), with computed ratio and diagnostics."""
     return brew_service.serialize(brew_service.get_brew(db, brew_id))
 
 
 @router.patch("/{brew_id}", response_model=BrewRead)
 def update_brew(brew_id: int, data: BrewUpdate, db: DbSession, user: CurrentUser) -> BrewRead:
+    """Update a brew. Only its author (or an admin) may edit it."""
     brew = brew_service.get_owned_brew(db, brew_id, user)
     return brew_service.serialize(brew_service.update_brew(db, brew, data))
 
 
 @router.delete("/{brew_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_brew(brew_id: int, db: DbSession, user: CurrentUser) -> Response:
+    """Delete a brew (cascades to its tastings). Author or admin only."""
     brew = brew_service.get_owned_brew(db, brew_id, user)
     brew_service.delete_brew(db, brew)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
