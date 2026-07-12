@@ -15,3 +15,6 @@ __pycache__/
 .DS_Store
 .idea/
 .vscode/
+
+# Claude Code (personal/local settings; a shared .claude/settings.json may be committed)
+.claude/settings.local.json
