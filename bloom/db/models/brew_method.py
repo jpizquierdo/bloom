@@ -1,4 +1,4 @@
-"""Brew method lookup table (3A: lookup, not enum)."""
+"""Brew method lookup table (3: lookup, not enum)."""
 
 from __future__ import annotations
 

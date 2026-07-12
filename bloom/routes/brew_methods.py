@@ -1,4 +1,4 @@
-"""Brew-method routes: reads for any user, writes for admins (3A lookup table)."""
+"""Brew-method routes: reads for any user, writes for admins (lookup table, decision 3)."""
 
 from fastapi import APIRouter, status
 

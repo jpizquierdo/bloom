@@ -1,4 +1,4 @@
-"""Brew model: a single extraction — the central entity (2C, 7A)."""
+"""Brew model: a single extraction — the central entity (2, 7)."""
 
 from __future__ import annotations
 

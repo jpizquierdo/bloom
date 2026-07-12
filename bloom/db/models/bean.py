@@ -1,4 +1,4 @@
-"""Bean model (1A: a physical bag/lot; 4B: process as TEXT + CHECK)."""
+"""Bean model (1: a physical bag/lot; 4: process as TEXT + CHECK)."""
 
 from __future__ import annotations
 

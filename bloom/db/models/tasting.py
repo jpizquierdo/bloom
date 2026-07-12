@@ -1,4 +1,4 @@
-"""Tasting model: subjective evaluation of a brew (6B, 8A, 9B)."""
+"""Tasting model: subjective evaluation of a brew (6, 8, 9)."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ _SCORE_COLUMNS = (
 
 class Tasting(Base):
     """A subjective evaluation of a brew; a brew may have several (1:N), and
-    different users may each score the same brew (6B). ``user_id`` records who
+    different users may each score the same brew (6). ``user_id`` records who
     tasted."""
 
     __tablename__ = "tasting"

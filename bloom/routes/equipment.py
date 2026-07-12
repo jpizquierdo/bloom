@@ -1,4 +1,4 @@
-"""Equipment routes: reads for any user, writes for admins (5A single table)."""
+"""Equipment routes: reads for any user, writes for admins (single table, decision 5)."""
 
 from fastapi import APIRouter, status
 

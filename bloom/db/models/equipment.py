@@ -1,4 +1,4 @@
-"""Equipment model (5A: single table with a type discriminator)."""
+"""Equipment model (5: single table with a type discriminator)."""
 
 from __future__ import annotations
 

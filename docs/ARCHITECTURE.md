@@ -108,12 +108,12 @@ Design points:
 - The **first admin is bootstrapped from env vars** (`BLOOM_ADMIN_EMAIL` /
   `BLOOM_ADMIN_PASSWORD`), created only if it does not exist. There is **no public sign-up**:
   admins create further accounts, which default to `user`.
-- **Everything is a shared log** (household/café model, 11A). Any authenticated user can
+- **Everything is a shared log** (household/café model, 11). Any authenticated user can
   read all beans, brews and tastings, and can add beans, brew from any bean, and taste any
   brew. Each row records who created it — `bean.user_id` (owner), `brew.user_id` (author),
   `tasting.user_id` (taster) — and **only that creator (or an admin) may edit or delete it**
   (a non-creator write returns `403`). Because tastings carry their taster, several people
-  can each score the same brew (realizing 6B).
+  can each score the same brew (realizing 6).
 - **Users are soft-deleted** via an `is_active` flag — never hard-deleted — so history is
   always preserved.
 - Auth is JWT via the OAuth2 password flow (access token only). Passwords are hashed with
@@ -164,13 +164,13 @@ docker exec bloom-db pg_dump -U bloom -d bloom --schema-only
 
 ## Design decisions
 
-Each decision was made explicitly. Letter codes match the options weighed during design.
+Each decision was made explicitly.
 
-### 1A — `bean` is a physical lot, not an abstract coffee
+### 1 — `bean` is a physical lot, not an abstract coffee
 One `bean` row = one bag bought, with its own purchase date, price and weight. If needed
 later, this splits into `coffee` (concept) + `bean_lot` (physical).
 
-### 2C — Derived vs. measured fields: a hybrid rule
+### 2 — Derived vs. measured fields: a hybrid rule
 - **`ratio` is computed in the domain layer, never stored.**
 - **`tds_percent` and `extraction_yield_percent` are stored** — real refractometer
   measurements, not derivations. When only TDS is measured, EY is computed once at write
@@ -178,35 +178,35 @@ later, this splits into `coffee` (concept) + `bean_lot` (physical).
 
 Rule: **per-row math → domain layer; aggregates over many rows → SQL.**
 
-### 3A — `brew_method` as a lookup table, not an enum
+### 3 — `brew_method` as a lookup table, not an enum
 New methods without a migration.
 
-### 4B — `process` as `TEXT` + `CHECK`, not a native enum
+### 4 — `process` as `TEXT` + `CHECK`, not a native enum
 Specialty processes evolve constantly; `TEXT` + `CHECK` gives integrity with a one-line
 change to extend, avoiding the rigidity of Postgres enums.
 
-### 5A — Single `equipment` table with a `type` discriminator
+### 5 — Single `equipment` table with a `type` discriminator
 Grinders, machines and kettles share enough shape. `brew` references it as `grinder_id`.
 
-### 6B — `tasting` is 1:N with `brew`
+### 6 — `tasting` is 1:N with `brew`
 Same extraction can be scored by more than one person, or re-tasted as it cools. Keeping
 tasting separate keeps objective parameters clean from subjective scores. Each tasting
-records its taster (`tasting.user_id`), so several users can score the same brew (see 11A).
+records its taster (`tasting.user_id`), so several users can score the same brew (see 11).
 
-### 7A — `grind_setting` as `TEXT`, not numeric
+### 7 — `grind_setting` as `TEXT`, not numeric
 Every grinder has its own scale; a number would lose meaning across grinders.
 
-### 8A — Tasting scores as `SMALLINT` 1–10 with `CHECK`
+### 8 — Tasting scores as `SMALLINT` 1–10 with `CHECK`
 Enough resolution, no false precision, valid data guaranteed at the DB level.
 
-### 9B — `descriptors` as `TEXT[]`
+### 9 — `descriptors` as `TEXT[]`
 Flavor notes are a list. A controlled vocabulary (SCA flavor wheel join table) is a
 possible future upgrade.
 
-### 10A — Full entity set from day one
+### 10 — Full entity set from day one
 `user`, `bean`, `brew`, `tasting`, `brew_method`, `equipment` all present from the start.
 
-### 11A — Shared log, creator-owned rows (household / café model)
+### 11 — Shared log, creator-owned rows (household / café model)
 The instance is a single shared log — a household, or a café bar with several baristas.
 Every authenticated user can **read** all beans, brews and tastings; can **add** beans,
 brew from any bean, and taste any brew; and may **edit/delete only what they created**
@@ -218,13 +218,13 @@ This evolved in two steps:
   made "my partner brews from my bag" impossible to attribute. So beans became shared and
   `brew` gained its own author (`brew.user_id`).
 - Then, so that several baristas can each score the same pour, brews were opened for reading
-  by anyone and `tasting` gained its own `user_id` (the taster), realizing 6B.
+  by anyone and `tasting` gained its own `user_id` (the taster), realizing 6.
 
 Alternative considered: a full `household`/`team` grouping entity to isolate one group from
 another — deferred as overkill for a small, trusted, self-hosted instance; it is the natural
 next step if per-group isolation is ever needed.
 
-### 12A — Brewing from a finished bean is allowed (soft warning)
+### 12 — Brewing from a finished bean is allowed (soft warning)
 `bean.is_finished` marks a used-up bag, but it is treated as **informational, not a hard
 constraint**. Creating a brew from a finished bean is permitted — you often finish a bag and
 only then log a brew you pulled earlier (retroactive logging) — and the brew service emits a
