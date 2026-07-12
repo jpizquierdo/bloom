@@ -10,13 +10,13 @@ from __future__ import annotations
 
 import time
 
-from alembic import command
 from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
+from alembic import command
 from bloom.core.logger import get_logger
 from bloom.db.session import SessionLocal, engine
 from bloom.services import auth_service

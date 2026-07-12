@@ -28,9 +28,7 @@ def get_brew(brew_id: int, db: DbSession, _user: CurrentUser) -> BrewRead:
 
 
 @router.patch("/{brew_id}", response_model=BrewRead)
-def update_brew(
-    brew_id: int, data: BrewUpdate, db: DbSession, user: CurrentUser
-) -> BrewRead:
+def update_brew(brew_id: int, data: BrewUpdate, db: DbSession, user: CurrentUser) -> BrewRead:
     brew = brew_service.get_owned_brew(db, brew_id, user)
     return brew_service.serialize(brew_service.update_brew(db, brew, data))
 

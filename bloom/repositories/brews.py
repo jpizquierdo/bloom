@@ -14,16 +14,12 @@ def get(db: Session, brew_id: int) -> Brew | None:
 
 def list_all(db: Session) -> list[Brew]:
     """List every brew (most recent first) — brews are a shared log."""
-    return list(
-        db.execute(select(Brew).order_by(Brew.brewed_at.desc())).scalars().all()
-    )
+    return list(db.execute(select(Brew).order_by(Brew.brewed_at.desc())).scalars().all())
 
 
 def list_for_author(db: Session, user_id: int) -> list[Brew]:
     """List brews authored by ``user_id`` (most recent first)."""
-    stmt = (
-        select(Brew).where(Brew.user_id == user_id).order_by(Brew.brewed_at.desc())
-    )
+    stmt = select(Brew).where(Brew.user_id == user_id).order_by(Brew.brewed_at.desc())
     return list(db.execute(stmt).scalars().all())
 
 

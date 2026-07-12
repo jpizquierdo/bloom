@@ -48,9 +48,7 @@ class Brew(Base):
         CheckConstraint("water_grams > 0", name="ck_brew_water_positive"),
         CheckConstraint("brew_time_seconds > 0", name="ck_brew_time_positive"),
         CheckConstraint("tds_percent >= 0", name="ck_brew_tds_nonneg"),
-        CheckConstraint(
-            "extraction_yield_percent >= 0", name="ck_brew_ey_nonneg"
-        ),
+        CheckConstraint("extraction_yield_percent >= 0", name="ck_brew_ey_nonneg"),
         Index("idx_brew_bean_id", "bean_id"),
         Index("idx_brew_method_id", "method_id"),
         Index("idx_brew_user_id", "user_id"),
@@ -59,20 +57,14 @@ class Brew(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     # Author: who prepared the brew. RESTRICT pairs with user soft-delete.
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id", ondelete="RESTRICT"), nullable=False
-    )
-    bean_id: Mapped[int] = mapped_column(
-        ForeignKey("bean.id", ondelete="CASCADE"), nullable=False
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="RESTRICT"), nullable=False)
+    bean_id: Mapped[int] = mapped_column(ForeignKey("bean.id", ondelete="CASCADE"), nullable=False)
     method_id: Mapped[int] = mapped_column(
         SmallInteger,
         ForeignKey("brew_method.id", ondelete="RESTRICT"),
         nullable=False,
     )
-    grinder_id: Mapped[int | None] = mapped_column(
-        ForeignKey("equipment.id", ondelete="SET NULL")
-    )
+    grinder_id: Mapped[int | None] = mapped_column(ForeignKey("equipment.id", ondelete="SET NULL"))
     brewed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -90,10 +82,10 @@ class Brew(Base):
 
     notes: Mapped[str | None] = mapped_column(Text)
 
-    author: Mapped["User"] = relationship()
-    bean: Mapped["Bean"] = relationship(back_populates="brews")
-    method: Mapped["BrewMethod"] = relationship()
-    grinder: Mapped["Equipment | None"] = relationship()
-    tastings: Mapped[list["Tasting"]] = relationship(
+    author: Mapped[User] = relationship()
+    bean: Mapped[Bean] = relationship(back_populates="brews")
+    method: Mapped[BrewMethod] = relationship()
+    grinder: Mapped[Equipment | None] = relationship()
+    tastings: Mapped[list[Tasting]] = relationship(
         back_populates="brew", cascade="all, delete-orphan", passive_deletes=True
     )

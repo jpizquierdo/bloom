@@ -17,9 +17,7 @@ def list_users(db: Session) -> list[User]:
 
 def create_user(db: Session, *, email: str, password: str, role: str = "user") -> User:
     """Create a user with a hashed password and commit."""
-    user = users_repo.add(
-        db, email=email, hashed_password=hash_password(password), role=role
-    )
+    user = users_repo.add(db, email=email, hashed_password=hash_password(password), role=role)
     db.commit()
     db.refresh(user)
     logger.info("User %s created: %s (role %s)", user.id, email, role)

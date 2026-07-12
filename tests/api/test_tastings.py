@@ -47,8 +47,6 @@ def test_score_out_of_range_rejected(client, alice_headers, brew_id):
 
 def test_tasting_on_unknown_brew_404(client, alice_headers):
     assert (
-        client.post(
-            "/brews/9999/tastings", headers=alice_headers, json={"overall": 8}
-        ).status_code
+        client.post("/brews/9999/tastings", headers=alice_headers, json={"overall": 8}).status_code
         == 404
     )

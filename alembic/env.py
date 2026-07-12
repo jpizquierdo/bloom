@@ -1,15 +1,12 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
-from alembic import context
-
-from bloom.core.config import get_settings
-from bloom.db.base import Base
+from sqlalchemy import engine_from_config, pool
 
 # Registers every model on Base.metadata before autogenerate inspects it.
 import bloom.db.models  # noqa: F401
+from alembic import context
+from bloom.core.config import get_settings
+from bloom.db.base import Base
 
 config = context.config
 
@@ -60,9 +57,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

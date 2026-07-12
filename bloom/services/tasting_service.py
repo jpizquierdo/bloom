@@ -49,9 +49,7 @@ def get_owned_tasting(db: Session, tasting_id: int, user: User) -> Tasting:
     return tasting
 
 
-def create_tasting(
-    db: Session, brew_id: int, data: TastingCreate, user: User
-) -> Tasting:
+def create_tasting(db: Session, brew_id: int, data: TastingCreate, user: User) -> Tasting:
     """Add a tasting (authored by ``user``) to any existing brew."""
     brew_service.get_brew(db, brew_id)  # 404 if the brew does not exist
     tasting = tastings_repo.add(

@@ -1,6 +1,6 @@
 """Password hashing (argon2) and JWT access-token creation/verification."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from argon2 import PasswordHasher
@@ -28,8 +28,10 @@ def verify_password(password: str, hashed_password: str) -> bool:
 def create_access_token(subject: str, expires_minutes: int | None = None) -> str:
     """Create a signed JWT access token whose ``sub`` claim is ``subject``."""
     settings = get_settings()
-    minutes = expires_minutes if expires_minutes is not None else settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    expire = datetime.now(timezone.utc) + timedelta(minutes=minutes)
+    minutes = (
+        expires_minutes if expires_minutes is not None else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+    expire = datetime.now(UTC) + timedelta(minutes=minutes)
     payload = {"sub": subject, "exp": expire}
     return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
 

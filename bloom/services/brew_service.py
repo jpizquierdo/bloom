@@ -23,9 +23,7 @@ def serialize(brew: Brew) -> BrewRead:
     ratio = brew_ratio(brew.dose_grams, brew.yield_grams, brew.water_grams, category)
     if ratio is not None:
         ratio = ratio.quantize(Decimal("0.01"))
-    diagnostics = classify_extraction(
-        brew.tds_percent, brew.extraction_yield_percent, category
-    )
+    diagnostics = classify_extraction(brew.tds_percent, brew.extraction_yield_percent, category)
     read = BrewRead.model_validate(brew)
     read.ratio = ratio
     read.diagnostics = ExtractionDiagnosticsRead(

@@ -26,9 +26,7 @@ def list_tastings(brew_id: int, db: DbSession, _user: CurrentUser) -> list[Tasti
 
 
 @router.get("/tastings", response_model=list[TastingRead])
-def list_all_tastings(
-    db: DbSession, user: CurrentUser, mine: bool = False
-) -> list[TastingRead]:
+def list_all_tastings(db: DbSession, user: CurrentUser, mine: bool = False) -> list[TastingRead]:
     return tasting_service.list_tastings(db, user, mine=mine)
 
 

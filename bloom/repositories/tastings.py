@@ -19,18 +19,12 @@ def list_for_brew(db: Session, brew_id: int) -> list[Tasting]:
 
 def list_all(db: Session) -> list[Tasting]:
     """List every tasting (most recent first) — tastings are a shared log."""
-    return list(
-        db.execute(select(Tasting).order_by(Tasting.tasted_at.desc())).scalars().all()
-    )
+    return list(db.execute(select(Tasting).order_by(Tasting.tasted_at.desc())).scalars().all())
 
 
 def list_for_user(db: Session, user_id: int) -> list[Tasting]:
     """List tastings made by ``user_id`` (most recent first)."""
-    stmt = (
-        select(Tasting)
-        .where(Tasting.user_id == user_id)
-        .order_by(Tasting.tasted_at.desc())
-    )
+    stmt = select(Tasting).where(Tasting.user_id == user_id).order_by(Tasting.tasted_at.desc())
     return list(db.execute(stmt).scalars().all())
 
 

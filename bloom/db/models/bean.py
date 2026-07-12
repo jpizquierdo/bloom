@@ -50,9 +50,7 @@ class Bean(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     # Ownership: a bean belongs to a user. RESTRICT protects brew history —
     # users are soft-deleted (is_active), never hard-deleted.
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id", ondelete="RESTRICT"), nullable=False
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="RESTRICT"), nullable=False)
     name: Mapped[str] = mapped_column(Text, nullable=False)
     roaster: Mapped[str] = mapped_column(Text, nullable=False)
     origin_country: Mapped[str | None] = mapped_column(Text)
@@ -68,14 +66,12 @@ class Bean(Base):
     altitude_masl: Mapped[int | None] = mapped_column(Integer)
     tasting_notes_label: Mapped[str | None] = mapped_column(Text)
     notes: Mapped[str | None] = mapped_column(Text)
-    is_finished: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("false")
-    )
+    is_finished: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    owner: Mapped["User"] = relationship(back_populates="beans")
-    brews: Mapped[list["Brew"]] = relationship(
+    owner: Mapped[User] = relationship(back_populates="beans")
+    brews: Mapped[list[Brew]] = relationship(
         back_populates="bean", cascade="all, delete-orphan", passive_deletes=True
     )

@@ -22,19 +22,15 @@ class User(Base):
     """
 
     __tablename__ = "user"
-    __table_args__ = (
-        CheckConstraint("role IN ('admin', 'user')", name="ck_user_role"),
-    )
+    __table_args__ = (CheckConstraint("role IN ('admin', 'user')", name="ck_user_role"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     hashed_password: Mapped[str] = mapped_column(Text, nullable=False)
     role: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("'user'"))
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("true")
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    beans: Mapped[list["Bean"]] = relationship(back_populates="owner")
+    beans: Mapped[list[Bean]] = relationship(back_populates="owner")

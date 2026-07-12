@@ -14,9 +14,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 def create_user(data: UserCreate, db: DbSession, _admin: AdminUser) -> UserRead:
     """Create a new user (role 'user'). Admin-only."""
     if users_repo.get_by_email(db, data.email) is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Email already registered"
-        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
     return users_service.create_user(db, email=data.email, password=data.password)
 
 
@@ -27,15 +25,11 @@ def list_users(db: DbSession, _admin: AdminUser) -> list[UserRead]:
 
 
 @router.patch("/{user_id}", response_model=UserRead)
-def update_user(
-    user_id: int, data: UserUpdate, db: DbSession, admin: AdminUser
-) -> UserRead:
+def update_user(user_id: int, data: UserUpdate, db: DbSession, admin: AdminUser) -> UserRead:
     """Promote/demote or activate/deactivate a user. Admin-only."""
     user = users_repo.get_by_id(db, user_id)
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     # Guard against an admin locking themselves out (demoting or deactivating
     # their own account), which could leave the system with no active admin.
@@ -51,6 +45,4 @@ def update_user(
                 detail="An admin cannot deactivate their own account",
             )
 
-    return users_service.update_user(
-        db, user, role=data.role, is_active=data.is_active
-    )
+    return users_service.update_user(db, user, role=data.role, is_active=data.is_active)

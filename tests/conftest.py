@@ -60,9 +60,7 @@ def engine():
 
 @pytest.fixture(scope="session")
 def session_factory(engine):
-    return sessionmaker(
-        bind=engine, autoflush=False, autocommit=False, expire_on_commit=False
-    )
+    return sessionmaker(bind=engine, autoflush=False, autocommit=False, expire_on_commit=False)
 
 
 @pytest.fixture(autouse=True)

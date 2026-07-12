@@ -44,9 +44,7 @@ class Tasting(Base):
     __tablename__ = "tasting"
     __table_args__ = (
         *(
-            CheckConstraint(
-                f"{column} BETWEEN 1 AND 10", name=f"ck_tasting_{column}_range"
-            )
+            CheckConstraint(f"{column} BETWEEN 1 AND 10", name=f"ck_tasting_{column}_range")
             for column in _SCORE_COLUMNS
         ),
         Index("idx_tasting_brew_id", "brew_id"),
@@ -54,13 +52,9 @@ class Tasting(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    brew_id: Mapped[int] = mapped_column(
-        ForeignKey("brew.id", ondelete="CASCADE"), nullable=False
-    )
+    brew_id: Mapped[int] = mapped_column(ForeignKey("brew.id", ondelete="CASCADE"), nullable=False)
     # Who tasted. RESTRICT pairs with user soft-delete.
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id", ondelete="RESTRICT"), nullable=False
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="RESTRICT"), nullable=False)
     aroma: Mapped[int | None] = mapped_column(SmallInteger)
     acidity: Mapped[int | None] = mapped_column(SmallInteger)
     sweetness: Mapped[int | None] = mapped_column(SmallInteger)
@@ -76,5 +70,5 @@ class Tasting(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    brew: Mapped["Brew"] = relationship(back_populates="tastings")
-    author: Mapped["User"] = relationship()
+    brew: Mapped[Brew] = relationship(back_populates="tastings")
+    author: Mapped[User] = relationship()

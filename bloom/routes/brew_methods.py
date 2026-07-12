@@ -20,7 +20,5 @@ def get_brew_method(method_id: int, db: DbSession, _user: CurrentUser) -> BrewMe
 
 
 @router.post("", response_model=BrewMethodRead, status_code=status.HTTP_201_CREATED)
-def create_brew_method(
-    data: BrewMethodCreate, db: DbSession, _admin: AdminUser
-) -> BrewMethodRead:
+def create_brew_method(data: BrewMethodCreate, db: DbSession, _admin: AdminUser) -> BrewMethodRead:
     return lookups_service.create_brew_method(db, data)

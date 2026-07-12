@@ -20,7 +20,5 @@ def get_equipment(equipment_id: int, db: DbSession, _user: CurrentUser) -> Equip
 
 
 @router.post("", response_model=EquipmentRead, status_code=status.HTTP_201_CREATED)
-def create_equipment(
-    data: EquipmentCreate, db: DbSession, _admin: AdminUser
-) -> EquipmentRead:
+def create_equipment(data: EquipmentCreate, db: DbSession, _admin: AdminUser) -> EquipmentRead:
     return lookups_service.create_equipment(db, data)

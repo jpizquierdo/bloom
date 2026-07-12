@@ -35,7 +35,9 @@ class TestBrewRatio:
         assert brew_ratio(D("16"), None, D("256"), constants.CATEGORY_IMMERSION) == D("16")
 
     def test_water_zero_falls_back_to_yield(self) -> None:
-        assert brew_ratio(D("15"), D("240"), D("0"), constants.CATEGORY_FILTER) == D("240") / D("15")
+        assert brew_ratio(D("15"), D("240"), D("0"), constants.CATEGORY_FILTER) == D("240") / D(
+            "15"
+        )
 
     def test_accepts_int_arguments(self) -> None:
         assert brew_ratio(18, 36, None, constants.CATEGORY_ESPRESSO) == D("2")
@@ -102,7 +104,9 @@ class TestClassifyExtraction:
 
     def test_espresso_uses_espresso_strength_scale(self) -> None:
         # TDS 10% is "within" for espresso but far "above" the filter scale.
-        assert classify_extraction(D("10"), D("20"), constants.CATEGORY_ESPRESSO).strength == "within"
+        assert (
+            classify_extraction(D("10"), D("20"), constants.CATEGORY_ESPRESSO).strength == "within"
+        )
         assert classify_extraction(D("10"), D("20"), constants.CATEGORY_FILTER).strength == "above"
 
     def test_band_boundaries_are_inclusive(self) -> None:

@@ -53,9 +53,7 @@ def test_non_owner_can_read_but_not_modify_bean(client, alice_headers, bob_heade
 
 def test_update_bean(client, alice_headers):
     bean_id = _make_bean(client, alice_headers).json()["id"]
-    resp = client.patch(
-        f"/beans/{bean_id}", headers=alice_headers, json={"is_finished": True}
-    )
+    resp = client.patch(f"/beans/{bean_id}", headers=alice_headers, json={"is_finished": True})
     assert resp.status_code == 200
     assert resp.json()["is_finished"] is True
 

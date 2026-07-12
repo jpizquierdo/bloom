@@ -6,9 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-Process = Literal[
-    "washed", "natural", "honey", "anaerobic", "carbonic_maceration", "other"
-]
+Process = Literal["washed", "natural", "honey", "anaerobic", "carbonic_maceration", "other"]
 RoastLevel = Literal["light", "medium_light", "medium", "medium_dark", "dark"]
 
 

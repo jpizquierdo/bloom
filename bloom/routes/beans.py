@@ -25,9 +25,7 @@ def get_bean(bean_id: int, db: DbSession, _user: CurrentUser) -> BeanRead:
 
 
 @router.patch("/{bean_id}", response_model=BeanRead)
-def update_bean(
-    bean_id: int, data: BeanUpdate, db: DbSession, user: CurrentUser
-) -> BeanRead:
+def update_bean(bean_id: int, data: BeanUpdate, db: DbSession, user: CurrentUser) -> BeanRead:
     bean = bean_service.get_owned_bean(db, bean_id, user)
     return bean_service.update_bean(db, bean, data)
 
