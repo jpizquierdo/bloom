@@ -1,0 +1,22 @@
+# VCS / tooling
+.git/
+.gitignore
+.claude/
+CLAUDE.md
+CLAUDE_CODE_PROMPT.md
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Local env and things not needed at runtime
+.env
+tests/
+docs/
+frontend/
+
+# NOTE: README.md is kept — pyproject `readme = "README.md"` needs it at build time.
+# alembic/ and alembic.ini are kept — migrations run on startup.

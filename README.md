@@ -57,6 +57,25 @@ Settings come from environment variables or a local `.env` (copy `.env.example`)
 The connection URL (`SQLALCHEMY_DATABASE_URI`) is assembled from these parts in
 `bloom/core/config.py`.
 
+## Docker
+
+Bloom ships a minimal single-instance image. Point `POSTGRES_SERVER` at your Postgres
+(the Compose service is reachable as `db`):
+
+```bash
+docker build -t bloom:latest .
+
+docker run --rm -p 8000:8000 \
+  --network docker_default \
+  -e POSTGRES_SERVER=db \
+  -e JWT_SECRET=change-me \
+  -e BLOOM_ADMIN_EMAIL=admin@example.com -e BLOOM_ADMIN_PASSWORD=change-me \
+  bloom:latest
+```
+
+The container applies migrations and bootstraps the admin on startup, then serves with
+`fastapi run`.
+
 ## Authentication
 
 There is no public sign-up. The first admin is bootstrapped from the env vars above;
