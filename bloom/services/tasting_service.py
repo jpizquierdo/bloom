@@ -65,10 +65,12 @@ def create_tasting(
 
 def update_tasting(db: Session, tasting: Tasting, data: TastingUpdate) -> Tasting:
     """Apply a partial update to an already-authorized tasting."""
-    for field, value in data.model_dump(exclude_unset=True).items():
+    changes = data.model_dump(exclude_unset=True)
+    for field, value in changes.items():
         setattr(tasting, field, value)
     db.commit()
     db.refresh(tasting)
+    logger.info("Tasting %s updated: %s", tasting.id, ", ".join(changes) or "no fields")
     return tasting
 
 

@@ -90,10 +90,12 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
 
 def update_brew(db: Session, brew: Brew, data: BrewUpdate) -> Brew:
     """Apply a partial update to an already-authorized brew."""
-    for field, value in data.model_dump(exclude_unset=True).items():
+    changes = data.model_dump(exclude_unset=True)
+    for field, value in changes.items():
         setattr(brew, field, value)
     db.commit()
     db.refresh(brew)
+    logger.info("Brew %s updated: %s", brew.id, ", ".join(changes) or "no fields")
     return brew
 
 

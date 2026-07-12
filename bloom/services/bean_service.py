@@ -47,10 +47,12 @@ def create_bean(db: Session, data: BeanCreate, user: User) -> Bean:
 
 def update_bean(db: Session, bean: Bean, data: BeanUpdate) -> Bean:
     """Apply a partial update to an already-authorized bean."""
-    for field, value in data.model_dump(exclude_unset=True).items():
+    changes = data.model_dump(exclude_unset=True)
+    for field, value in changes.items():
         setattr(bean, field, value)
     db.commit()
     db.refresh(bean)
+    logger.info("Bean %s updated: %s", bean.id, ", ".join(changes) or "no fields")
     return bean
 
 
