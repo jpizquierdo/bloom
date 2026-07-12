@@ -1,16 +1,15 @@
 """Authentication logic and first-admin bootstrap."""
 
-import logging
-
 from sqlalchemy.orm import Session
 
 from bloom.core.config import get_settings
+from bloom.core.logger import get_logger
 from bloom.core.security import verify_password
 from bloom.db.models.user import User
 from bloom.repositories import users as users_repo
 from bloom.services import users_service
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def authenticate(db: Session, email: str, password: str) -> User | None:

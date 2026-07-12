@@ -52,6 +52,7 @@ Settings come from environment variables or a local `.env` (copy `.env.example`)
 | `POSTGRES_SERVER` / `POSTGRES_PORT` / `POSTGRES_DB` | Postgres host, port and database (default `localhost` / `5432` / `bloom`). |
 | `JWT_SECRET` | Access-token signing key — **set a strong value in production**. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Access-token lifetime (default 60). |
+| `LOG_LEVEL` | Logging level for the `bloom` logger (default `INFO`). |
 | `BLOOM_ADMIN_EMAIL` / `BLOOM_ADMIN_PASSWORD` | First admin, bootstrapped on startup if absent. |
 
 The connection URL (`SQLALCHEMY_DATABASE_URI`) is assembled from these parts in

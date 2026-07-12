@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
+    LOG_LEVEL: str = "INFO"
+
     # Leave empty to skip the first-admin bootstrap.
     BLOOM_ADMIN_EMAIL: str | None = None
     BLOOM_ADMIN_PASSWORD: str | None = None

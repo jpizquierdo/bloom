@@ -8,7 +8,6 @@ is actually behind.
 
 from __future__ import annotations
 
-import logging
 import time
 
 from alembic import command
@@ -18,10 +17,11 @@ from alembic.script import ScriptDirectory
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
+from bloom.core.logger import get_logger
 from bloom.db.session import SessionLocal, engine
 from bloom.services import auth_service
 
-logger = logging.getLogger("bloom.db.init_db")
+logger = get_logger(__name__)
 
 ALEMBIC_INI = "alembic.ini"
 

@@ -9,6 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from bloom.core.dependencies import get_db
+from bloom.core.logger import configure_logging
 from bloom.db import init_db
 from bloom.routes import auth, beans, brew_methods, brews, equipment, tastings, users
 from bloom.services.errors import ForbiddenError, NotFoundError
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     """Build and configure the Bloom FastAPI application."""
+    configure_logging()
     app = FastAPI(title="Bloom", version="0.1.0", lifespan=lifespan)
 
     @app.exception_handler(NotFoundError)
