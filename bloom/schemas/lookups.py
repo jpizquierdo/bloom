@@ -11,33 +11,42 @@ EquipmentType = Literal["grinder", "espresso_machine", "kettle", "other"]
 
 
 class BrewMethodCreate(BaseModel):
-    name: str = Field(min_length=1)
-    category: BrewCategory
-    default_ratio: Decimal | None = Field(default=None, gt=0)
+    name: str = Field(min_length=1, description="Unique method name.", examples=["V60"])
+    category: BrewCategory = Field(
+        description="Brewing family the method belongs to.", examples=["filter"]
+    )
+    default_ratio: Decimal | None = Field(
+        default=None,
+        gt=0,
+        description="Optional default brew ratio (grams of water per gram of coffee).",
+        examples=["16.00"],
+    )
 
 
 class BrewMethodRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    name: str
-    category: str
-    default_ratio: Decimal | None
+    id: int = Field(examples=[1])
+    name: str = Field(examples=["V60"])
+    category: str = Field(examples=["filter"])
+    default_ratio: Decimal | None = Field(examples=["16.00"])
 
 
 class EquipmentCreate(BaseModel):
-    type: EquipmentType
-    name: str = Field(min_length=1)
-    brand: str | None = None
-    notes: str | None = None
+    type: EquipmentType = Field(description="Kind of equipment.", examples=["grinder"])
+    name: str = Field(min_length=1, description="Model name.", examples=["Niche Zero"])
+    brand: str | None = Field(default=None, description="Manufacturer.", examples=["Niche"])
+    notes: str | None = Field(
+        default=None, description="Free-form notes.", examples=["Single dosing"]
+    )
 
 
 class EquipmentRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    type: str
-    name: str
-    brand: str | None
-    notes: str | None
-    created_at: datetime
+    id: int = Field(examples=[1])
+    type: str = Field(examples=["grinder"])
+    name: str = Field(examples=["Niche Zero"])
+    brand: str | None = Field(examples=["Niche"])
+    notes: str | None = Field(examples=["Single dosing"])
+    created_at: datetime = Field(examples=["2026-07-12T18:00:00Z"])

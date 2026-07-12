@@ -11,15 +11,22 @@ Role = Literal["admin", "user"]
 class UserCreate(BaseModel):
     """Payload for creating a user (admin-only). New users default to role 'user'."""
 
-    email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
+    email: EmailStr = Field(description="Login email (unique).", examples=["barista@example.com"])
+    password: str = Field(
+        min_length=8,
+        max_length=128,
+        description="Plaintext password (8-128 chars); stored hashed.",
+        examples=["s3cure-passw0rd"],
+    )
 
 
 class UserUpdate(BaseModel):
     """Admin-editable user fields: promote/demote and activate/deactivate."""
 
-    role: Role | None = None
-    is_active: bool | None = None
+    role: Role | None = Field(default=None, description="New role.", examples=["admin"])
+    is_active: bool | None = Field(
+        default=None, description="Activate or deactivate the account.", examples=[False]
+    )
 
 
 class UserRead(BaseModel):
@@ -27,15 +34,15 @@ class UserRead(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    email: str
-    role: str
-    is_active: bool
-    created_at: datetime
+    id: int = Field(examples=[1])
+    email: str = Field(examples=["barista@example.com"])
+    role: str = Field(examples=["user"])
+    is_active: bool = Field(examples=[True])
+    created_at: datetime = Field(examples=["2026-07-05T09:30:00Z"])
 
 
 class Token(BaseModel):
     """OAuth2 bearer token response."""
 
-    access_token: str
-    token_type: str = "bearer"
+    access_token: str = Field(description="JWT access token.", examples=["eyJhbGciOiJIUzI1Ni..."])
+    token_type: str = Field(default="bearer", examples=["bearer"])
