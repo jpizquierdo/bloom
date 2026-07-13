@@ -21,8 +21,10 @@ down_revision: Union[str, Sequence[str], None] = '1cfe1dd99d74'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-# Same normalisation as bloom.domain.naming.normalize_name: trim + collapse whitespace.
-NORMALIZED = r"regexp_replace(btrim(bean.roaster), '\s+', ' ', 'g')"
+# Same normalisation as bloom.domain.naming.normalize_name (trim + collapse whitespace).
+# bean.roaster was NOT NULL but never CHECK'd, so a blank value is possible; it would
+# become a roaster named '' that the API can no longer match (a blank name is a 422).
+NORMALIZED = r"coalesce(nullif(regexp_replace(btrim(bean.roaster), '\s+', ' ', 'g'), ''), 'Unknown')"
 
 
 def upgrade() -> None:
@@ -35,6 +37,7 @@ def upgrade() -> None:
     sa.Column('website', sa.Text(), nullable=True),
     sa.Column('notes', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.CheckConstraint("btrim(name) <> ''", name='ck_roaster_name_not_blank'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('uq_roaster_name_lower', 'roaster', [sa.text('lower(name)')], unique=True)

@@ -72,7 +72,40 @@ def test_update_bean_roaster_moves_it_to_a_new_roaster(client, alice_headers):
     assert resp.json()["roaster"]["name"] == "Right Side"
     assert resp.json()["roaster"]["id"] != bean["roaster"]["id"]
 
-    # The bean moved; the roaster it was patched onto was created on the fly.
+    # The bean moved to a roaster created on the fly; the one it left held nothing and
+    # had no beans left, so it was discarded (see the abandoned-roaster tests below).
+    roasters = {r["name"] for r in client.get("/roasters", headers=alice_headers).json()}
+    assert roasters == {"Right Side"}
+
+
+def test_fixing_a_typo_discards_the_abandoned_roaster(client, alice_headers):
+    # A roaster auto-created by a typo holds no information, so once its last bean
+    # leaves it must not linger in the picker.
+    bean = _make_bean(client, alice_headers, roaster="Nomad Coffe").json()
+    client.patch(f"/beans/{bean['id']}", headers=alice_headers, json={"roaster": "Nomad Coffee"})
+
+    roasters = {r["name"] for r in client.get("/roasters", headers=alice_headers).json()}
+    assert roasters == {"Nomad Coffee"}
+
+
+def test_an_abandoned_roaster_with_metadata_is_kept(client, alice_headers):
+    # Somebody entered this roaster's details on purpose: losing its last bean does not
+    # make it garbage.
+    client.post("/roasters", headers=alice_headers, json={"name": "Nomad", "country": "Spain"})
+    bean = _make_bean(client, alice_headers, roaster="Nomad").json()
+    client.patch(f"/beans/{bean['id']}", headers=alice_headers, json={"roaster": "Right Side"})
+
+    roasters = {r["name"] for r in client.get("/roasters", headers=alice_headers).json()}
+    assert roasters == {"Nomad", "Right Side"}
+
+
+def test_a_roaster_still_used_by_another_bean_is_kept(client, alice_headers, bob_headers):
+    kept = _make_bean(client, alice_headers, name="Stays", roaster="Nomad").json()
+    moving = _make_bean(client, bob_headers, name="Moves", roaster="Nomad").json()
+    client.patch(f"/beans/{moving['id']}", headers=bob_headers, json={"roaster": "Right Side"})
+
+    # Alice's bean still points at Nomad, so it survives Bob moving his away.
+    assert client.get(f"/beans/{kept['id']}", headers=alice_headers).json()["roaster"]["name"] == "Nomad"
     roasters = {r["name"] for r in client.get("/roasters", headers=alice_headers).json()}
     assert roasters == {"Nomad", "Right Side"}
 

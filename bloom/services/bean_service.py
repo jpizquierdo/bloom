@@ -8,6 +8,7 @@ from bloom.db.models.user import User
 from bloom.repositories import beans as beans_repo
 from bloom.repositories import roasters as roasters_repo
 from bloom.schemas.bean import BeanCreate, BeanUpdate
+from bloom.services import roaster_service
 from bloom.services.access import owns_or_admin
 from bloom.services.errors import ForbiddenError, NotFoundError
 
@@ -52,10 +53,14 @@ def update_bean(db: Session, bean: Bean, data: BeanUpdate) -> Bean:
     """Apply a partial update to an already-authorized bean."""
     changes = data.model_dump(exclude_unset=True)
     roaster_name = changes.pop("roaster", None)
+    previous_roaster = bean.roaster if roaster_name is not None else None
     if roaster_name is not None:
         bean.roaster = roasters_repo.get_or_create(db, name=roaster_name)
     for field, value in changes.items():
         setattr(bean, field, value)
+    if previous_roaster is not None and previous_roaster.id != bean.roaster.id:
+        db.flush()
+        roaster_service.discard_if_abandoned(db, previous_roaster)
     db.commit()
     db.refresh(bean)
     logger.info("Bean %s updated: %s", bean.id, ", ".join(data.model_fields_set) or "no fields")

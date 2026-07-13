@@ -88,6 +88,25 @@ def test_merge_moves_beans_and_deletes_the_source(client, admin_headers, alice_h
     assert client.get(f"/roasters/{duplicate['id']}", headers=alice_headers).status_code == 404
 
 
+def test_merge_adopts_the_source_metadata_where_the_target_is_empty(client, admin_headers, alice_headers):
+    # The duplicate is often the one somebody filled in properly; its data must survive.
+    keeper = client.post("/roasters", headers=alice_headers, json={"name": "Nomad", "city": "BCN"}).json()
+    duplicate = client.post(
+        "/roasters",
+        headers=alice_headers,
+        json={"name": "Nomad Coffe", "city": "Barcelona", "country": "Spain"},
+    ).json()
+
+    merged = client.post(
+        f"/roasters/{keeper['id']}/merge",
+        headers=admin_headers,
+        json={"source_id": duplicate["id"]},
+    ).json()
+
+    assert merged["country"] == "Spain"  # target had none: adopted from the source
+    assert merged["city"] == "BCN"  # target had its own: kept, not overwritten
+
+
 def test_merge_into_itself_409(client, admin_headers, alice_headers):
     roaster_id = client.post("/roasters", headers=alice_headers, json={"name": "Nomad"}).json()["id"]
     resp = client.post(f"/roasters/{roaster_id}/merge", headers=admin_headers, json={"source_id": roaster_id})

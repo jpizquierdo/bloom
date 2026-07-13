@@ -247,16 +247,33 @@ So: **any user creates a roaster, implicitly.** `POST /beans` still takes `roast
 *name*; the service resolves it with a get-or-create, matching case-insensitively against a
 unique index on `lower(name)` (with whitespace trimmed and collapsed by
 `domain/naming.normalize_name`). The first spelling seen becomes canonical. Beans read the
-roaster back as a nested object. Concurrent creation of the same name is safe: the insert runs
-in a savepoint and falls back to re-reading the row the unique index rejected it for.
+roaster back as a nested object.
+
+**Case folding happens in the database, never in Python.** The index is `lower(name)` under
+Postgres' collation, and `str.lower()` does not always agree with it (Turkish `İ`); folding
+one side in Python would let a lookup miss a row the index still rejects as a duplicate.
+
+**Every write that can collide with the unique index is savepoint-guarded** (`add_if_absent`,
+`try_update`, `try_delete` in the repository): losing a race against a concurrent insert or
+rename is a `409`, never an `IntegrityError` escaping as a `500`. The same applies to the FK:
+`bean.roaster_id` is `RESTRICT` and `Roaster.beans` is `passive_deletes`, so the database — not
+a check-then-delete in the service, which can go stale — is what refuses to strand a bean.
 
 What the table buys, beyond identity:
 - **Rename once, every bean follows** (`PATCH /roasters/{id}`, admin) — impossible with free text.
 - **Merge duplicates** (`POST /roasters/{id}/merge`, admin): the source's beans are reassigned
-  to the target and the source is deleted. This is the escape hatch for variants that slipped
-  in before someone noticed, and the reason `DELETE` of an in-use roaster is a `409` rather
-  than a cascade — beans are never silently detached from their roaster.
+  to the target and the source is deleted. The duplicate is often the one somebody filled in
+  properly, so the target **adopts the source's metadata for any field it left empty** (its own
+  values always win). This is the escape hatch for variants that slipped in before someone
+  noticed, and the reason `DELETE` of an in-use roaster is a `409` rather than a cascade —
+  beans are never silently detached from their roaster.
 - **Somewhere to put roaster metadata** (country, city, website, notes).
+
+**Abandoned roasters are reaped.** Fixing a typo with `PATCH /beans/{id}` would otherwise leave
+the misspelled roaster in the picker forever — the very mess the table exists to prevent. When a
+bean moves away and its old roaster has no beans left **and no metadata**, it is deleted: it held
+nothing anyone entered. A roaster with metadata is always kept, beans or not — someone typed
+those details on purpose.
 
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
