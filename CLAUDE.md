@@ -27,6 +27,13 @@ Guidance for AI assistants working in this repository.
   `Field(description=...)` / `summary=` where it improves the generated docs. Do **not**
   strip these to be terse.
 
+## Secrets
+
+- **NEVER read the `.env` file, under any circumstances.** Do not open it, `cat` it,
+  grep it, or print its contents — it holds real production secrets. Use `.env.example`
+  when you need to know which variables exist.
+- Never write secret values into the repository, commits, logs, or chat output.
+
 ## Project conventions
 
 - All code, comments, and identifiers in **English**.
