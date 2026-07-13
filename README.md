@@ -4,9 +4,6 @@ Self-hosted tracking for the specialty coffee you brew — at home or behind the
 Bloom records the beans you buy, every brew you pull or pour, and how each one tasted,
 so you can find what actually makes a good cup repeatable.
 
-This repository is the **backend REST API and data layer** (FastAPI + PostgreSQL). A
-`frontend/` directory is reserved for later. For the design rationale and data model, see
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Stack
 
