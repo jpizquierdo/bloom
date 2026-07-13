@@ -6,6 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bloom.schemas.common import reject_null
 from bloom.schemas.roaster import RoasterName, RoasterRead
 
 Process = Literal["washed", "natural", "honey", "anaerobic", "carbonic_maceration", "other"]
@@ -51,6 +52,8 @@ class BeanUpdate(BeanBase):
         examples=["Nomad Coffee"],
     )
     is_finished: bool | None = Field(default=None, description="Whether the bag is used up.", examples=[True])
+
+    _no_null = reject_null("name", "roaster", "is_finished")
 
 
 class BeanRead(BeanBase):

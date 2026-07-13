@@ -92,6 +92,20 @@ def test_blank_roaster_422(client, alice_headers):
     assert _make_bean(client, alice_headers, roaster="   ").status_code == 422
 
 
+def test_explicit_null_on_a_required_field_422(client, alice_headers):
+    bean_id = _make_bean(client, alice_headers).json()["id"]
+    # These columns are NOT NULL: omitting them leaves them unchanged, but sending an
+    # explicit null must be a validation error, not a database failure.
+    for field in ["name", "roaster", "is_finished"]:
+        resp = client.patch(f"/beans/{bean_id}", headers=alice_headers, json={field: None})
+        assert resp.status_code == 422, f"{field} accepted a null"
+
+    # A nullable field, in contrast, can still be cleared with an explicit null.
+    resp = client.patch(f"/beans/{bean_id}", headers=alice_headers, json={"notes": None})
+    assert resp.status_code == 200
+    assert resp.json()["notes"] is None
+
+
 def test_invalid_process_422(client, alice_headers):
     assert _make_bean(client, alice_headers, process="rocket-fuel").status_code == 422
 

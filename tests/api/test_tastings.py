@@ -38,5 +38,22 @@ def test_score_out_of_range_rejected(client, alice_headers, brew_id):
     assert client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"aroma": 11}).status_code == 422
 
 
+def test_null_descriptors_rejected_but_scores_are_nullable(client, alice_headers, brew_id):
+    tasting = client.post(
+        f"/brews/{brew_id}/tastings",
+        headers=alice_headers,
+        json={"aroma": 8, "descriptors": ["floral"]},
+    ).json()
+
+    # descriptors is NOT NULL (empty list, never null) — send [] to clear it.
+    assert client.patch(f"/tastings/{tasting['id']}", headers=alice_headers, json={"descriptors": None}).status_code == 422
+    assert client.patch(f"/tastings/{tasting['id']}", headers=alice_headers, json={"descriptors": []}).status_code == 200
+
+    # Scores, in contrast, are nullable: an explicit null clears one.
+    resp = client.patch(f"/tastings/{tasting['id']}", headers=alice_headers, json={"aroma": None})
+    assert resp.status_code == 200
+    assert resp.json()["aroma"] is None
+
+
 def test_tasting_on_unknown_brew_404(client, alice_headers):
     assert client.post("/brews/9999/tastings", headers=alice_headers, json={"overall": 8}).status_code == 404
