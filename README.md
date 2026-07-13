@@ -5,11 +5,6 @@ Bloom records the beans you buy, every brew you pull or pour, and how each one t
 so you can find what actually makes a good cup repeatable.
 
 
-## Stack
-
-FastAPI · SQLAlchemy 2.x (sync) · Alembic · Pydantic v2 · PostgreSQL 16 (`psycopg` 3) ·
-JWT auth (argon2id) · packaged with `uv` · Postgres via Docker Compose.
-
 ## Requirements
 
 - Docker (for PostgreSQL)
