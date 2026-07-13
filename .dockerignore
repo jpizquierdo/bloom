@@ -14,9 +14,11 @@ __pycache__/
 
 # Local env and things not needed at runtime
 .env
+.env.example
 tests/
 docs/
 frontend/
+docker/
 
 # NOTE: README.md is kept — pyproject `readme = "README.md"` needs it at build time.
 # alembic/ and alembic.ini are kept — migrations run on startup.
