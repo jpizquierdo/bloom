@@ -49,14 +49,8 @@ def test_admin_can_deactivate_user(client, admin_headers, users):
 
 def test_admin_cannot_self_demote(client, admin_headers, users):
     admin_id = users["admin"].id
-    assert (
-        client.patch(f"/users/{admin_id}", headers=admin_headers, json={"role": "user"}).status_code
-        == 400
-    )
+    assert client.patch(f"/users/{admin_id}", headers=admin_headers, json={"role": "user"}).status_code == 400
 
 
 def test_patch_missing_user_404(client, admin_headers):
-    assert (
-        client.patch("/users/9999", headers=admin_headers, json={"is_active": False}).status_code
-        == 404
-    )
+    assert client.patch("/users/9999", headers=admin_headers, json={"is_active": False}).status_code == 404

@@ -24,9 +24,7 @@ class UserUpdate(BaseModel):
     """Admin-editable user fields: promote/demote and activate/deactivate."""
 
     role: Role | None = Field(default=None, description="New role.", examples=["admin"])
-    is_active: bool | None = Field(
-        default=None, description="Activate or deactivate the account.", examples=[False]
-    )
+    is_active: bool | None = Field(default=None, description="Activate or deactivate the account.", examples=[False])
 
 
 class UserRead(BaseModel):

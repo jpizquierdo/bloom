@@ -14,9 +14,7 @@ router = APIRouter(tags=["tastings"])
     response_model=TastingRead,
     status_code=status.HTTP_201_CREATED,
 )
-def create_tasting(
-    brew_id: int, data: TastingCreate, db: DbSession, user: CurrentUser
-) -> TastingRead:
+def create_tasting(brew_id: int, data: TastingCreate, db: DbSession, user: CurrentUser) -> TastingRead:
     """Add a tasting to any brew; you are recorded as its taster.
 
     A brew can be scored by several users, so multiple tastings per brew are allowed.
@@ -43,9 +41,7 @@ def get_tasting(tasting_id: int, db: DbSession, _user: CurrentUser) -> TastingRe
 
 
 @router.patch("/tastings/{tasting_id}", response_model=TastingRead)
-def update_tasting(
-    tasting_id: int, data: TastingUpdate, db: DbSession, user: CurrentUser
-) -> TastingRead:
+def update_tasting(tasting_id: int, data: TastingUpdate, db: DbSession, user: CurrentUser) -> TastingRead:
     """Update a tasting. Only its author (or an admin) may edit it."""
     tasting = tasting_service.get_owned_tasting(db, tasting_id, user)
     return tasting_service.update_tasting(db, tasting, data)

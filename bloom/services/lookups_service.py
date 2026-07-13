@@ -28,9 +28,7 @@ def get_brew_method(db: Session, method_id: int) -> BrewMethod:
 
 
 def create_brew_method(db: Session, data: BrewMethodCreate) -> BrewMethod:
-    method = lookups_repo.add_brew_method(
-        db, name=data.name, category=data.category, default_ratio=data.default_ratio
-    )
+    method = lookups_repo.add_brew_method(db, name=data.name, category=data.category, default_ratio=data.default_ratio)
     db.commit()
     db.refresh(method)
     return method
@@ -48,9 +46,7 @@ def get_equipment(db: Session, equipment_id: int) -> Equipment:
 
 
 def create_equipment(db: Session, data: EquipmentCreate) -> Equipment:
-    equipment = lookups_repo.add_equipment(
-        db, type=data.type, name=data.name, brand=data.brand, notes=data.notes
-    )
+    equipment = lookups_repo.add_equipment(db, type=data.type, name=data.name, brand=data.brand, notes=data.notes)
     db.commit()
     db.refresh(equipment)
     logger.info("Equipment %s (%s '%s') created", equipment.id, equipment.type, equipment.name)

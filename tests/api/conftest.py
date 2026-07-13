@@ -37,9 +37,7 @@ def _test_database_url() -> str:
 @pytest.fixture(scope="session")
 def engine():
     """Create the test database (if needed), build the schema, yield an engine."""
-    admin_engine = create_engine(
-        str(get_settings().SQLALCHEMY_DATABASE_URI), isolation_level="AUTOCOMMIT"
-    )
+    admin_engine = create_engine(str(get_settings().SQLALCHEMY_DATABASE_URI), isolation_level="AUTOCOMMIT")
     with admin_engine.connect() as conn:
         exists = conn.execute(
             text("SELECT 1 FROM pg_database WHERE datname = :name"),
@@ -101,15 +99,9 @@ def client(session_factory) -> TestClient:
 def users(db) -> dict:
     """Seed an admin and two standard users; return them by role/name."""
     return {
-        "admin": users_service.create_user(
-            db, email="admin@example.com", password="adminpass1", role="admin"
-        ),
-        "alice": users_service.create_user(
-            db, email="alice@example.com", password="alicepass1", role="user"
-        ),
-        "bob": users_service.create_user(
-            db, email="bob@example.com", password="bobpass123", role="user"
-        ),
+        "admin": users_service.create_user(db, email="admin@example.com", password="adminpass1", role="admin"),
+        "alice": users_service.create_user(db, email="alice@example.com", password="alicepass1", role="user"),
+        "bob": users_service.create_user(db, email="bob@example.com", password="bobpass123", role="user"),
     }
 
 

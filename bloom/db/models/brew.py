@@ -65,9 +65,7 @@ class Brew(Base):
         nullable=False,
     )
     grinder_id: Mapped[int | None] = mapped_column(ForeignKey("equipment.id", ondelete="SET NULL"))
-    brewed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
+    brewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     dose_grams: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
     yield_grams: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))
@@ -86,6 +84,4 @@ class Brew(Base):
     bean: Mapped[Bean] = relationship(back_populates="brews")
     method: Mapped[BrewMethod] = relationship()
     grinder: Mapped[Equipment | None] = relationship()
-    tastings: Mapped[list[Tasting]] = relationship(
-        back_populates="brew", cascade="all, delete-orphan", passive_deletes=True
-    )
+    tastings: Mapped[list[Tasting]] = relationship(back_populates="brew", cascade="all, delete-orphan", passive_deletes=True)

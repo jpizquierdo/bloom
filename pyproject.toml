@@ -34,7 +34,7 @@ packages = ["bloom"]
 testpaths = ["tests"]
 
 [tool.ruff]
-line-length = 100
+line-length = 140
 target-version = "py312"
 extend-exclude = ["alembic/versions"]
 
