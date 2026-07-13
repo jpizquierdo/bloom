@@ -5,6 +5,8 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bloom.schemas.common import reject_null
+
 # A 1-10 subjective score (nullable), matching the DB CHECK constraints.
 Score = Annotated[int | None, Field(default=None, ge=1, le=10, description="Score from 1 to 10.", examples=[8])]
 
@@ -38,6 +40,9 @@ class TastingUpdate(TastingBase):
     """Partial update; only provided fields are applied (PATCH semantics)."""
 
     descriptors: list[str] | None = Field(default=None, description="Flavor descriptors.", examples=[["peach"]])
+
+    # Scores are nullable (an explicit null clears one); descriptors are not — send [] instead.
+    _no_null = reject_null("descriptors")
 
 
 class TastingRead(TastingBase):

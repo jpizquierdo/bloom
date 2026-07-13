@@ -96,6 +96,17 @@ def test_dose_zero_rejected(client, alice_headers, lookups, bean_id):
     assert resp.status_code == 422
 
 
+def test_null_dose_rejected(client, alice_headers, lookups, bean_id):
+    brew = client.post(
+        "/brews",
+        headers=alice_headers,
+        json={"bean_id": bean_id, "method_id": lookups["filter"]["id"], "dose_grams": "15"},
+    ).json()
+    # dose_grams is NOT NULL: omit it to leave it alone, never null it out.
+    resp = client.patch(f"/brews/{brew['id']}", headers=alice_headers, json={"dose_grams": None})
+    assert resp.status_code == 422
+
+
 def test_unknown_method_404(client, alice_headers, bean_id):
     resp = client.post(
         "/brews",

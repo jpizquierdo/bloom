@@ -5,6 +5,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from bloom.schemas.common import reject_null
+
 Role = Literal["admin", "user"]
 
 
@@ -25,6 +27,8 @@ class UserUpdate(BaseModel):
 
     role: Role | None = Field(default=None, description="New role.", examples=["admin"])
     is_active: bool | None = Field(default=None, description="Activate or deactivate the account.", examples=[False])
+
+    _no_null = reject_null("role", "is_active")
 
 
 class UserRead(BaseModel):

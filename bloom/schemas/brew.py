@@ -5,6 +5,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bloom.schemas.common import reject_null
+
 
 class BrewBase(BaseModel):
     grinder_id: int | None = Field(default=None, description="Grinder used (equipment id).", examples=[1])
@@ -38,6 +40,8 @@ class BrewUpdate(BrewBase):
     """Partial update. bean_id/method_id are immutable after creation."""
 
     dose_grams: Decimal | None = Field(default=None, gt=0, description="Dry coffee dose (g).", examples=["15"])
+
+    _no_null = reject_null("dose_grams")
 
 
 class ExtractionDiagnosticsRead(BaseModel):

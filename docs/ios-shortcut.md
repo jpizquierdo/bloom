@@ -85,7 +85,7 @@ All paths are relative to `BASE_URL`. Authenticated calls need the
 
 | Resource | Action | Method & path | Body (JSON) |
 |----------|--------|---------------|-------------|
-| Bean  | Create | `POST /beans` | `name`*, `roaster`*, optional: `origin_country`, `region`, `producer`, `variety`, `process`, `roast_level`, `roast_date`, `purchase_date`, `weight_grams`, `price`, `altitude_masl`, `tasting_notes_label`, `notes`, `is_finished` |
+| Bean  | Create | `POST /beans` | `name`*, `roaster`* (a name — created if new), optional: `origin_country`, `region`, `producer`, `variety`, `process`, `roast_level`, `roast_date`, `purchase_date`, `weight_grams`, `price`, `altitude_masl`, `tasting_notes_label`, `notes`, `is_finished` |
 | Bean  | List   | `GET /beans` (`?mine=true` for yours) | — |
 | Bean  | Update | `PATCH /beans/{id}` | any of the create fields |
 | Bean  | Delete | `DELETE /beans/{id}` | — |
@@ -99,6 +99,7 @@ All paths are relative to `BASE_URL`. Authenticated calls need the
 | Tasting | Update | `PATCH /tastings/{id}` | any tasting field |
 | Tasting | Delete | `DELETE /tastings/{id}` | — |
 | Lookups | List methods / equipment | `GET /brew-methods`, `GET /equipment` | — |
+| Roaster | List | `GET /roasters` | — (handy for a picker; you never need to create one by hand) |
 
 \* required. Numbers may be sent as strings (`"15"`) or numbers; the API accepts both.
 Dates are ISO (`2026-07-01`), timestamps ISO-8601 (`2026-07-12T08:00:00Z`).
@@ -108,7 +109,8 @@ Dates are ISO (`2026-07-01`), timestamps ISO-8601 (`2026-07-12T08:00:00Z`).
 ## Worked example A — Create a Bean
 
 1. **Ask for Input** (Text) "Bean name?" → variable `name`.
-2. **Ask for Input** (Text) "Roaster?" → variable `roaster`.
+2. **Ask for Input** (Text) "Roaster?" → variable `roaster`. Type it freely: the API reuses the
+   roaster if it already knows the name (any capitalisation) and creates it otherwise.
 3. *(optional)* **Ask for Input** (Number) "Weight (g)?" → `weight`.
 4. **Dictionary** action, add keys:
    - `name` → `name`
@@ -131,7 +133,8 @@ A brew needs a `bean_id` and a `method_id`, so first let the user pick them from
 2. **Choose from List** on that result → the user picks a bean. Then **Get Dictionary
    Value** `id` from the chosen item → `bean_id`.
    - *Nicer labels:* **Repeat with Each** over the beans, build a text
-     `"[name] — [roaster] (#[id])"`, **Choose from List** of those, then extract the id.
+     `"[name] — [roaster.name] (#[id])"` (a bean's `roaster` is a nested object, so take
+     **Get Dictionary Value** `name` from it), **Choose from List** of those, then extract the id.
 3. **Get Contents of URL**: `GET [BASE_URL]/brew-methods` → **Choose from List** →
    **Get Dictionary Value** `id` → `method_id`.
 4. **Ask for Input** (Number) "Dose (g)?" → `dose`.

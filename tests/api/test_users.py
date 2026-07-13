@@ -52,5 +52,12 @@ def test_admin_cannot_self_demote(client, admin_headers, users):
     assert client.patch(f"/users/{admin_id}", headers=admin_headers, json={"role": "user"}).status_code == 400
 
 
+def test_null_role_or_is_active_rejected(client, admin_headers, users):
+    alice_id = users["alice"].id
+    # Both columns are NOT NULL: a null is a validation error, not a 500.
+    assert client.patch(f"/users/{alice_id}", headers=admin_headers, json={"role": None}).status_code == 422
+    assert client.patch(f"/users/{alice_id}", headers=admin_headers, json={"is_active": None}).status_code == 422
+
+
 def test_patch_missing_user_404(client, admin_headers):
     assert client.patch("/users/9999", headers=admin_headers, json={"is_active": False}).status_code == 404

@@ -123,14 +123,14 @@ Design points:
 
 ## Data model
 
-Six tables. `brew` is the central, highest-volume entity.
+Seven tables. `brew` is the central, highest-volume entity.
 
 ```
 Entities:
-    bean 1 ──< brew >── 1 brew_method
-                 │  └─── 1 equipment   (grinder, nullable)
-                 │
-                 └──< tasting          (1:N)
+    roaster 1 ──< bean 1 ──< brew >── 1 brew_method
+                              │  └─── 1 equipment   (grinder, nullable)
+                              │
+                              └──< tasting          (1:N)
 
 Ownership (who created each row):
     user 1 ──< bean       (owner)
@@ -147,6 +147,7 @@ Every row carries who created it: `bean.user_id` (owner), `brew.user_id` (author
 |---------------|---------------------------------------------------------------------|
 | `user`        | Accounts with a role (`admin` / `user`). Owns beans, authors brews, makes tastings. |
 | `bean`        | A physical bag/lot of coffee. Shared; `user_id` is the owner.        |
+| `roaster`     | Who roasted the bean. User-creatable, unique on `lower(name)` (see 13). |
 | `brew_method` | Lookup: V60, Espresso, AeroPress… with a category.                  |
 | `equipment`   | Grinders, machines, kettles — one table, `type` discriminator.      |
 | `brew`        | A single extraction: the objective parameters. Central entity; `user_id` is the author. |
@@ -231,6 +232,49 @@ only then log a brew you pulled earlier (retroactive logging) — and the brew s
 `WARNING` (`Brew N created on a finished bean`) rather than rejecting the request. A hard
 block (409) was rejected as too rigid for a personal/café tracking app.
 
+### 13 — `roaster` as its own table, created on demand (not free text, not admin-curated)
+`bean.roaster` was free text; it is now `bean.roaster_id` → `roaster`.
+
+Free text made every typo a new roaster ("Nomad" / "Nomad Coffee" / "nomad coffee"), which
+silently splits any per-roaster grouping, and it offers nowhere to hang the roaster's own
+metadata (country, city, website). But curating the table like `brew_method` / `equipment`
+(admin-only writes) was rejected too: those are **small closed sets** — the ~10 brewing
+methods, the gear physically in the house — whereas roasters are an **open set that grows with
+every bag bought**. Admin-gating them would block a user from logging a bean until an admin
+pre-registered the roaster.
+
+So: **any user creates a roaster, implicitly.** `POST /beans` still takes `roaster` as a
+*name*; the service resolves it with a get-or-create, matching case-insensitively against a
+unique index on `lower(name)` (with whitespace trimmed and collapsed by
+`domain/naming.normalize_name`). The first spelling seen becomes canonical. Beans read the
+roaster back as a nested object.
+
+**Case folding happens in the database, never in Python.** The index is `lower(name)` under
+Postgres' collation, and `str.lower()` does not always agree with it (Turkish `İ`); folding
+one side in Python would let a lookup miss a row the index still rejects as a duplicate.
+
+**Every write that can collide with the unique index is savepoint-guarded** (`add_if_absent`,
+`try_update`, `try_delete` in the repository): losing a race against a concurrent insert or
+rename is a `409`, never an `IntegrityError` escaping as a `500`. The same applies to the FK:
+`bean.roaster_id` is `RESTRICT` and `Roaster.beans` is `passive_deletes`, so the database — not
+a check-then-delete in the service, which can go stale — is what refuses to strand a bean.
+
+What the table buys, beyond identity:
+- **Rename once, every bean follows** (`PATCH /roasters/{id}`, admin) — impossible with free text.
+- **Merge duplicates** (`POST /roasters/{id}/merge`, admin): the source's beans are reassigned
+  to the target and the source is deleted. The duplicate is often the one somebody filled in
+  properly, so the target **adopts the source's metadata for any field it left empty** (its own
+  values always win). This is the escape hatch for variants that slipped in before someone
+  noticed, and the reason `DELETE` of an in-use roaster is a `409` rather than a cascade —
+  beans are never silently detached from their roaster.
+- **Somewhere to put roaster metadata** (country, city, website, notes).
+
+**Abandoned roasters are reaped.** Fixing a typo with `PATCH /beans/{id}` would otherwise leave
+the misspelled roaster in the picker forever — the very mess the table exists to prevent. When a
+bean moves away and its old roaster has no beans left **and no metadata**, it is deleted: it held
+nothing anyone entered. A roaster with metadata is always kept, beans or not — someone typed
+those details on purpose.
+
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
 - **First admin via env vars on startup**; further accounts are admin-created and default
@@ -248,6 +292,7 @@ block (409) was rejected as too rigid for a personal/café tracking app.
   - `bean` → `brew` → `tasting`: **CASCADE**. Note: because beans are shared, deleting a
     bean removes *every* user's brews on it (only the owner can trigger this).
   - `brew.method_id`: **RESTRICT** (a method in use cannot be deleted).
+  - `bean.roaster_id`: **RESTRICT** (a roaster with beans is merged away, never deleted — see 13).
   - `brew.grinder_id`: **SET NULL** (deleting a grinder preserves brew history).
   - `user` → `bean` (owner), `user` → `brew` (author), `user` → `tasting` (taster): all
     **RESTRICT**, paired with **soft-delete** of users (an `is_active` flag). Accounts are

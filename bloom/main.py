@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 from bloom.core.dependencies import get_db
 from bloom.core.logger import configure_logging
 from bloom.db import init_db
-from bloom.routes import auth, beans, brew_methods, brews, equipment, tastings, users
-from bloom.services.errors import ForbiddenError, NotFoundError
+from bloom.routes import auth, beans, brew_methods, brews, equipment, roasters, tastings, users
+from bloom.services.errors import ConflictError, ForbiddenError, NotFoundError
 
 
 @asynccontextmanager
@@ -39,6 +39,10 @@ def create_app() -> FastAPI:
     async def _forbidden_handler(request: Request, exc: ForbiddenError) -> JSONResponse:
         return JSONResponse(status_code=403, content={"detail": str(exc) or "Forbidden"})
 
+    @app.exception_handler(ConflictError)
+    async def _conflict_handler(request: Request, exc: ConflictError) -> JSONResponse:
+        return JSONResponse(status_code=409, content={"detail": str(exc) or "Conflict"})
+
     @app.get("/health", tags=["system"])
     def health(db: Session = Depends(get_db)) -> dict[str, str]:
         """Liveness/readiness check: confirms the API and its DB are reachable."""
@@ -47,6 +51,7 @@ def create_app() -> FastAPI:
 
     app.include_router(auth.router)
     app.include_router(users.router)
+    app.include_router(roasters.router)
     app.include_router(beans.router)
     app.include_router(brew_methods.router)
     app.include_router(equipment.router)
