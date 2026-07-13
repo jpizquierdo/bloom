@@ -55,8 +55,6 @@ Settings come from environment variables or a local `.env` (copy `.env.example`)
 | `LOG_LEVEL` | Logging level for the `bloom` logger (default `INFO`). |
 | `BLOOM_ADMIN_EMAIL` / `BLOOM_ADMIN_PASSWORD` | First admin, bootstrapped on startup if absent. |
 
-The connection URL (`SQLALCHEMY_DATABASE_URI`) is assembled from these parts in
-`bloom/core/config.py`.
 
 ## Docker
 
