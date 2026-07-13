@@ -11,13 +11,40 @@ services:
       - "5432:5432"
     volumes:
       - bloom_pgdata:/var/lib/postgresql/data
-      # NOTE: the schema is owned by Alembic migrations, not an init script.
-      # Run `uv run alembic upgrade head` after the container is up.
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U bloom -d bloom"]
       interval: 5s
       timeout: 5s
       retries: 5
+  bloom:
+    image: jpizquierdo/bloom:0.0.1
+    container_name: bloom-core
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_DB: bloom
+      POSTGRES_USER: bloom
+      POSTGRES_PASSWORD: bloom
+      POSTGRES_SERVER: db
+    ports:
+      - "8000:8000"
+    healthcheck:
+      # The image is python-slim: no curl/wget available, so probe with urllib.
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   bloom_pgdata:
