@@ -88,6 +88,7 @@ curl http://localhost:8000/auth/me -H "Authorization: Bearer <token>"
 | Auth | `POST /auth/token`, `GET /auth/me` |
 | Users (admin) | `POST /users`, `GET /users`, `PATCH /users/{id}` |
 | Beans | `POST/GET /beans` (`?mine=true`), `GET/PATCH/DELETE /beans/{id}` |
+| Roasters | `POST/GET /roasters`, `GET /roasters/{id}`; `PATCH/DELETE /roasters/{id}` and `POST /roasters/{id}/merge` are admin-only |
 | Brews | `POST/GET /brews` (`?mine=true`), `GET/PATCH/DELETE /brews/{id}` |
 | Tastings | `POST/GET /brews/{id}/tastings`, `GET /tastings` (`?mine=true`), `GET/PATCH/DELETE /tastings/{id}` |
 | Lookups | `GET /brew-methods`, `GET /equipment` (create is admin-only) |
@@ -95,6 +96,11 @@ curl http://localhost:8000/auth/me -H "Authorization: Bearer <token>"
 Bloom is a **shared log**: any authenticated user can read all beans, brews and tastings,
 add beans, brew from any bean, and taste any brew. Each row records who created it, and only
 that creator (or an admin) can edit or delete it. Interactive docs are served at `/docs`.
+
+A bean carries its **roaster** as a name (`"roaster": "Nomad Coffee"`): the API matches it
+case-insensitively and creates the roaster if it is new, so nobody has to pre-register one.
+Beans read back with the roaster as a nested object. Admins can rename a roaster — every bean
+follows — or merge a duplicate into another with `POST /roasters/{id}/merge`.
 
 ## Tests
 

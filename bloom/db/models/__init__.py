@@ -4,6 +4,7 @@ from bloom.db.models.bean import Bean
 from bloom.db.models.brew import Brew
 from bloom.db.models.brew_method import BrewMethod
 from bloom.db.models.equipment import Equipment
+from bloom.db.models.roaster import Roaster
 from bloom.db.models.tasting import Tasting
 from bloom.db.models.user import User
 
@@ -12,6 +13,7 @@ __all__ = [
     "Brew",
     "BrewMethod",
     "Equipment",
+    "Roaster",
     "Tasting",
     "User",
 ]

@@ -6,6 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bloom.schemas.roaster import RoasterName, RoasterRead
+
 Process = Literal["washed", "natural", "honey", "anaerobic", "carbonic_maceration", "other"]
 RoastLevel = Literal["light", "medium_light", "medium", "medium_dark", "dark"]
 
@@ -32,7 +34,10 @@ class BeanBase(BaseModel):
 
 class BeanCreate(BeanBase):
     name: str = Field(min_length=1, description="Coffee name.", examples=["Guji Natural"])
-    roaster: str = Field(min_length=1, description="Roaster.", examples=["Nomad Coffee"])
+    roaster: RoasterName = Field(
+        description="Roaster name. Matched case-insensitively; created if it does not exist yet.",
+        examples=["Nomad Coffee"],
+    )
     is_finished: bool = Field(default=False, description="Whether the bag is used up.", examples=[False])
 
 
@@ -40,7 +45,11 @@ class BeanUpdate(BeanBase):
     """All fields optional; only provided fields are applied (PATCH semantics)."""
 
     name: str | None = Field(default=None, min_length=1, description="Coffee name.", examples=["Guji Natural"])
-    roaster: str | None = Field(default=None, min_length=1, description="Roaster.", examples=["Nomad Coffee"])
+    roaster: RoasterName | None = Field(
+        default=None,
+        description="Move the bean to this roaster. Matched case-insensitively; created if it does not exist yet.",
+        examples=["Nomad Coffee"],
+    )
     is_finished: bool | None = Field(default=None, description="Whether the bag is used up.", examples=[True])
 
 
@@ -50,6 +59,6 @@ class BeanRead(BeanBase):
     id: int = Field(examples=[1])
     user_id: int = Field(description="Owner (who added the bean).", examples=[1])
     name: str = Field(examples=["Guji Natural"])
-    roaster: str = Field(examples=["Nomad Coffee"])
+    roaster: RoasterRead = Field(description="The roaster this bean came from.")
     is_finished: bool = Field(examples=[False])
     created_at: datetime = Field(examples=["2026-07-05T09:30:00Z"])

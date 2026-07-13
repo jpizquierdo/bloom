@@ -6,6 +6,7 @@ from bloom.core.logger import get_logger
 from bloom.db.models.bean import Bean
 from bloom.db.models.user import User
 from bloom.repositories import beans as beans_repo
+from bloom.repositories import roasters as roasters_repo
 from bloom.schemas.bean import BeanCreate, BeanUpdate
 from bloom.services.access import owns_or_admin
 from bloom.services.errors import ForbiddenError, NotFoundError
@@ -37,8 +38,10 @@ def get_owned_bean(db: Session, bean_id: int, user: User) -> Bean:
 
 
 def create_bean(db: Session, data: BeanCreate, user: User) -> Bean:
-    """Create a bean owned by ``user``."""
-    bean = beans_repo.add(db, user_id=user.id, **data.model_dump())
+    """Create a bean owned by ``user``, resolving its roaster by name (created if new)."""
+    fields = data.model_dump()
+    roaster = roasters_repo.get_or_create(db, name=fields.pop("roaster"))
+    bean = beans_repo.add(db, user_id=user.id, roaster_id=roaster.id, **fields)
     db.commit()
     db.refresh(bean)
     logger.info("Bean %s (%s) created by user %s", bean.id, bean.name, user.id)
@@ -48,11 +51,14 @@ def create_bean(db: Session, data: BeanCreate, user: User) -> Bean:
 def update_bean(db: Session, bean: Bean, data: BeanUpdate) -> Bean:
     """Apply a partial update to an already-authorized bean."""
     changes = data.model_dump(exclude_unset=True)
+    roaster_name = changes.pop("roaster", None)
+    if roaster_name is not None:
+        bean.roaster = roasters_repo.get_or_create(db, name=roaster_name)
     for field, value in changes.items():
         setattr(bean, field, value)
     db.commit()
     db.refresh(bean)
-    logger.info("Bean %s updated: %s", bean.id, ", ".join(changes) or "no fields")
+    logger.info("Bean %s updated: %s", bean.id, ", ".join(data.model_fields_set) or "no fields")
     return bean
 
 

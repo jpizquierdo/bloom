@@ -19,3 +19,11 @@ class ForbiddenError(Exception):
     Used for shared resources (beans): everyone can read them, but only the
     owner (or an admin) may edit or delete, so a 403 is the honest answer.
     """
+
+
+class ConflictError(Exception):
+    """The request clashes with the current state of the data.
+
+    Used for roasters: a duplicate name, or deleting one that beans still
+    reference (it must be merged away instead).
+    """
