@@ -26,9 +26,7 @@ def serialize(brew: Brew) -> BrewRead:
     diagnostics = classify_extraction(brew.tds_percent, brew.extraction_yield_percent, category)
     read = BrewRead.model_validate(brew)
     read.ratio = ratio
-    read.diagnostics = ExtractionDiagnosticsRead(
-        strength=diagnostics.strength, extraction=diagnostics.extraction
-    )
+    read.diagnostics = ExtractionDiagnosticsRead(strength=diagnostics.strength, extraction=diagnostics.extraction)
     return read
 
 

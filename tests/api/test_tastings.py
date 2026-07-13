@@ -5,9 +5,7 @@ import pytest
 
 @pytest.fixture
 def brew_id(client, alice_headers, lookups):
-    bean_id = client.post(
-        "/beans", headers=alice_headers, json={"name": "Kenya AA", "roaster": "Nomad"}
-    ).json()["id"]
+    bean_id = client.post("/beans", headers=alice_headers, json={"name": "Kenya AA", "roaster": "Nomad"}).json()["id"]
     return client.post(
         "/brews",
         headers=alice_headers,
@@ -37,16 +35,8 @@ def test_multiple_tastings_per_brew(client, alice_headers, brew_id):
 
 
 def test_score_out_of_range_rejected(client, alice_headers, brew_id):
-    assert (
-        client.post(
-            f"/brews/{brew_id}/tastings", headers=alice_headers, json={"aroma": 11}
-        ).status_code
-        == 422
-    )
+    assert client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"aroma": 11}).status_code == 422
 
 
 def test_tasting_on_unknown_brew_404(client, alice_headers):
-    assert (
-        client.post("/brews/9999/tastings", headers=alice_headers, json={"overall": 8}).status_code
-        == 404
-    )
+    assert client.post("/brews/9999/tastings", headers=alice_headers, json={"overall": 8}).status_code == 404

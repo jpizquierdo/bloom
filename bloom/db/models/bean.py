@@ -34,8 +34,7 @@ class Bean(Base):
     __tablename__ = "bean"
     __table_args__ = (
         CheckConstraint(
-            "process IN ('washed', 'natural', 'honey', "
-            "'anaerobic', 'carbonic_maceration', 'other')",
+            "process IN ('washed', 'natural', 'honey', 'anaerobic', 'carbonic_maceration', 'other')",
             name="ck_bean_process",
         ),
         CheckConstraint(
@@ -67,11 +66,7 @@ class Bean(Base):
     tasting_notes_label: Mapped[str | None] = mapped_column(Text)
     notes: Mapped[str | None] = mapped_column(Text)
     is_finished: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     owner: Mapped[User] = relationship(back_populates="beans")
-    brews: Mapped[list[Brew]] = relationship(
-        back_populates="bean", cascade="all, delete-orphan", passive_deletes=True
-    )
+    brews: Mapped[list[Brew]] = relationship(back_populates="bean", cascade="all, delete-orphan", passive_deletes=True)

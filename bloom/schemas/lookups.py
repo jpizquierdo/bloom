@@ -12,9 +12,7 @@ EquipmentType = Literal["grinder", "espresso_machine", "kettle", "other"]
 
 class BrewMethodCreate(BaseModel):
     name: str = Field(min_length=1, description="Unique method name.", examples=["V60"])
-    category: BrewCategory = Field(
-        description="Brewing family the method belongs to.", examples=["filter"]
-    )
+    category: BrewCategory = Field(description="Brewing family the method belongs to.", examples=["filter"])
     default_ratio: Decimal | None = Field(
         default=None,
         gt=0,
@@ -36,9 +34,7 @@ class EquipmentCreate(BaseModel):
     type: EquipmentType = Field(description="Kind of equipment.", examples=["grinder"])
     name: str = Field(min_length=1, description="Model name.", examples=["Niche Zero"])
     brand: str | None = Field(default=None, description="Manufacturer.", examples=["Niche"])
-    notes: str | None = Field(
-        default=None, description="Free-form notes.", examples=["Single dosing"]
-    )
+    notes: str | None = Field(default=None, description="Free-form notes.", examples=["Single dosing"])
 
 
 class EquipmentRead(BaseModel):

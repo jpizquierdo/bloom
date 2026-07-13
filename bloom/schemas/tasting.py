@@ -6,9 +6,7 @@ from typing import Annotated
 from pydantic import BaseModel, ConfigDict, Field
 
 # A 1-10 subjective score (nullable), matching the DB CHECK constraints.
-Score = Annotated[
-    int | None, Field(default=None, ge=1, le=10, description="Score from 1 to 10.", examples=[8])
-]
+Score = Annotated[int | None, Field(default=None, ge=1, le=10, description="Score from 1 to 10.", examples=[8])]
 
 
 class TastingBase(BaseModel):
@@ -24,9 +22,7 @@ class TastingBase(BaseModel):
         description="Flavor descriptors.",
         examples=[["peach", "jasmine"]],
     )
-    notes: str | None = Field(
-        default=None, description="Free-form notes.", examples=["Juicy, clean finish"]
-    )
+    notes: str | None = Field(default=None, description="Free-form notes.", examples=["Juicy, clean finish"])
     tasted_at: datetime | None = Field(
         default=None,
         description="When tasted (defaults to now).",
@@ -41,9 +37,7 @@ class TastingCreate(TastingBase):
 class TastingUpdate(TastingBase):
     """Partial update; only provided fields are applied (PATCH semantics)."""
 
-    descriptors: list[str] | None = Field(
-        default=None, description="Flavor descriptors.", examples=[["peach"]]
-    )
+    descriptors: list[str] | None = Field(default=None, description="Flavor descriptors.", examples=[["peach"]])
 
 
 class TastingRead(TastingBase):

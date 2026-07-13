@@ -5,9 +5,7 @@ import pytest
 
 @pytest.fixture
 def bean_id(client, alice_headers):
-    return client.post(
-        "/beans", headers=alice_headers, json={"name": "Kenya AA", "roaster": "Nomad"}
-    ).json()["id"]
+    return client.post("/beans", headers=alice_headers, json={"name": "Kenya AA", "roaster": "Nomad"}).json()["id"]
 
 
 def test_brew_on_finished_bean_is_allowed(client, alice_headers, lookups, bean_id):

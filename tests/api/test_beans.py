@@ -8,9 +8,7 @@ def _make_bean(client, headers, **overrides):
 
 
 def test_create_and_get_bean(client, alice_headers, users):
-    resp = _make_bean(
-        client, alice_headers, process="washed", roast_level="medium", weight_grams=250
-    )
+    resp = _make_bean(client, alice_headers, process="washed", roast_level="medium", weight_grams=250)
     assert resp.status_code == 201
     bean = resp.json()
     assert bean["user_id"] == users["alice"].id
@@ -42,12 +40,7 @@ def test_non_owner_can_read_but_not_modify_bean(client, alice_headers, bob_heade
     # A non-owner can read a shared bean...
     assert client.get(f"/beans/{bean_id}", headers=bob_headers).status_code == 200
     # ...but cannot edit or delete it.
-    assert (
-        client.patch(
-            f"/beans/{bean_id}", headers=bob_headers, json={"is_finished": True}
-        ).status_code
-        == 403
-    )
+    assert client.patch(f"/beans/{bean_id}", headers=bob_headers, json={"is_finished": True}).status_code == 403
     assert client.delete(f"/beans/{bean_id}", headers=bob_headers).status_code == 403
 
 
