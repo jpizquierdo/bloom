@@ -2,6 +2,7 @@
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from importlib.metadata import version
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -29,7 +30,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     """Build and configure the Bloom FastAPI application."""
     configure_logging()
-    app = FastAPI(title="Bloom", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="Bloom", version=version("bloom"), lifespan=lifespan)
 
     @app.exception_handler(NotFoundError)
     async def _not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
