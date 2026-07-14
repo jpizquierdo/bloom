@@ -41,5 +41,34 @@ Guidance for AI assistants working in this repository.
   as pure functions. `domain/` never imports ORM/FastAPI/session; routes contain no
   SQL; repositories are the only DB-access layer.
 - Typed SQLAlchemy 2.x (`Mapped[...]`), Pydantic v2, FastAPI dependency injection.
+- Every API route is served under `/api/v1` (`settings.API_V1_STR`). **`/health` stays at
+  the root** — container healthchecks probe it.
 - See `docs/ARCHITECTURE.md` for the architecture, data model, and design decisions
   (source of truth). `README.md` covers how to run and use the project.
+
+## Web UI (`frontend/`)
+
+React + TypeScript SPA: Vite, Tailwind v4, shadcn/ui, TanStack Router + Query,
+react-hook-form + zod. See `frontend/README.md` for the stack and how to add a page.
+
+- **`frontend/src/client/` is generated — never edit it by hand.** It is committed, so it
+  looks editable, but any change is lost on the next run. After touching a route or a schema:
+  `uv run python scripts/dump_openapi.py && (cd frontend && npm run generate-client)`.
+- **Ownership**: rows are readable by everyone, editable only by their creator or an admin.
+  Drive the UI from `canEdit(row, user)` (`src/lib/auth.ts`) — never re-derive the rule.
+- **PATCH never sends `null`**: the API rejects an explicit `null` for fields backed by NOT
+  NULL columns (`bloom/schemas/common.py:reject_null`). Build payloads with `stripEmpty()`
+  (`src/lib/format.ts`), which omits empty keys.
+- Numeric columns arrive as **strings** (`"18.50"`) — format via `src/lib/format.ts`.
+- The UI is **served by the API from `bloom/static`**, built into the same image; there is no
+  separate frontend container. It therefore calls the API with **relative** URLs — do not
+  reintroduce an absolute base URL, or the image stops working behind a reverse proxy.
+- Checks: `npm run lint`, `npm run build` (both run in CI, and the build gates the release
+  image). Node comes from `nvm`.
+
+## Releasing
+
+The version lives in five places and they must agree: `pyproject.toml`, `uv.lock`, the image
+tag in `docker/docker-compose.yml`, `openapi.json`, and `frontend/package.json`. Bump
+`pyproject.toml`, then run `uv lock` and `uv run python scripts/dump_openapi.py` to refresh
+the derived ones — a stale `uv.lock` fails the Docker build, which runs `uv sync --frozen`.
