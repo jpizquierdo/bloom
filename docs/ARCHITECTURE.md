@@ -309,6 +309,55 @@ and proxies `/api` to the backend: `FRONTEND_HOST` (plus any `BACKEND_CORS_ORIGI
 origins allowed through the middleware. In a source checkout `bloom/static` does not exist and
 the app simply serves no UI.
 
+### 16 — shadcn/ui: components are vendored, not a dependency
+
+`frontend/src/components/ui/` holds the actual source of every primitive, copied in rather than
+imported from a package. Restyling a button is editing a file in this repo, not fighting a
+library's theme API — which is the whole point for a project meant to be easy to pick up later.
+The cost is that upstream fixes do not arrive by `npm update`; that trade is deliberate.
+
+The reference (`fastapi/full-stack-fastapi-template`) uses Chakra; its architecture was kept
+(Vite, TanStack Router + Query, generated client, route guards) and only the component layer
+swapped.
+
+### 17 — One CRUD kit, so a resource is one file
+
+`DataTable`, `ResourceDialog`, `DeleteAlert` and `RowActions` (`src/components/data/`) are
+shared, and a page supplies only three things: column definitions, a zod form schema, and the
+generated query/mutation hooks. `routes/_app/roasters.tsx` is the smallest complete example.
+
+Two API rules are centralised rather than re-derived per page, because getting either wrong is
+silent:
+
+- **Ownership** — `canEdit(row, user)` (`src/lib/auth.ts`) mirrors `services/access.py`. The UI
+  hides what it must, and the API enforces it regardless.
+- **PATCH omits, never nulls** — `stripEmpty()` (`src/lib/format.ts`), because `reject_null`
+  turns an explicit `null` on a NOT NULL-backed field into a 422.
+
+### 18 — Bearer token in `localStorage`, no refresh flow
+
+The API issues a 60-minute JWT and has no refresh endpoint, so the UI stores the token in
+`localStorage`, attaches it on every request, and on a `401` clears it and returns to `/login`.
+An expired session means logging in again.
+
+`localStorage` is readable by any script on the origin, so this leans on the app shipping no
+third-party JavaScript (the CSP-free, self-hosted, single-origin setup makes that tractable).
+If the threat model ever widens, the fix is a refresh flow with an httpOnly cookie — a backend
+change, not a UI one.
+
+### 19 — Mutations invalidate everything
+
+Deletes cascade server-side (a bean takes its brews and its tastings with it) and rows
+cross-reference each other, so a blanket `invalidateQueries()` after any write is both the
+simplest and the most correct refresh. It is affordable precisely because the lists are small
+and unpaginated — see 20. Revisit together with pagination, not before.
+
+### 20 — Sorting and filtering are client-side
+
+The API returns whole tables (no `limit`/`offset` anywhere), so the UI sorts and filters what it
+already has. This is honest for a household-sized log and wrong at scale; the day a list gets
+long, pagination is a backend change first and the tables follow.
+
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
 - **First admin via env vars on startup**; further accounts are admin-created and default
