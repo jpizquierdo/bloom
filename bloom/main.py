@@ -3,12 +3,16 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from importlib.metadata import version
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from bloom.core.config import get_settings
 from bloom.core.dependencies import get_db
 from bloom.core.logger import configure_logging
 from bloom.db import init_db
@@ -27,10 +31,48 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
+def custom_generate_unique_id(route: APIRoute) -> str:
+    """Name operations ``<tag>-<handler>`` so generated clients get readable method names."""
+    return f"{route.tags[0]}-{route.name}"
+
+
+# The Docker build drops the compiled web UI here; in a source checkout it simply does not exist.
+STATIC_DIR = Path(__file__).parent / "static"
+
+
+def mount_frontend(app: FastAPI) -> None:
+    """Serve the built web UI from the API's own origin, if it was bundled into the image.
+
+    Same-origin means the UI calls the API with relative URLs, so one image works behind any
+    hostname or reverse proxy, with no rebuild and no CORS. ``fallback="index.html"`` hands
+    unknown browser navigations to the SPA so client-side routes like ``/brews/3`` survive a
+    refresh, while missing assets and non-GET requests still get a real 404.
+    """
+    if not STATIC_DIR.is_dir():
+        return
+
+    app.frontend("/", directory=STATIC_DIR, fallback="index.html")
+
+
 def create_app() -> FastAPI:
     """Build and configure the Bloom FastAPI application."""
     configure_logging()
-    app = FastAPI(title="Bloom", version=version("bloom"), lifespan=lifespan)
+    settings = get_settings()
+    app = FastAPI(
+        title="Bloom",
+        version=version("bloom"),
+        lifespan=lifespan,
+        generate_unique_id_function=custom_generate_unique_id,
+    )
+
+    if settings.all_cors_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.all_cors_origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
     @app.exception_handler(NotFoundError)
     async def _not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
@@ -44,20 +86,26 @@ def create_app() -> FastAPI:
     async def _conflict_handler(request: Request, exc: ConflictError) -> JSONResponse:
         return JSONResponse(status_code=409, content={"detail": str(exc) or "Conflict"})
 
+    # Deliberately outside the API prefix: container healthchecks probe /health.
     @app.get("/health", tags=["system"])
     def health(db: Session = Depends(get_db)) -> dict[str, str]:
         """Liveness/readiness check: confirms the API and its DB are reachable."""
         db.execute(text("SELECT 1"))
         return {"status": "ok", "db": "ok"}
 
-    app.include_router(auth.router)
-    app.include_router(users.router)
-    app.include_router(roasters.router)
-    app.include_router(beans.router)
-    app.include_router(brew_methods.router)
-    app.include_router(equipment.router)
-    app.include_router(brews.router)
-    app.include_router(tastings.router)
+    for router in (
+        auth.router,
+        users.router,
+        roasters.router,
+        beans.router,
+        brew_methods.router,
+        equipment.router,
+        brews.router,
+        tastings.router,
+    ):
+        app.include_router(router, prefix=settings.API_V1_STR)
+
+    mount_frontend(app)
 
     return app
 

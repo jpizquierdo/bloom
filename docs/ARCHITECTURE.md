@@ -63,6 +63,8 @@ bloom/
 │   └── routes/                # FastAPI routers (thin — validate, delegate, return)
 │       ├── auth.py  users.py  beans.py  brews.py
 │       ├── tastings.py  brew_methods.py  equipment.py
+├── frontend/                  # React SPA; its API client is generated from openapi.json
+├── scripts/                   # dump_openapi.py (schema for the frontend's codegen)
 ├── alembic/                   # migration environment (env.py, versions/)
 ├── tests/                     # pytest, outside the package
 │   ├── conftest.py
@@ -274,6 +276,38 @@ the misspelled roaster in the picker forever — the very mess the table exists 
 bean moves away and its old roaster has no beans left **and no metadata**, it is deleted: it held
 nothing anyone entered. A roaster with metadata is always kept, beans or not — someone typed
 those details on purpose.
+
+### 14 — `/api/v1` prefix, and the frontend generates its client from the schema
+
+Every router is mounted under `API_V1_STR` (`/api/v1`) so the API can evolve without breaking
+an installed UI. **`/health` deliberately stays at the root**: container healthchecks probe it,
+and a liveness check is not part of the versioned contract.
+
+The web UI's API client is *derived* from the backend, never hand-written, so a route or schema
+change surfaces as a TypeScript error rather than a runtime 404. Two things make that work:
+
+- **Operation ids are `<tag>-<handler>`** (`generate_unique_id_function`), which is what gives
+  the generated client readable names (`beansCreateBean`, not `create_bean_beans_post`).
+- **`scripts/dump_openapi.py`** writes `openapi.json` without needing a database, so codegen
+  runs offline and in CI.
+
+### 15 — One image serves the UI and the API (like Mealie)
+
+The Docker build compiles the SPA in a Node stage and copies `dist/` into `bloom/static`, which
+`app.frontend()` serves (FastAPI ≥ 0.139) with an `index.html` fallback so client-side routes
+survive a refresh. API routes, `/docs` and `/health` are matched first; missing assets and
+non-GET requests still return a real 404.
+
+The alternative — a second nginx image — was rejected because **Vite inlines the API URL at
+build time**: a published frontend image would only work for whoever's API happened to sit at
+the baked-in URL. Serving both from one origin means the UI calls the API with **relative**
+paths, so a single image works at `localhost`, on a LAN IP, or behind a reverse proxy with no
+rebuild and no configuration. It also makes CORS unnecessary in production.
+
+CORS therefore exists only for development, where Vite runs the UI on its own origin (`:5173`)
+and proxies `/api` to the backend: `FRONTEND_HOST` (plus any `BACKEND_CORS_ORIGINS`) lists the
+origins allowed through the middleware. In a source checkout `bloom/static` does not exist and
+the app simply serves no UI.
 
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
