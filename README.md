@@ -140,3 +140,9 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the data model, the
 Backend API and data layer are implemented (users/auth, beans, lots, brews, tastings, lookups),
 and the web UI covers all of them. Sign-up and password reset do not exist yet: the UI shows
 those screens but leaves them inert, and admins create accounts.
+
+## License
+
+Bloom is licensed under the **GNU Affero General Public License v3.0 or later** — see
+[`LICENSE`](LICENSE). You can use, modify and self-host it freely; but if you run a modified
+version as a network service, you must offer that version's source to its users.
