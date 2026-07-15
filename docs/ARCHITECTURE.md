@@ -70,7 +70,6 @@ bloom/
 │   ├── conftest.py
 │   ├── domain/                # fast unit tests for the pure functions
 │   └── api/                   # endpoint tests against a disposable test DB
-├── frontend/                  # reserved — empty for now
 ├── docker/docker-compose.yml
 ├── docs/ARCHITECTURE.md       # this file
 └── README.md
@@ -330,7 +329,13 @@ swapped.
 
 `DataTable`, `ResourceDialog`, `DeleteAlert` and `RowActions` (`src/components/data/`) are
 shared, and a page supplies only three things: column definitions, a zod form schema, and the
-generated query/mutation hooks. `routes/_app/roasters.tsx` is the smallest complete example.
+generated query/mutation hooks. `routes/_app/roasters/index.tsx` is the smallest complete example.
+
+Resources that benefit from a drill-down add a `$id.tsx` detail route beside `index.tsx`
+(`roasters/`, `beans/`, `brews/`), each mirroring the next — a roaster lists its beans, a bean
+lists its brews, a brew lists its tastings. Long pick-lists (beans) use the searchable
+`Combobox` (`components/data/combobox.tsx`) rather than a plain `Select`; both the filters and
+the row navigation are client-side, consistent with 20.
 
 Two API rules are centralised rather than re-derived per page, because getting either wrong is
 silent:

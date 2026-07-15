@@ -136,7 +136,8 @@ database on the running Postgres.
 ## Web UI
 
 A React SPA lives in [`frontend/`](frontend/), with its API client generated from
-`openapi.json`. It has a login screen, a sidebar, and CRUD for every resource.
+`openapi.json`. It has a login screen, a sidebar, and CRUD for every resource, with drill-down
+detail pages (a roaster's beans, a bean's brews) and client-side filtering.
 
 In production it is **built into the API image** and served from the same origin (see Docker
 below) — there is nothing separate to deploy. For development, run it against a local API:

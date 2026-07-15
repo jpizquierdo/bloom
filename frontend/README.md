@@ -63,9 +63,14 @@ src/
 ## Adding a resource
 
 The CRUD pieces are shared, so a new resource is one file in `src/routes/_app/`. Copy
-`roasters.tsx` — the smallest complete example — and supply three things: the column
+`roasters/index.tsx` — the smallest complete example — and supply three things: the column
 definitions, a zod form schema, and the generated query/mutation hooks. `DataTable`,
 `ResourceDialog` and `DeleteAlert` handle the rest.
+
+For a **detail page**, add a `$id.tsx` route beside `index.tsx` and make the list rows
+navigate to it (`onRowClick`); `roasters/$roasterId.tsx`, `beans/$beanId.tsx` and
+`brews/$brewId.tsx` are the examples. For a **long pick-list** (e.g. beans), use the
+searchable `Combobox` (`components/data/combobox.tsx`) instead of a plain `Select`.
 
 Two API rules every page must respect:
 
