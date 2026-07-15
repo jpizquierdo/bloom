@@ -72,3 +72,6 @@ The version lives in five places and they must agree: `pyproject.toml`, `uv.lock
 tag in `docker/docker-compose.yml`, `openapi.json`, and `frontend/package.json`. Bump
 `pyproject.toml`, then run `uv lock` and `uv run python scripts/dump_openapi.py` to refresh
 the derived ones — a stale `uv.lock` fails the Docker build, which runs `uv sync --frozen`.
+
+CI regenerates `openapi.json` and the frontend client and fails if either drifts — this also
+catches a half-done version bump, since `openapi.json` embeds the version.
