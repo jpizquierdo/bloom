@@ -35,7 +35,7 @@ function DashboardPage() {
   return (
     <>
       <PageHeader
-        title={`Welcome back${user ? `, ${user.email.split("@")[0]}` : ""}`}
+        title={`Welcome back${user ? `, ${user.username}` : ""}`}
         description="What the whole log has been drinking."
       />
 
