@@ -4,6 +4,20 @@ Self-hosted tracking for the specialty coffee you brew — at home or behind the
 Bloom records the beans you buy, every brew you pull or pour, and how each one tasted,
 so you can find what actually makes a good cup repeatable.
 
+## Screenshots
+
+The shared dashboard — coffees, brews and recent extractions at a glance:
+
+![Bloom dashboard](docs/screenshots/dashboard.png)
+
+| Beans, filterable by roaster | A coffee: its lots and its brews |
+| :--: | :--: |
+| ![Beans list](docs/screenshots/beans.png) | ![Bean detail](docs/screenshots/bean-detail.png) |
+
+A brew with its recipe, extraction-yield diagnostics and a tasting:
+
+![Brew detail](docs/screenshots/brew-detail.png)
+
 
 ## Requirements
 
