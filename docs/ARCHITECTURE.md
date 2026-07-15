@@ -227,14 +227,15 @@ Flavor notes are a list. A controlled vocabulary (SCA flavor wheel join table) i
 possible future upgrade.
 
 ### 10 — Full entity set from day one
-`user`, `bean`, `brew`, `tasting`, `brew_method`, `equipment` all present from the start.
+`user`, `bean`, `brew`, `tasting`, `brew_method`, `equipment` all present from the start
+(`bean_lot` came later, when `bean` split into coffee + lot — see 1).
 
 ### 11 — Shared log, creator-owned rows (household / café model)
 The instance is a single shared log — a household, or a café bar with several baristas.
 Every authenticated user can **read** all beans, brews and tastings; can **add** beans,
 brew from any bean, and taste any brew; and may **edit/delete only what they created**
 (a non-creator write returns `403`). Each row records its creator: `bean.user_id` (owner),
-`brew.user_id` (author), `tasting.user_id` (taster).
+`bean_lot.user_id` (buyer), `brew.user_id` (author), `tasting.user_id` (taster).
 
 This evolved in two steps:
 - Originally `user_id` lived only on `bean` and a brew's owner was derived through it — which
@@ -247,11 +248,11 @@ Alternative considered: a full `household`/`team` grouping entity to isolate one
 another — deferred as overkill for a small, trusted, self-hosted instance; it is the natural
 next step if per-group isolation is ever needed.
 
-### 12 — Brewing from a finished bean is allowed (soft warning)
-`bean.is_finished` marks a used-up bag, but it is treated as **informational, not a hard
-constraint**. Creating a brew from a finished bean is permitted — you often finish a bag and
-only then log a brew you pulled earlier (retroactive logging) — and the brew service emits a
-`WARNING` (`Brew N created on a finished bean`) rather than rejecting the request. A hard
+### 12 — Brewing from a finished lot is allowed (soft warning)
+`bean_lot.is_finished` marks a used-up bag, but it is treated as **informational, not a hard
+constraint**. A brew that names a finished lot is permitted — you often finish a bag and only
+then log a brew you pulled earlier (retroactive logging) — and the brew service emits a
+`WARNING` (`Brew N created on a finished lot`) rather than rejecting the request. A hard
 block (409) was rejected as too rigid for a personal/café tracking app.
 
 ### 13 — `roaster` as its own table, created on demand (not free text, not admin-curated)
