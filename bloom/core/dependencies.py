@@ -7,12 +7,13 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
+from bloom.core.config import get_settings
 from bloom.core.security import decode_token
 from bloom.db.models.user import User
 from bloom.db.session import SessionLocal
 from bloom.repositories import users as users_repo
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{get_settings().API_V1_STR}/auth/token")
 
 
 def get_db() -> Iterator[Session]:

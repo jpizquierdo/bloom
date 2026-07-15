@@ -12,17 +12,21 @@ from bloom.services import users_service
 logger = get_logger(__name__)
 
 
-def authenticate(db: Session, email: str, password: str) -> User | None:
-    """Return the user if credentials are valid and the account is active."""
-    user = users_repo.get_by_email(db, email)
+def authenticate(db: Session, identifier: str, password: str) -> User | None:
+    """Return the user if credentials are valid and the account is active.
+
+    ``identifier`` may be either an email or a username — the login form field is
+    a single "email or username" box, so we resolve it against both.
+    """
+    user = users_repo.get_by_email(db, identifier) or users_repo.get_by_username(db, identifier)
     if user is None:
-        logger.warning("Failed login: unknown email %s", email)
+        logger.warning("Failed login: unknown identifier %s", identifier)
         return None
     if not user.is_active:
-        logger.warning("Failed login: inactive user %s (%s)", user.id, email)
+        logger.warning("Failed login: inactive user %s (%s)", user.id, user.email)
         return None
     if not verify_password(password, user.hashed_password):
-        logger.warning("Failed login: wrong password for user %s (%s)", user.id, email)
+        logger.warning("Failed login: wrong password for user %s (%s)", user.id, user.email)
         return None
     return user
 
@@ -43,6 +47,7 @@ def bootstrap_admin(db: Session) -> User | None:
     if users_repo.get_by_email(db, email) is not None:
         return None
 
-    admin = users_service.create_user(db, email=email, password=password, role="admin")
-    logger.info("Bootstrapped initial admin user: %s", email)
+    username = email.split("@", 1)[0].lower()
+    admin = users_service.create_user(db, email=email, username=username, password=password, role="admin")
+    logger.info("Bootstrapped initial admin user: %s (%s)", email, username)
     return admin

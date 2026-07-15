@@ -13,7 +13,17 @@ def test_login_and_me(client, users):
     assert me.status_code == 200
     body = me.json()
     assert body["email"] == "alice@example.com"
+    assert body["username"] == "alice"
     assert body["role"] == "user"
+
+
+def test_login_with_username(client, users):
+    # The identifier field accepts the username too, case-insensitively.
+    resp = client.post(
+        "/auth/token",
+        data={"username": "Alice", "password": "alicepass1"},
+    )
+    assert resp.status_code == 200
 
 
 def test_wrong_password_401(client, users):

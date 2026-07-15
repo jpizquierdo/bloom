@@ -92,16 +92,17 @@ def client(session_factory) -> TestClient:
 
     app.dependency_overrides[get_db] = override_get_db
     # Note: not used as a context manager, so the lifespan/admin bootstrap is skipped.
-    return TestClient(app)
+    # base_url carries the API prefix, so tests address routes as "/beans", "/auth/token"…
+    return TestClient(app, base_url=f"http://testserver{get_settings().API_V1_STR}")
 
 
 @pytest.fixture
 def users(db) -> dict:
     """Seed an admin and two standard users; return them by role/name."""
     return {
-        "admin": users_service.create_user(db, email="admin@example.com", password="adminpass1", role="admin"),
-        "alice": users_service.create_user(db, email="alice@example.com", password="alicepass1", role="user"),
-        "bob": users_service.create_user(db, email="bob@example.com", password="bobpass123", role="user"),
+        "admin": users_service.create_user(db, email="admin@example.com", username="admin", password="adminpass1", role="admin"),
+        "alice": users_service.create_user(db, email="alice@example.com", username="alice", password="alicepass1", role="user"),
+        "bob": users_service.create_user(db, email="bob@example.com", username="bob", password="bobpass123", role="user"),
     }
 
 

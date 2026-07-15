@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 concurrency:
@@ -46,3 +47,40 @@ jobs:
 
       - name: Tests
         run: uv run pytest
+
+      # openapi.json is generated from the FastAPI app and committed; fail if it drifts.
+      - name: OpenAPI schema is up to date
+        run: |
+          uv run python scripts/dump_openapi.py
+          git diff --exit-code openapi.json
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # src/client is generated from openapi.json and committed; fail if it drifts.
+      - name: Generated client is up to date
+        run: |
+          npm run generate-client
+          git diff --exit-code src/client
+
+      - name: Lint (oxlint)
+        run: npm run lint
+
+      # The release image bundles this build, so a type error must fail CI, not the release.
+      - name: Build
+        run: npm run build

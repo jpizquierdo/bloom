@@ -16,6 +16,9 @@ __pycache__/
 .idea/
 .vscode/
 
+# Compiled web UI, produced by the Docker build (or a local `npm run build -- --outDir`)
+bloom/static/
+
 # Claude Code (personal/local settings; a shared .claude/settings.json may be committed)
 .claude/settings.local.json
 

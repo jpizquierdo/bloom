@@ -6,6 +6,7 @@ from decimal import Decimal
 from pydantic import BaseModel, ConfigDict, Field
 
 from bloom.schemas.common import reject_null
+from bloom.schemas.user import AuthorRead
 
 
 class BrewBase(BaseModel):
@@ -55,7 +56,8 @@ class BrewRead(BrewBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int = Field(examples=[1])
-    user_id: int = Field(description="Author (who prepared the brew).", examples=[1])
+    user_id: int = Field(description="Author id (who prepared the brew).", examples=[1])
+    author: AuthorRead = Field(description="Author (who prepared the brew).")
     bean_id: int = Field(examples=[1])
     method_id: int = Field(examples=[1])
     dose_grams: Decimal = Field(examples=["15"])

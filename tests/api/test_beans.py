@@ -12,6 +12,8 @@ def test_create_and_get_bean(client, alice_headers, users):
     assert resp.status_code == 201
     bean = resp.json()
     assert bean["user_id"] == users["alice"].id
+    # The owner is embedded as a nested object so the UI can name who added the bag.
+    assert bean["owner"] == {"id": users["alice"].id, "username": "alice"}
     # The roaster is returned as a nested object, created on the fly from its name.
     assert bean["roaster"]["name"] == "Nomad"
 

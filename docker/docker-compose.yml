@@ -17,7 +17,7 @@ services:
       timeout: 5s
       retries: 5
   bloom:
-    image: jpizquierdo/bloom:0.0.1
+    image: jpizquierdo/bloom:0.0.3
     container_name: bloom-core
     restart: unless-stopped
     depends_on:
@@ -31,6 +31,7 @@ services:
       POSTGRES_PASSWORD: bloom
       POSTGRES_SERVER: db
     ports:
+      # The image serves the web UI and the API together: http://localhost:8000
       - "8000:8000"
     healthcheck:
       # The image is python-slim: no curl/wget available, so probe with urllib.

@@ -1,0 +1,4440 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bloom",
+    "version": "0.0.3"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Health",
+        "description": "Liveness/readiness check: confirms the API and its DB are reachable.",
+        "operationId": "system-health",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response System-Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/token": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login",
+        "description": "Exchange an email or username (``username`` field) + password for a JWT access token.",
+        "operationId": "auth-login",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_auth-login"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Read Current User",
+        "description": "Return the authenticated user's profile.",
+        "operationId": "auth-read_current_user",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRead"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "List Users",
+        "description": "List all users. Admin-only.",
+        "operationId": "users-list_users",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserRead"
+                  },
+                  "type": "array",
+                  "title": "Response Users-List Users"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Create User",
+        "description": "Create a new user (role 'user'). Admin-only.",
+        "operationId": "users-create_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{user_id}": {
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Update User",
+        "description": "Promote/demote or activate/deactivate a user. Admin-only.",
+        "operationId": "users-update_user",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roasters": {
+      "get": {
+        "tags": [
+          "roasters"
+        ],
+        "summary": "List Roasters",
+        "description": "List every roaster, alphabetically. Any authenticated user.",
+        "operationId": "roasters-list_roasters",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RoasterRead"
+                  },
+                  "type": "array",
+                  "title": "Response Roasters-List Roasters"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "roasters"
+        ],
+        "summary": "Create Roaster",
+        "description": "Create a roaster with its metadata. Any authenticated user; 409 if the name is taken.\n\nNot required to add a bean \u2014 posting a bean with an unknown roaster name creates it.",
+        "operationId": "roasters-create_roaster",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoasterCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoasterRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/roasters/{roaster_id}": {
+      "get": {
+        "tags": [
+          "roasters"
+        ],
+        "summary": "Get Roaster",
+        "description": "Get a roaster by id. Any authenticated user.",
+        "operationId": "roasters-get_roaster",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "roaster_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Roaster Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoasterRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "roasters"
+        ],
+        "summary": "Update Roaster",
+        "description": "Edit or rename a roaster (every bean referencing it follows). Admin only.",
+        "operationId": "roasters-update_roaster",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "roaster_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Roaster Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoasterUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoasterRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "roasters"
+        ],
+        "summary": "Delete Roaster",
+        "description": "Delete a roaster that has no beans. Admin only; 409 if it is still in use.",
+        "operationId": "roasters-delete_roaster",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "roaster_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Roaster Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roasters/{roaster_id}/merge": {
+      "post": {
+        "tags": [
+          "roasters"
+        ],
+        "summary": "Merge Roaster",
+        "description": "Fold a duplicate into this roaster: its beans move here and it is deleted. Admin only.",
+        "operationId": "roasters-merge_roaster",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "roaster_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Roaster Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoasterMerge"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoasterRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/beans": {
+      "post": {
+        "tags": [
+          "beans"
+        ],
+        "summary": "Create Bean",
+        "description": "Create a bean. It is shared with everyone; you are recorded as its owner.",
+        "operationId": "beans-create_bean",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BeanCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeanRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "beans"
+        ],
+        "summary": "List Beans",
+        "description": "List all beans (shared). Use `?mine=true` to return only the beans you own.",
+        "operationId": "beans-list_beans",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "mine",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Mine"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BeanRead"
+                  },
+                  "title": "Response Beans-List Beans"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/beans/{bean_id}": {
+      "get": {
+        "tags": [
+          "beans"
+        ],
+        "summary": "Get Bean",
+        "description": "Get a bean by id. Any authenticated user may read any bean.",
+        "operationId": "beans-get_bean",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bean_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Bean Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeanRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "beans"
+        ],
+        "summary": "Update Bean",
+        "description": "Update a bean. Only its owner (or an admin) may edit it.",
+        "operationId": "beans-update_bean",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bean_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Bean Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BeanUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeanRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "beans"
+        ],
+        "summary": "Delete Bean",
+        "description": "Delete a bean (cascades to its brews and tastings). Owner or admin only.",
+        "operationId": "beans-delete_bean",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bean_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Bean Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/brew-methods": {
+      "get": {
+        "tags": [
+          "brew-methods"
+        ],
+        "summary": "List Brew Methods",
+        "description": "List all brew methods. Any authenticated user.",
+        "operationId": "brew-methods-list_brew_methods",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BrewMethodRead"
+                  },
+                  "type": "array",
+                  "title": "Response Brew-Methods-List Brew Methods"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "brew-methods"
+        ],
+        "summary": "Create Brew Method",
+        "description": "Create a brew method (shared lookup data). Admin only.",
+        "operationId": "brew-methods-create_brew_method",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrewMethodCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrewMethodRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/brew-methods/{method_id}": {
+      "get": {
+        "tags": [
+          "brew-methods"
+        ],
+        "summary": "Get Brew Method",
+        "description": "Get a brew method by id. Any authenticated user.",
+        "operationId": "brew-methods-get_brew_method",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "method_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Method Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrewMethodRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/equipment": {
+      "get": {
+        "tags": [
+          "equipment"
+        ],
+        "summary": "List Equipment",
+        "description": "List all equipment (grinders, machines, kettles\u2026). Any authenticated user.",
+        "operationId": "equipment-list_equipment",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EquipmentRead"
+                  },
+                  "type": "array",
+                  "title": "Response Equipment-List Equipment"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "equipment"
+        ],
+        "summary": "Create Equipment",
+        "description": "Register a piece of equipment (shared lookup data). Admin only.",
+        "operationId": "equipment-create_equipment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipmentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/equipment/{equipment_id}": {
+      "get": {
+        "tags": [
+          "equipment"
+        ],
+        "summary": "Get Equipment",
+        "description": "Get an equipment item by id. Any authenticated user.",
+        "operationId": "equipment-get_equipment",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "equipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Equipment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/brews": {
+      "post": {
+        "tags": [
+          "brews"
+        ],
+        "summary": "Create Brew",
+        "description": "Create a brew from any bean; you are recorded as its author.\n\nExtraction yield is computed and stored when only TDS (and beverage mass) is\ngiven. The response includes the computed brew ratio and control-chart diagnostics.",
+        "operationId": "brews-create_brew",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrewCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrewRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "brews"
+        ],
+        "summary": "List Brews",
+        "description": "List the shared brew log. Use `?mine=true` to return only your own brews.",
+        "operationId": "brews-list_brews",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "mine",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Mine"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BrewRead"
+                  },
+                  "title": "Response Brews-List Brews"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/brews/{brew_id}": {
+      "get": {
+        "tags": [
+          "brews"
+        ],
+        "summary": "Get Brew",
+        "description": "Get a brew by id (any authenticated user), with computed ratio and diagnostics.",
+        "operationId": "brews-get_brew",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brew_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Brew Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrewRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "brews"
+        ],
+        "summary": "Update Brew",
+        "description": "Update a brew. Only its author (or an admin) may edit it.",
+        "operationId": "brews-update_brew",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brew_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Brew Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrewUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrewRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "brews"
+        ],
+        "summary": "Delete Brew",
+        "description": "Delete a brew (cascades to its tastings). Author or admin only.",
+        "operationId": "brews-delete_brew",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brew_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Brew Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/brews/{brew_id}/tastings": {
+      "post": {
+        "tags": [
+          "tastings"
+        ],
+        "summary": "Create Tasting",
+        "description": "Add a tasting to any brew; you are recorded as its taster.\n\nA brew can be scored by several users, so multiple tastings per brew are allowed.",
+        "operationId": "tastings-create_tasting",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brew_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Brew Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TastingCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TastingRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "tastings"
+        ],
+        "summary": "List Tastings",
+        "description": "List all tastings of a brew (shared). Any authenticated user.",
+        "operationId": "tastings-list_tastings",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "brew_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Brew Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TastingRead"
+                  },
+                  "title": "Response Tastings-List Tastings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tastings": {
+      "get": {
+        "tags": [
+          "tastings"
+        ],
+        "summary": "List All Tastings",
+        "description": "List the shared tasting log. Use `?mine=true` to return only your own tastings.",
+        "operationId": "tastings-list_all_tastings",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "mine",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Mine"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TastingRead"
+                  },
+                  "title": "Response Tastings-List All Tastings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tastings/{tasting_id}": {
+      "get": {
+        "tags": [
+          "tastings"
+        ],
+        "summary": "Get Tasting",
+        "description": "Get a tasting by id. Any authenticated user.",
+        "operationId": "tastings-get_tasting",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tasting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Tasting Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TastingRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "tastings"
+        ],
+        "summary": "Update Tasting",
+        "description": "Update a tasting. Only its author (or an admin) may edit it.",
+        "operationId": "tastings-update_tasting",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tasting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Tasting Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TastingUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TastingRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "tastings"
+        ],
+        "summary": "Delete Tasting",
+        "description": "Delete a tasting. Only its author (or an admin) may delete it.",
+        "operationId": "tastings-delete_tasting",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tasting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Tasting Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuthorRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "Author's handle.",
+            "examples": [
+              "barista"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username"
+        ],
+        "title": "AuthorRead",
+        "description": "Minimal public projection of a user, embedded as the author of a brew or tasting."
+      },
+      "BeanCreate": {
+        "properties": {
+          "origin_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Country",
+            "description": "Country of origin.",
+            "examples": [
+              "Ethiopia"
+            ]
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region",
+            "description": "Growing region.",
+            "examples": [
+              "Guji"
+            ]
+          },
+          "producer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Producer",
+            "description": "Farm or producer.",
+            "examples": [
+              "Tabe Burka"
+            ]
+          },
+          "variety": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variety",
+            "description": "Coffee variety.",
+            "examples": [
+              "Heirloom"
+            ]
+          },
+          "process": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "washed",
+                  "natural",
+                  "honey",
+                  "anaerobic",
+                  "carbonic_maceration",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Process",
+            "description": "Post-harvest process.",
+            "examples": [
+              "washed"
+            ]
+          },
+          "roast_level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "medium_light",
+                  "medium",
+                  "medium_dark",
+                  "dark"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Level",
+            "description": "Roast level.",
+            "examples": [
+              "medium_light"
+            ]
+          },
+          "roast_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Date",
+            "description": "Roast date.",
+            "examples": [
+              "2026-07-01"
+            ]
+          },
+          "purchase_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date",
+            "description": "Purchase date.",
+            "examples": [
+              "2026-07-05"
+            ]
+          },
+          "weight_grams": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Grams",
+            "description": "Bag weight in grams.",
+            "examples": [
+              250
+            ]
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price",
+            "description": "Price paid for the bag.",
+            "examples": [
+              "18.50"
+            ]
+          },
+          "altitude_masl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Altitude Masl",
+            "description": "Growing altitude (metres above sea level).",
+            "examples": [
+              2100
+            ]
+          },
+          "tasting_notes_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasting Notes Label",
+            "description": "Tasting notes printed on the bag.",
+            "examples": [
+              "Peach, jasmine, black tea"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Your own notes.",
+            "examples": [
+              "Great as filter"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Coffee name.",
+            "examples": [
+              "Guji Natural"
+            ]
+          },
+          "roaster": {
+            "type": "string",
+            "title": "Roaster",
+            "description": "Roaster name. Matched case-insensitively; created if it does not exist yet.",
+            "examples": [
+              "Nomad Coffee"
+            ]
+          },
+          "is_finished": {
+            "type": "boolean",
+            "title": "Is Finished",
+            "description": "Whether the bag is used up.",
+            "default": false,
+            "examples": [
+              false
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "roaster"
+        ],
+        "title": "BeanCreate"
+      },
+      "BeanRead": {
+        "properties": {
+          "origin_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Country",
+            "description": "Country of origin.",
+            "examples": [
+              "Ethiopia"
+            ]
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region",
+            "description": "Growing region.",
+            "examples": [
+              "Guji"
+            ]
+          },
+          "producer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Producer",
+            "description": "Farm or producer.",
+            "examples": [
+              "Tabe Burka"
+            ]
+          },
+          "variety": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variety",
+            "description": "Coffee variety.",
+            "examples": [
+              "Heirloom"
+            ]
+          },
+          "process": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "washed",
+                  "natural",
+                  "honey",
+                  "anaerobic",
+                  "carbonic_maceration",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Process",
+            "description": "Post-harvest process.",
+            "examples": [
+              "washed"
+            ]
+          },
+          "roast_level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "medium_light",
+                  "medium",
+                  "medium_dark",
+                  "dark"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Level",
+            "description": "Roast level.",
+            "examples": [
+              "medium_light"
+            ]
+          },
+          "roast_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Date",
+            "description": "Roast date.",
+            "examples": [
+              "2026-07-01"
+            ]
+          },
+          "purchase_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date",
+            "description": "Purchase date.",
+            "examples": [
+              "2026-07-05"
+            ]
+          },
+          "weight_grams": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Grams",
+            "description": "Bag weight in grams.",
+            "examples": [
+              250
+            ]
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price",
+            "description": "Price paid for the bag.",
+            "examples": [
+              "18.50"
+            ]
+          },
+          "altitude_masl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Altitude Masl",
+            "description": "Growing altitude (metres above sea level).",
+            "examples": [
+              2100
+            ]
+          },
+          "tasting_notes_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasting Notes Label",
+            "description": "Tasting notes printed on the bag.",
+            "examples": [
+              "Peach, jasmine, black tea"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Your own notes.",
+            "examples": [
+              "Great as filter"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "description": "Owner id (who added the bean).",
+            "examples": [
+              1
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/AuthorRead",
+            "description": "Owner (who added the bean)."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Guji Natural"
+            ]
+          },
+          "roaster": {
+            "$ref": "#/components/schemas/RoasterRead",
+            "description": "The roaster this bean came from."
+          },
+          "is_finished": {
+            "type": "boolean",
+            "title": "Is Finished",
+            "examples": [
+              false
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "examples": [
+              "2026-07-05T09:30:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "owner",
+          "name",
+          "roaster",
+          "is_finished",
+          "created_at"
+        ],
+        "title": "BeanRead"
+      },
+      "BeanUpdate": {
+        "properties": {
+          "origin_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Country",
+            "description": "Country of origin.",
+            "examples": [
+              "Ethiopia"
+            ]
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region",
+            "description": "Growing region.",
+            "examples": [
+              "Guji"
+            ]
+          },
+          "producer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Producer",
+            "description": "Farm or producer.",
+            "examples": [
+              "Tabe Burka"
+            ]
+          },
+          "variety": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variety",
+            "description": "Coffee variety.",
+            "examples": [
+              "Heirloom"
+            ]
+          },
+          "process": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "washed",
+                  "natural",
+                  "honey",
+                  "anaerobic",
+                  "carbonic_maceration",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Process",
+            "description": "Post-harvest process.",
+            "examples": [
+              "washed"
+            ]
+          },
+          "roast_level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "medium_light",
+                  "medium",
+                  "medium_dark",
+                  "dark"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Level",
+            "description": "Roast level.",
+            "examples": [
+              "medium_light"
+            ]
+          },
+          "roast_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Date",
+            "description": "Roast date.",
+            "examples": [
+              "2026-07-01"
+            ]
+          },
+          "purchase_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date",
+            "description": "Purchase date.",
+            "examples": [
+              "2026-07-05"
+            ]
+          },
+          "weight_grams": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Grams",
+            "description": "Bag weight in grams.",
+            "examples": [
+              250
+            ]
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price",
+            "description": "Price paid for the bag.",
+            "examples": [
+              "18.50"
+            ]
+          },
+          "altitude_masl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Altitude Masl",
+            "description": "Growing altitude (metres above sea level).",
+            "examples": [
+              2100
+            ]
+          },
+          "tasting_notes_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasting Notes Label",
+            "description": "Tasting notes printed on the bag.",
+            "examples": [
+              "Peach, jasmine, black tea"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Your own notes.",
+            "examples": [
+              "Great as filter"
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Coffee name.",
+            "examples": [
+              "Guji Natural"
+            ]
+          },
+          "roaster": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roaster",
+            "description": "Move the bean to this roaster. Matched case-insensitively; created if it does not exist yet.",
+            "examples": [
+              "Nomad Coffee"
+            ]
+          },
+          "is_finished": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Finished",
+            "description": "Whether the bag is used up.",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "type": "object",
+        "title": "BeanUpdate",
+        "description": "All fields optional; only provided fields are applied (PATCH semantics)."
+      },
+      "Body_auth-login": {
+        "properties": {
+          "grant_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^password$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grant Type"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "title": "Password"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": ""
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "format": "password",
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "Body_auth-login"
+      },
+      "BrewCreate": {
+        "properties": {
+          "grinder_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grinder Id",
+            "description": "Grinder used (equipment id).",
+            "examples": [
+              1
+            ]
+          },
+          "brewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brewed At",
+            "description": "When it was brewed (defaults to now).",
+            "examples": [
+              "2026-07-12T08:00:00Z"
+            ]
+          },
+          "yield_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yield Grams",
+            "description": "Beverage mass in the cup (g).",
+            "examples": [
+              "250"
+            ]
+          },
+          "water_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Grams",
+            "description": "Water used (g); for filter/immersion.",
+            "examples": [
+              "250"
+            ]
+          },
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Grinder setting (grinder-specific).",
+            "examples": [
+              "18"
+            ]
+          },
+          "water_temp_celsius": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp Celsius",
+            "description": "Water temperature (\u00b0C).",
+            "examples": [
+              "93.0"
+            ]
+          },
+          "brew_time_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brew Time Seconds",
+            "description": "Total brew time (s).",
+            "examples": [
+              150
+            ]
+          },
+          "tds_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tds Percent",
+            "description": "Measured TDS % (refractometer).",
+            "examples": [
+              "1.35"
+            ]
+          },
+          "extraction_yield_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Yield Percent",
+            "description": "Extraction yield %; computed and stored from TDS if omitted.",
+            "examples": [
+              "22.50"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Free-form notes.",
+            "examples": [
+              "Even extraction"
+            ]
+          },
+          "bean_id": {
+            "type": "integer",
+            "title": "Bean Id",
+            "description": "Bean brewed (any shared bean).",
+            "examples": [
+              1
+            ]
+          },
+          "method_id": {
+            "type": "integer",
+            "title": "Method Id",
+            "description": "Brew method id.",
+            "examples": [
+              1
+            ]
+          },
+          "dose_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Dose Grams",
+            "description": "Dry coffee dose (g).",
+            "examples": [
+              "15"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "bean_id",
+          "method_id",
+          "dose_grams"
+        ],
+        "title": "BrewCreate"
+      },
+      "BrewMethodCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Unique method name.",
+            "examples": [
+              "V60"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "espresso",
+              "filter",
+              "immersion"
+            ],
+            "title": "Category",
+            "description": "Brewing family the method belongs to.",
+            "examples": [
+              "filter"
+            ]
+          },
+          "default_ratio": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Ratio",
+            "description": "Optional default brew ratio (grams of water per gram of coffee).",
+            "examples": [
+              "16.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "category"
+        ],
+        "title": "BrewMethodCreate"
+      },
+      "BrewMethodRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "V60"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "examples": [
+              "filter"
+            ]
+          },
+          "default_ratio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Ratio",
+            "examples": [
+              "16.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "category",
+          "default_ratio"
+        ],
+        "title": "BrewMethodRead"
+      },
+      "BrewRead": {
+        "properties": {
+          "grinder_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grinder Id",
+            "description": "Grinder used (equipment id).",
+            "examples": [
+              1
+            ]
+          },
+          "brewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brewed At",
+            "description": "When it was brewed (defaults to now).",
+            "examples": [
+              "2026-07-12T08:00:00Z"
+            ]
+          },
+          "yield_grams": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yield Grams",
+            "description": "Beverage mass in the cup (g).",
+            "examples": [
+              "250"
+            ]
+          },
+          "water_grams": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Grams",
+            "description": "Water used (g); for filter/immersion.",
+            "examples": [
+              "250"
+            ]
+          },
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Grinder setting (grinder-specific).",
+            "examples": [
+              "18"
+            ]
+          },
+          "water_temp_celsius": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp Celsius",
+            "description": "Water temperature (\u00b0C).",
+            "examples": [
+              "93.0"
+            ]
+          },
+          "brew_time_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brew Time Seconds",
+            "description": "Total brew time (s).",
+            "examples": [
+              150
+            ]
+          },
+          "tds_percent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tds Percent",
+            "description": "Measured TDS % (refractometer).",
+            "examples": [
+              "1.35"
+            ]
+          },
+          "extraction_yield_percent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Yield Percent",
+            "description": "Extraction yield %; computed and stored from TDS if omitted.",
+            "examples": [
+              "22.50"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Free-form notes.",
+            "examples": [
+              "Even extraction"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "description": "Author id (who prepared the brew).",
+            "examples": [
+              1
+            ]
+          },
+          "author": {
+            "$ref": "#/components/schemas/AuthorRead",
+            "description": "Author (who prepared the brew)."
+          },
+          "bean_id": {
+            "type": "integer",
+            "title": "Bean Id",
+            "examples": [
+              1
+            ]
+          },
+          "method_id": {
+            "type": "integer",
+            "title": "Method Id",
+            "examples": [
+              1
+            ]
+          },
+          "dose_grams": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Dose Grams",
+            "examples": [
+              "15"
+            ]
+          },
+          "ratio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ratio",
+            "description": "Computed brew ratio (never stored).",
+            "examples": [
+              "16.67"
+            ]
+          },
+          "diagnostics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExtractionDiagnosticsRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "author",
+          "bean_id",
+          "method_id",
+          "dose_grams"
+        ],
+        "title": "BrewRead"
+      },
+      "BrewUpdate": {
+        "properties": {
+          "grinder_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grinder Id",
+            "description": "Grinder used (equipment id).",
+            "examples": [
+              1
+            ]
+          },
+          "brewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brewed At",
+            "description": "When it was brewed (defaults to now).",
+            "examples": [
+              "2026-07-12T08:00:00Z"
+            ]
+          },
+          "yield_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yield Grams",
+            "description": "Beverage mass in the cup (g).",
+            "examples": [
+              "250"
+            ]
+          },
+          "water_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Grams",
+            "description": "Water used (g); for filter/immersion.",
+            "examples": [
+              "250"
+            ]
+          },
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Grinder setting (grinder-specific).",
+            "examples": [
+              "18"
+            ]
+          },
+          "water_temp_celsius": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp Celsius",
+            "description": "Water temperature (\u00b0C).",
+            "examples": [
+              "93.0"
+            ]
+          },
+          "brew_time_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brew Time Seconds",
+            "description": "Total brew time (s).",
+            "examples": [
+              150
+            ]
+          },
+          "tds_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tds Percent",
+            "description": "Measured TDS % (refractometer).",
+            "examples": [
+              "1.35"
+            ]
+          },
+          "extraction_yield_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Yield Percent",
+            "description": "Extraction yield %; computed and stored from TDS if omitted.",
+            "examples": [
+              "22.50"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Free-form notes.",
+            "examples": [
+              "Even extraction"
+            ]
+          },
+          "dose_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dose Grams",
+            "description": "Dry coffee dose (g).",
+            "examples": [
+              "15"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "BrewUpdate",
+        "description": "Partial update. bean_id/method_id are immutable after creation."
+      },
+      "EquipmentCreate": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "grinder",
+              "espresso_machine",
+              "kettle",
+              "other"
+            ],
+            "title": "Type",
+            "description": "Kind of equipment.",
+            "examples": [
+              "grinder"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Model name.",
+            "examples": [
+              "Niche Zero"
+            ]
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand",
+            "description": "Manufacturer.",
+            "examples": [
+              "Niche"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Free-form notes.",
+            "examples": [
+              "Single dosing"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "name"
+        ],
+        "title": "EquipmentCreate"
+      },
+      "EquipmentRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "examples": [
+              "grinder"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Niche Zero"
+            ]
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand",
+            "examples": [
+              "Niche"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "examples": [
+              "Single dosing"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "examples": [
+              "2026-07-12T18:00:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "name",
+          "brand",
+          "notes",
+          "created_at"
+        ],
+        "title": "EquipmentRead"
+      },
+      "ExtractionDiagnosticsRead": {
+        "properties": {
+          "strength": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strength",
+            "description": "TDS band: below / within / above target.",
+            "examples": [
+              "within"
+            ]
+          },
+          "extraction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction",
+            "description": "Extraction-yield band: below / within / above target.",
+            "examples": [
+              "above"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "strength",
+          "extraction"
+        ],
+        "title": "ExtractionDiagnosticsRead",
+        "description": "Where the brew sits on the brewing control chart."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "RoasterCreate": {
+        "properties": {
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "Country the roaster is based in.",
+            "examples": [
+              "Spain"
+            ]
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City",
+            "description": "City the roaster is based in.",
+            "examples": [
+              "Barcelona"
+            ]
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website",
+            "description": "Website.",
+            "examples": [
+              "https://nomadcoffee.es"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Your own notes.",
+            "examples": [
+              "Great subscriptions"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Roaster name (unique, case-insensitive).",
+            "examples": [
+              "Nomad Coffee"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "RoasterCreate"
+      },
+      "RoasterMerge": {
+        "properties": {
+          "source_id": {
+            "type": "integer",
+            "title": "Source Id",
+            "description": "Roaster to merge away: its beans move to the target and it is deleted.",
+            "examples": [
+              7
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_id"
+        ],
+        "title": "RoasterMerge"
+      },
+      "RoasterRead": {
+        "properties": {
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "Country the roaster is based in.",
+            "examples": [
+              "Spain"
+            ]
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City",
+            "description": "City the roaster is based in.",
+            "examples": [
+              "Barcelona"
+            ]
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website",
+            "description": "Website.",
+            "examples": [
+              "https://nomadcoffee.es"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Your own notes.",
+            "examples": [
+              "Great subscriptions"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "Nomad Coffee"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "examples": [
+              "2026-07-12T18:00:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "created_at"
+        ],
+        "title": "RoasterRead"
+      },
+      "RoasterUpdate": {
+        "properties": {
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "Country the roaster is based in.",
+            "examples": [
+              "Spain"
+            ]
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City",
+            "description": "City the roaster is based in.",
+            "examples": [
+              "Barcelona"
+            ]
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website",
+            "description": "Website.",
+            "examples": [
+              "https://nomadcoffee.es"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Your own notes.",
+            "examples": [
+              "Great subscriptions"
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Rename the roaster \u2014 every bean referencing it follows.",
+            "examples": [
+              "Nomad Coffee Roasters"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "RoasterUpdate",
+        "description": "All fields optional; only provided fields are applied (PATCH semantics)."
+      },
+      "TastingCreate": {
+        "properties": {
+          "aroma": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aroma",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "acidity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acidity",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "sweetness": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sweetness",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "body": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "bitterness": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bitterness",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "aftertaste": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aftertaste",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "overall": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "descriptors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Descriptors",
+            "description": "Flavor descriptors.",
+            "examples": [
+              [
+                "peach",
+                "jasmine"
+              ]
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Free-form notes.",
+            "examples": [
+              "Juicy, clean finish"
+            ]
+          },
+          "tasted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasted At",
+            "description": "When tasted (defaults to now).",
+            "examples": [
+              "2026-07-12T08:10:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "TastingCreate"
+      },
+      "TastingRead": {
+        "properties": {
+          "aroma": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aroma",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "acidity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acidity",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "sweetness": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sweetness",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "body": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "bitterness": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bitterness",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "aftertaste": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aftertaste",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "overall": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "descriptors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Descriptors",
+            "description": "Flavor descriptors.",
+            "examples": [
+              [
+                "peach",
+                "jasmine"
+              ]
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Free-form notes.",
+            "examples": [
+              "Juicy, clean finish"
+            ]
+          },
+          "tasted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasted At",
+            "description": "When tasted (defaults to now).",
+            "examples": [
+              "2026-07-12T08:10:00Z"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "brew_id": {
+            "type": "integer",
+            "title": "Brew Id",
+            "examples": [
+              1
+            ]
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "description": "Taster id (who scored the brew).",
+            "examples": [
+              1
+            ]
+          },
+          "author": {
+            "$ref": "#/components/schemas/AuthorRead",
+            "description": "Taster (who scored the brew)."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "brew_id",
+          "user_id",
+          "author"
+        ],
+        "title": "TastingRead"
+      },
+      "TastingUpdate": {
+        "properties": {
+          "aroma": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aroma",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "acidity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acidity",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "sweetness": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sweetness",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "body": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "bitterness": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bitterness",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "aftertaste": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aftertaste",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "overall": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall",
+            "description": "Score from 1 to 10.",
+            "examples": [
+              8
+            ]
+          },
+          "descriptors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descriptors",
+            "description": "Flavor descriptors.",
+            "examples": [
+              [
+                "peach"
+              ]
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Free-form notes.",
+            "examples": [
+              "Juicy, clean finish"
+            ]
+          },
+          "tasted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasted At",
+            "description": "When tasted (defaults to now).",
+            "examples": [
+              "2026-07-12T08:10:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "TastingUpdate",
+        "description": "Partial update; only provided fields are applied (PATCH semantics)."
+      },
+      "Token": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "description": "JWT access token.",
+            "examples": [
+              "eyJhbGciOiJIUzI1Ni..."
+            ]
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer",
+            "examples": [
+              "bearer"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token"
+        ],
+        "title": "Token",
+        "description": "OAuth2 bearer token response."
+      },
+      "UserCreate": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Login email (unique).",
+            "examples": [
+              "barista@example.com"
+            ]
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 3,
+            "pattern": "^[a-z0-9_.-]+$",
+            "title": "Username",
+            "description": "Login handle (unique). Lowercase letters, digits, and . _ - only.",
+            "examples": [
+              "barista"
+            ]
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password",
+            "description": "Plaintext password (8-128 chars); stored hashed.",
+            "examples": [
+              "s3cure-passw0rd"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "username",
+          "password"
+        ],
+        "title": "UserCreate",
+        "description": "Payload for creating a user (admin-only). New users default to role 'user'."
+      },
+      "UserRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "examples": [
+              "barista@example.com"
+            ]
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "examples": [
+              "barista"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "examples": [
+              "user"
+            ]
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "examples": [
+              true
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "examples": [
+              "2026-07-05T09:30:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "username",
+          "role",
+          "is_active",
+          "created_at"
+        ],
+        "title": "UserRead",
+        "description": "Public representation of a user (never exposes the password hash)."
+      },
+      "UserUpdate": {
+        "properties": {
+          "username": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32,
+                "minLength": 3,
+                "pattern": "^[a-z0-9_.-]+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "New login handle (unique).",
+            "examples": [
+              "head-barista"
+            ]
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "admin",
+                  "user"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role",
+            "description": "New role.",
+            "examples": [
+              "admin"
+            ]
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active",
+            "description": "Activate or deactivate the account.",
+            "examples": [
+              false
+            ]
+          }
+        },
+        "type": "object",
+        "title": "UserUpdate",
+        "description": "Admin-editable user fields: rename, promote/demote and activate/deactivate."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {},
+            "tokenUrl": "/api/v1/auth/token"
+          }
+        }
+      }
+    }
+  }
+}

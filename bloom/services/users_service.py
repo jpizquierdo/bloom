@@ -15,12 +15,12 @@ def list_users(db: Session) -> list[User]:
     return users_repo.list_all(db)
 
 
-def create_user(db: Session, *, email: str, password: str, role: str = "user") -> User:
+def create_user(db: Session, *, email: str, username: str, password: str, role: str = "user") -> User:
     """Create a user with a hashed password and commit."""
-    user = users_repo.add(db, email=email, hashed_password=hash_password(password), role=role)
+    user = users_repo.add(db, email=email, username=username, hashed_password=hash_password(password), role=role)
     db.commit()
     db.refresh(user)
-    logger.info("User %s created: %s (role %s)", user.id, email, role)
+    logger.info("User %s created: %s / %s (role %s)", user.id, email, username, role)
     return user
 
 
@@ -28,11 +28,15 @@ def update_user(
     db: Session,
     user: User,
     *,
+    username: str | None = None,
     role: str | None = None,
     is_active: bool | None = None,
 ) -> User:
-    """Apply role/activation changes to ``user`` and commit."""
+    """Apply rename/role/activation changes to ``user`` and commit."""
     changes = []
+    if username is not None:
+        user.username = username
+        changes.append(f"username={username}")
     if role is not None:
         user.role = role
         changes.append(f"role={role}")
