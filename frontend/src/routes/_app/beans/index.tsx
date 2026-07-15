@@ -40,7 +40,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
-import { Plus } from "lucide-react"
+import { Plus, X } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -114,6 +114,11 @@ function BeansPage() {
   const [editing, setEditing] = useState<BeanRead | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState<BeanRead | null>(null)
+  const [roasterFilter, setRoasterFilter] = useState("all")
+
+  const filtered = (data ?? []).filter(
+    (bean) => roasterFilter === "all" || String(bean.roaster.id) === roasterFilter,
+  )
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY })
 
@@ -264,12 +269,36 @@ function BeansPage() {
 
       <DataTable
         columns={columns}
-        data={data}
+        data={filtered}
         isLoading={isLoading}
         searchPlaceholder="Search beans…"
         emptyMessage="No beans yet. Add the bag you are drinking."
         onRowClick={(bean) =>
           navigate({ to: "/beans/$beanId", params: { beanId: String(bean.id) } })
+        }
+        toolbar={
+          <>
+            <Select value={roasterFilter} onValueChange={setRoasterFilter}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="All roasters" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All roasters</SelectItem>
+                {(roasters ?? []).map((roaster) => (
+                  <SelectItem key={roaster.id} value={String(roaster.id)}>
+                    {roaster.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {roasterFilter !== "all" ? (
+              <Button variant="ghost" size="sm" onClick={() => setRoasterFilter("all")}>
+                <X className="size-4" />
+                Clear
+              </Button>
+            ) : null}
+          </>
         }
       />
 
