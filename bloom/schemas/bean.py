@@ -1,7 +1,6 @@
-"""Pydantic DTOs for beans (a physical bag/lot)."""
+"""Pydantic DTOs for beans (the coffee concept; purchases live in bean_lot)."""
 
-from datetime import date, datetime
-from decimal import Decimal
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -21,10 +20,6 @@ class BeanBase(BaseModel):
     variety: str | None = Field(default=None, description="Coffee variety.", examples=["Heirloom"])
     process: Process | None = Field(default=None, description="Post-harvest process.", examples=["washed"])
     roast_level: RoastLevel | None = Field(default=None, description="Roast level.", examples=["medium_light"])
-    roast_date: date | None = Field(default=None, description="Roast date.", examples=["2026-07-01"])
-    purchase_date: date | None = Field(default=None, description="Purchase date.", examples=["2026-07-05"])
-    weight_grams: int | None = Field(default=None, gt=0, description="Bag weight in grams.", examples=[250])
-    price: Decimal | None = Field(default=None, ge=0, description="Price paid for the bag.", examples=["18.50"])
     altitude_masl: int | None = Field(default=None, description="Growing altitude (metres above sea level).", examples=[2100])
     tasting_notes_label: str | None = Field(
         default=None,
@@ -40,7 +35,6 @@ class BeanCreate(BeanBase):
         description="Roaster name. Matched case-insensitively; created if it does not exist yet.",
         examples=["Nomad Coffee"],
     )
-    is_finished: bool = Field(default=False, description="Whether the bag is used up.", examples=[False])
 
 
 class BeanUpdate(BeanBase):
@@ -52,9 +46,8 @@ class BeanUpdate(BeanBase):
         description="Move the bean to this roaster. Matched case-insensitively; created if it does not exist yet.",
         examples=["Nomad Coffee"],
     )
-    is_finished: bool | None = Field(default=None, description="Whether the bag is used up.", examples=[True])
 
-    _no_null = reject_null("name", "roaster", "is_finished")
+    _no_null = reject_null("name", "roaster")
 
 
 class BeanRead(BeanBase):
@@ -65,5 +58,4 @@ class BeanRead(BeanBase):
     owner: AuthorRead = Field(description="Owner (who added the bean).")
     name: str = Field(examples=["Guji Natural"])
     roaster: RoasterRead = Field(description="The roaster this bean came from.")
-    is_finished: bool = Field(examples=[False])
     created_at: datetime = Field(examples=["2026-07-05T09:30:00Z"])

@@ -27,3 +27,11 @@ class ConflictError(Exception):
     Used for roasters: a duplicate name, or deleting one that beans still
     reference (it must be merged away instead).
     """
+
+
+class UnprocessableError(Exception):
+    """The request is well-formed but references data that does not fit together.
+
+    Used for cross-field constraints only checkable against the database — e.g. a
+    brew that names a lot belonging to a different bean. Maps to a 422.
+    """

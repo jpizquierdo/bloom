@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Bloom",
-    "version": "0.0.4"
+    "version": "0.1.0"
   },
   "paths": {
     "/health": {
@@ -732,6 +732,257 @@
             "schema": {
               "type": "integer",
               "title": "Bean Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/beans/{bean_id}/lots": {
+      "post": {
+        "tags": [
+          "lots"
+        ],
+        "summary": "Create Lot",
+        "description": "Add a lot (a physical bag bought) to a bean; you are recorded as its buyer.",
+        "operationId": "lots-create_lot",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bean_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Bean Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BeanLotCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeanLotRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "lots"
+        ],
+        "summary": "List Lots",
+        "description": "List a bean's lots (shared). Any authenticated user.",
+        "operationId": "lots-list_lots",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bean_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Bean Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BeanLotRead"
+                  },
+                  "title": "Response Lots-List Lots"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lots/{lot_id}": {
+      "get": {
+        "tags": [
+          "lots"
+        ],
+        "summary": "Get Lot",
+        "description": "Get a lot by id. Any authenticated user.",
+        "operationId": "lots-get_lot",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lot Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeanLotRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "lots"
+        ],
+        "summary": "Update Lot",
+        "description": "Update a lot. Only its buyer (or an admin) may edit it.",
+        "operationId": "lots-update_lot",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lot Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BeanLotUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeanLotRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "lots"
+        ],
+        "summary": "Delete Lot",
+        "description": "Delete a lot. Only its buyer (or an admin) may delete it.",
+        "operationId": "lots-delete_lot",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lot Id"
             }
           }
         ],
@@ -1681,6 +1932,78 @@
               "medium_light"
             ]
           },
+          "altitude_masl": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Altitude Masl",
+            "description": "Growing altitude (metres above sea level).",
+            "examples": [
+              2100
+            ]
+          },
+          "tasting_notes_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasting Notes Label",
+            "description": "Tasting notes printed on the bag.",
+            "examples": [
+              "Peach, jasmine, black tea"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Your own notes.",
+            "examples": [
+              "Great as filter"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Coffee name.",
+            "examples": [
+              "Guji Natural"
+            ]
+          },
+          "roaster": {
+            "type": "string",
+            "title": "Roaster",
+            "description": "Roaster name. Matched case-insensitively; created if it does not exist yet.",
+            "examples": [
+              "Nomad Coffee"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "roaster"
+        ],
+        "title": "BeanCreate"
+      },
+      "BeanLotCreate": {
+        "properties": {
           "roast_date": {
             "anyOf": [
               {
@@ -1749,68 +2072,6 @@
               "18.50"
             ]
           },
-          "altitude_masl": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Altitude Masl",
-            "description": "Growing altitude (metres above sea level).",
-            "examples": [
-              2100
-            ]
-          },
-          "tasting_notes_label": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tasting Notes Label",
-            "description": "Tasting notes printed on the bag.",
-            "examples": [
-              "Peach, jasmine, black tea"
-            ]
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes",
-            "description": "Your own notes.",
-            "examples": [
-              "Great as filter"
-            ]
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Name",
-            "description": "Coffee name.",
-            "examples": [
-              "Guji Natural"
-            ]
-          },
-          "roaster": {
-            "type": "string",
-            "title": "Roaster",
-            "description": "Roaster name. Matched case-insensitively; created if it does not exist yet.",
-            "examples": [
-              "Nomad Coffee"
-            ]
-          },
           "is_finished": {
             "type": "boolean",
             "title": "Is Finished",
@@ -1822,11 +2083,216 @@
           }
         },
         "type": "object",
+        "title": "BeanLotCreate"
+      },
+      "BeanLotRead": {
+        "properties": {
+          "roast_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Date",
+            "description": "Roast date.",
+            "examples": [
+              "2026-07-01"
+            ]
+          },
+          "purchase_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date",
+            "description": "Purchase date.",
+            "examples": [
+              "2026-07-05"
+            ]
+          },
+          "weight_grams": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Grams",
+            "description": "Bag weight in grams.",
+            "examples": [
+              250
+            ]
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price",
+            "description": "Price paid for the bag.",
+            "examples": [
+              "18.50"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "bean_id": {
+            "type": "integer",
+            "title": "Bean Id",
+            "examples": [
+              1
+            ]
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "description": "Owner id (who bought this bag).",
+            "examples": [
+              1
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/AuthorRead",
+            "description": "Owner (who bought this bag)."
+          },
+          "is_finished": {
+            "type": "boolean",
+            "title": "Is Finished",
+            "examples": [
+              false
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "examples": [
+              "2026-07-05T09:30:00Z"
+            ]
+          }
+        },
+        "type": "object",
         "required": [
-          "name",
-          "roaster"
+          "id",
+          "bean_id",
+          "user_id",
+          "owner",
+          "is_finished",
+          "created_at"
         ],
-        "title": "BeanCreate"
+        "title": "BeanLotRead"
+      },
+      "BeanLotUpdate": {
+        "properties": {
+          "roast_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Date",
+            "description": "Roast date.",
+            "examples": [
+              "2026-07-01"
+            ]
+          },
+          "purchase_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Date",
+            "description": "Purchase date.",
+            "examples": [
+              "2026-07-05"
+            ]
+          },
+          "weight_grams": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Grams",
+            "description": "Bag weight in grams.",
+            "examples": [
+              250
+            ]
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price",
+            "description": "Price paid for the bag.",
+            "examples": [
+              "18.50"
+            ]
+          },
+          "is_finished": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Finished",
+            "description": "Whether the bag is used up.",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "type": "object",
+        "title": "BeanLotUpdate",
+        "description": "All fields optional; only provided fields are applied (PATCH semantics)."
       },
       "BeanRead": {
         "properties": {
@@ -1935,70 +2401,6 @@
               "medium_light"
             ]
           },
-          "roast_date": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Roast Date",
-            "description": "Roast date.",
-            "examples": [
-              "2026-07-01"
-            ]
-          },
-          "purchase_date": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Purchase Date",
-            "description": "Purchase date.",
-            "examples": [
-              "2026-07-05"
-            ]
-          },
-          "weight_grams": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "exclusiveMinimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Weight Grams",
-            "description": "Bag weight in grams.",
-            "examples": [
-              250
-            ]
-          },
-          "price": {
-            "anyOf": [
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Price",
-            "description": "Price paid for the bag.",
-            "examples": [
-              "18.50"
-            ]
-          },
           "altitude_masl": {
             "anyOf": [
               {
@@ -2074,13 +2476,6 @@
             "$ref": "#/components/schemas/RoasterRead",
             "description": "The roaster this bean came from."
           },
-          "is_finished": {
-            "type": "boolean",
-            "title": "Is Finished",
-            "examples": [
-              false
-            ]
-          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -2097,7 +2492,6 @@
           "owner",
           "name",
           "roaster",
-          "is_finished",
           "created_at"
         ],
         "title": "BeanRead"
@@ -2209,74 +2603,6 @@
               "medium_light"
             ]
           },
-          "roast_date": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Roast Date",
-            "description": "Roast date.",
-            "examples": [
-              "2026-07-01"
-            ]
-          },
-          "purchase_date": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Purchase Date",
-            "description": "Purchase date.",
-            "examples": [
-              "2026-07-05"
-            ]
-          },
-          "weight_grams": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "exclusiveMinimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Weight Grams",
-            "description": "Bag weight in grams.",
-            "examples": [
-              250
-            ]
-          },
-          "price": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Price",
-            "description": "Price paid for the bag.",
-            "examples": [
-              "18.50"
-            ]
-          },
           "altitude_masl": {
             "anyOf": [
               {
@@ -2352,21 +2678,6 @@
             "examples": [
               "Nomad Coffee"
             ]
-          },
-          "is_finished": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Finished",
-            "description": "Whether the bag is used up.",
-            "examples": [
-              true
-            ]
           }
         },
         "type": "object",
@@ -2434,6 +2745,21 @@
       },
       "BrewCreate": {
         "properties": {
+          "lot_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lot Id",
+            "description": "Optional: the physical lot this brew came from (must belong to the bean).",
+            "examples": [
+              1
+            ]
+          },
           "grinder_id": {
             "anyOf": [
               {
@@ -2754,6 +3080,21 @@
       },
       "BrewRead": {
         "properties": {
+          "lot_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lot Id",
+            "description": "Optional: the physical lot this brew came from (must belong to the bean).",
+            "examples": [
+              1
+            ]
+          },
           "grinder_id": {
             "anyOf": [
               {
@@ -2992,6 +3333,21 @@
       },
       "BrewUpdate": {
         "properties": {
+          "lot_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lot Id",
+            "description": "Optional: the physical lot this brew came from (must belong to the bean).",
+            "examples": [
+              1
+            ]
+          },
           "grinder_id": {
             "anyOf": [
               {

@@ -4,10 +4,12 @@ import {
   brewsCreateBrewMutation,
   brewsUpdateBrewMutation,
   equipmentListEquipmentOptions,
+  lotsListLotsOptions,
 } from "@/client/@tanstack/react-query.gen"
-import type { BrewRead } from "@/client/types.gen"
+import type { BeanLotRead, BrewRead } from "@/client/types.gen"
 import { Combobox } from "@/components/data/combobox"
 import { ResourceDialog } from "@/components/data/resource-dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   FormControl,
   FormDescription,
@@ -30,12 +32,13 @@ import { stripEmpty, toDateTimeLocal } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 const schema = z.object({
   bean_id: z.string().min(1, "Pick a bean"),
+  lot_id: z.string(),
   method_id: z.string().min(1, "Pick a method"),
   grinder_id: z.string(),
   dose_grams: z.string().min(1, "Dose is required"),
@@ -54,6 +57,7 @@ type FormValues = z.infer<typeof schema>
 
 const EMPTY: FormValues = {
   bean_id: "",
+  lot_id: "",
   method_id: "",
   grinder_id: "",
   dose_grams: "",
@@ -86,12 +90,23 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY })
 
+  // The lot picker offers the selected bean's lots (a brew's lot must belong to its bean).
+  const beanId = form.watch("bean_id")
+  const { data: lots } = useQuery({
+    ...lotsListLotsOptions({ path: { bean_id: Number(beanId) } }),
+    enabled: beanId !== "",
+  })
+  const [showFinished, setShowFinished] = useState(false)
+  // The bean we've already defaulted the lot for, so a manual choice is not overridden.
+  const autoLotBeanRef = useRef<string | null>(null)
+
   useEffect(() => {
     if (!open) return
     form.reset(
       brew
         ? {
             bean_id: String(brew.bean_id),
+            lot_id: brew.lot_id ? String(brew.lot_id) : "",
             method_id: String(brew.method_id),
             grinder_id: brew.grinder_id ? String(brew.grinder_id) : "",
             dose_grams: brew.dose_grams,
@@ -109,6 +124,24 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
     )
   }, [open, brew, defaultBeanId, form])
 
+  // Fresh dialog: hide finished lots and allow the lot to be auto-selected again.
+  useEffect(() => {
+    if (open) {
+      setShowFinished(false)
+      autoLotBeanRef.current = null
+    }
+  }, [open])
+
+  // On create, default the lot to the bean's most recent OPEN lot (once per bean). This also
+  // clears a stale lot when the bean changes; editing keeps the brew's own lot untouched.
+  useEffect(() => {
+    if (!open || brew || beanId === "" || !lots) return
+    if (autoLotBeanRef.current === beanId) return
+    autoLotBeanRef.current = beanId
+    const mostRecentOpen = lots.find((lot) => !lot.is_finished)
+    form.setValue("lot_id", mostRecentOpen ? String(mostRecentOpen.id) : "")
+  }, [open, brew, beanId, lots, form])
+
   const create = useMutation({
     ...brewsCreateBrewMutation(),
     onSuccess: feedback.onSuccess("Brew logged"),
@@ -122,6 +155,7 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
 
   function onSubmit(values: FormValues) {
     const measures = stripEmpty({
+      lot_id: values.lot_id === "" ? undefined : Number(values.lot_id),
       grinder_id: values.grinder_id === "" ? undefined : Number(values.grinder_id),
       yield_grams: values.yield_grams === "" ? undefined : Number(values.yield_grams),
       water_grams: values.water_grams === "" ? undefined : Number(values.water_grams),
@@ -191,6 +225,52 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
           </FormItem>
         )}
       />
+      {beanId !== "" && (lots?.length ?? 0) > 0 ? (
+        <FormField
+          control={form.control}
+          name="lot_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Lot</FormLabel>
+              <Select
+                value={field.value === "" ? "none" : field.value}
+                onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">No specific lot</SelectItem>
+                  {(lots ?? [])
+                    .filter(
+                      (lot) =>
+                        showFinished || !lot.is_finished || String(lot.id) === field.value,
+                    )
+                    .map((lot) => (
+                      <SelectItem key={lot.id} value={String(lot.id)}>
+                        {lotLabel(lot)}
+                        {lot.is_finished ? " · finished" : ""}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              {(lots ?? []).some((lot) => lot.is_finished) ? (
+                <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Checkbox
+                    checked={showFinished}
+                    onCheckedChange={(checked) => setShowFinished(checked === true)}
+                  />
+                  Show finished
+                </label>
+              ) : null}
+              <FormDescription>Which bag this brew came from (optional).</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      ) : null}
       <FormField
         control={form.control}
         name="method_id"
@@ -376,4 +456,13 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
       />
     </ResourceDialog>
   )
+}
+
+function lotLabel(lot: BeanLotRead): string {
+  const parts = [
+    lot.purchase_date ? `Bought ${lot.purchase_date}` : null,
+    lot.roast_date ? `roasted ${lot.roast_date}` : null,
+    lot.weight_grams ? `${lot.weight_grams} g` : null,
+  ].filter(Boolean)
+  return parts.length > 0 ? parts.join(" · ") : `Lot #${lot.id}`
 }

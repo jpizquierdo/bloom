@@ -3,6 +3,7 @@ import {
   brewMethodsListBrewMethodsOptions,
   brewsGetBrewOptions,
   equipmentListEquipmentOptions,
+  lotsGetLotOptions,
   tastingsDeleteTastingMutation,
   tastingsListTastingsOptions,
 } from "@/client/@tanstack/react-query.gen"
@@ -26,7 +27,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { canEdit, useCurrentUser } from "@/lib/auth"
 import { TASTING_SCORES } from "@/lib/domain"
-import { formatDateTime, formatNumber, formatSeconds, humanize } from "@/lib/format"
+import { formatDate, formatDateTime, formatNumber, formatSeconds, humanize } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute } from "@tanstack/react-router"
@@ -50,6 +51,10 @@ function BrewDetailPage() {
     ...beansGetBeanOptions({ path: { bean_id: brew?.bean_id ?? 0 } }),
     enabled: brew !== undefined,
   })
+  const { data: lot } = useQuery({
+    ...lotsGetLotOptions({ path: { lot_id: brew?.lot_id ?? 0 } }),
+    enabled: brew?.lot_id != null,
+  })
 
   const [brewDialogOpen, setBrewDialogOpen] = useState(false)
   const [tastingDialogOpen, setTastingDialogOpen] = useState(false)
@@ -68,6 +73,14 @@ function BrewDetailPage() {
 
   const method = methods?.find((item) => item.id === brew.method_id)
   const grinder = equipment?.find((item) => item.id === brew.grinder_id)
+  const lotLabel = lot
+    ? [
+        lot.roast_date ? `roasted ${formatDate(lot.roast_date)}` : null,
+        lot.weight_grams ? `${lot.weight_grams} g` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ") || `Lot #${lot.id}`
+    : "—"
 
   return (
     <>
@@ -126,6 +139,7 @@ function BrewDetailPage() {
             />
             <Metric label="Grinder" value={grinder?.name ?? "—"} />
             <Metric label="Setting" value={brew.grind_setting ?? "—"} />
+            {brew.lot_id ? <Metric label="Lot" value={lotLabel} /> : null}
           </CardContent>
         </Card>
 

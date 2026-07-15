@@ -24,6 +24,7 @@ from bloom.db.base import Base
 
 if TYPE_CHECKING:
     from bloom.db.models.bean import Bean
+    from bloom.db.models.bean_lot import BeanLot
     from bloom.db.models.brew_method import BrewMethod
     from bloom.db.models.equipment import Equipment
     from bloom.db.models.tasting import Tasting
@@ -50,6 +51,7 @@ class Brew(Base):
         CheckConstraint("tds_percent >= 0", name="ck_brew_tds_nonneg"),
         CheckConstraint("extraction_yield_percent >= 0", name="ck_brew_ey_nonneg"),
         Index("idx_brew_bean_id", "bean_id"),
+        Index("idx_brew_lot_id", "lot_id"),
         Index("idx_brew_method_id", "method_id"),
         Index("idx_brew_user_id", "user_id"),
         Index("idx_brew_brewed_at", text("brewed_at DESC")),
@@ -59,6 +61,8 @@ class Brew(Base):
     # Author: who prepared the brew. RESTRICT pairs with user soft-delete.
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="RESTRICT"), nullable=False)
     bean_id: Mapped[int] = mapped_column(ForeignKey("bean.id", ondelete="CASCADE"), nullable=False)
+    # Optional: which physical lot this brew came from. SET NULL preserves brew history.
+    lot_id: Mapped[int | None] = mapped_column(ForeignKey("bean_lot.id", ondelete="SET NULL"))
     method_id: Mapped[int] = mapped_column(
         SmallInteger,
         ForeignKey("brew_method.id", ondelete="RESTRICT"),
@@ -82,6 +86,7 @@ class Brew(Base):
 
     author: Mapped[User] = relationship()
     bean: Mapped[Bean] = relationship(back_populates="brews")
+    lot: Mapped[BeanLot | None] = relationship()
     method: Mapped[BrewMethod] = relationship()
     grinder: Mapped[Equipment | None] = relationship()
     tastings: Mapped[list[Tasting]] = relationship(back_populates="brew", cascade="all, delete-orphan", passive_deletes=True)
