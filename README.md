@@ -116,11 +116,12 @@ follows — or merge a duplicate into another with `POST /roasters/{id}/merge`.
 
 ## OpenAPI schema
 
-The web UI generates its API client from the schema, so regenerate it whenever routes or
-schemas change (no database needed):
+The web UI generates its API client from the schema, so regenerate both whenever routes or
+schemas change (no database needed). CI fails if either is out of date:
 
 ```bash
-uv run python scripts/dump_openapi.py   # writes openapi.json at the repo root
+uv run python scripts/dump_openapi.py            # writes openapi.json at the repo root
+cd frontend && npm run generate-client           # regenerates src/client from it
 ```
 
 ## Tests
