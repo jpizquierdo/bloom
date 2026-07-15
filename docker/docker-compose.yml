@@ -17,7 +17,7 @@ services:
       timeout: 5s
       retries: 5
   bloom:
-    image: jpizquierdo/bloom:0.1.1
+    image: jpizquierdo/bloom:0.2.0
     container_name: bloom-core
     restart: unless-stopped
     depends_on:

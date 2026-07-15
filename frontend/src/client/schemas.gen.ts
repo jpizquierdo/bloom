@@ -1110,26 +1110,6 @@ export const BrewCreateSchema = {
                 '1.35'
             ]
         },
-        extraction_yield_percent: {
-            anyOf: [
-                {
-                    type: 'number',
-                    minimum: 0
-                },
-                {
-                    type: 'string',
-                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Extraction Yield Percent',
-            description: 'Extraction yield %; computed and stored from TDS if omitted.',
-            examples: [
-                '22.50'
-            ]
-        },
         notes: {
             anyOf: [
                 {
@@ -1433,22 +1413,6 @@ export const BrewReadSchema = {
                 '1.35'
             ]
         },
-        extraction_yield_percent: {
-            anyOf: [
-                {
-                    type: 'string',
-                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Extraction Yield Percent',
-            description: 'Extraction yield %; computed and stored from TDS if omitted.',
-            examples: [
-                '22.50'
-            ]
-        },
         notes: {
             anyOf: [
                 {
@@ -1519,6 +1483,22 @@ export const BrewReadSchema = {
             description: 'Computed brew ratio (never stored).',
             examples: [
                 '16.67'
+            ]
+        },
+        extraction_yield_percent: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Extraction Yield Percent',
+            description: 'Extraction yield % — computed from TDS, yield and dose on read (never stored).',
+            examples: [
+                '22.50'
             ]
         },
         diagnostics: {
@@ -1700,26 +1680,6 @@ export const BrewUpdateSchema = {
             description: 'Measured TDS % (refractometer).',
             examples: [
                 '1.35'
-            ]
-        },
-        extraction_yield_percent: {
-            anyOf: [
-                {
-                    type: 'number',
-                    minimum: 0
-                },
-                {
-                    type: 'string',
-                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Extraction Yield Percent',
-            description: 'Extraction yield %; computed and stored from TDS if omitted.',
-            examples: [
-                '22.50'
             ]
         },
         notes: {

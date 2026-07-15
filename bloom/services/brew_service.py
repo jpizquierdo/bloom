@@ -19,14 +19,18 @@ logger = get_logger(__name__)
 
 
 def serialize(brew: Brew) -> BrewRead:
-    """Build a BrewRead, computing the (unstored) ratio and diagnostics."""
+    """Build a BrewRead, computing the (unstored) ratio, extraction yield and diagnostics."""
     category = brew.method.category
     ratio = brew_ratio(brew.dose_grams, brew.yield_grams, brew.water_grams, category)
     if ratio is not None:
         ratio = ratio.quantize(Decimal("0.01"))
-    diagnostics = classify_extraction(brew.tds_percent, brew.extraction_yield_percent, category)
+    ey = extraction_yield(brew.tds_percent, brew.yield_grams, brew.dose_grams)
+    if ey is not None:
+        ey = ey.quantize(Decimal("0.01"))
+    diagnostics = classify_extraction(brew.tds_percent, ey, category)
     read = BrewRead.model_validate(brew)
     read.ratio = ratio
+    read.extraction_yield_percent = ey
     read.diagnostics = ExtractionDiagnosticsRead(strength=diagnostics.strength, extraction=diagnostics.extraction)
     return read
 
@@ -56,11 +60,11 @@ def get_owned_brew(db: Session, brew_id: int, user: User) -> Brew:
 
 
 def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
-    """Create a brew (authored by ``user``) after validating refs and computing EY.
+    """Create a brew (authored by ``user``) after validating its references.
 
     Beans are shared, so a brew may be made from any existing bean; ``user`` is
-    recorded as the author. Extraction yield is stored once at write time when
-    only TDS was measured (and beverage mass is known); an explicit value is kept.
+    recorded as the author. Extraction yield is not stored — it is derived from
+    TDS, yield and dose on read (see :func:`serialize`).
     """
     # The bean only needs to exist — beans are shared, not owned per-brew.
     bean_service.get_bean(db, data.bean_id)
@@ -69,16 +73,7 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
         lookups_service.get_equipment(db, data.grinder_id)
     lot = _resolve_lot(db, data.lot_id, data.bean_id) if data.lot_id is not None else None
 
-    ey = data.extraction_yield_percent
-    if ey is None and data.tds_percent is not None:
-        ey = extraction_yield(data.tds_percent, data.yield_grams, data.dose_grams)
-
     payload = data.model_dump(exclude_none=True)
-    if ey is not None:
-        payload["extraction_yield_percent"] = ey
-    else:
-        payload.pop("extraction_yield_percent", None)
-
     brew = brews_repo.add(db, user_id=user.id, **payload)
     db.commit()
     db.refresh(brew)
