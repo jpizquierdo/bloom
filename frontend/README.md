@@ -53,8 +53,9 @@ src/
   client/         generated API client + TanStack Query hooks (never hand-edited)
   components/
     ui/           shadcn primitives — yours to modify
-    data/         DataTable, ResourceDialog, DeleteAlert, RowActions… the CRUD kit
+    data/         DataTable, ResourceDialog, DeleteAlert, RowActions, Combobox… the CRUD kit
     layout/       sidebar, user menu, theme toggle
+    beans/        lot dialog
     brews/        brew + tasting dialogs, extraction diagnostics
   lib/            api client config, auth, formatting, domain constants
   routes/         file-based routes; everything under `_app` requires a login

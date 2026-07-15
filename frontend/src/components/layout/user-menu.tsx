@@ -24,10 +24,10 @@ export function UserMenu() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton size="lg">
               <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent text-sm font-medium uppercase">
-                {user.email.slice(0, 2)}
+                {user.username.slice(0, 2)}
               </span>
               <span className="grid flex-1 text-left leading-tight">
-                <span className="truncate text-sm font-medium">{user.email}</span>
+                <span className="truncate text-sm font-medium">{user.username}</span>
                 <span className="truncate text-xs text-muted-foreground capitalize">
                   {user.role}
                 </span>

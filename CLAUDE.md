@@ -43,6 +43,12 @@ Guidance for AI assistants working in this repository.
 - Typed SQLAlchemy 2.x (`Mapped[...]`), Pydantic v2, FastAPI dependency injection.
 - Every API route is served under `/api/v1` (`settings.API_V1_STR`). **`/health` stays at
   the root** — container healthchecks probe it.
+- **Services stay framework-agnostic**: they raise domain errors from `bloom/services/errors.py`
+  (`NotFoundError`→404, `ForbiddenError`→403, `ConflictError`→409, `UnprocessableError`→422),
+  mapped to HTTP in `bloom/main.py`. Don't raise `HTTPException` from a service for these.
+- **A schema change needs an Alembic migration** (`alembic/versions/`), and validate it up **and**
+  down. The test DB is built from the ORM models (`create_all`), so a missing migration won't fail
+  tests — but it breaks a real deploy, which runs `alembic upgrade head` on startup.
 - See `docs/ARCHITECTURE.md` for the architecture, data model, and design decisions
   (source of truth). `README.md` covers how to run and use the project.
 
