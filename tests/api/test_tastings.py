@@ -28,6 +28,14 @@ def test_create_and_list_tasting(client, alice_headers, brew_id):
     assert len(listing.json()) == 1
 
 
+def test_tasting_embeds_taster(client, bob_headers, brew_id):
+    # Anyone can taste any brew; the tasting embeds its taster, who need not be
+    # the brew's author (here bob tastes alice's brew).
+    resp = client.post(f"/brews/{brew_id}/tastings", headers=bob_headers, json={"overall": 7})
+    assert resp.status_code == 201
+    assert resp.json()["author"]["username"] == "bob"
+
+
 def test_multiple_tastings_per_brew(client, alice_headers, brew_id):
     client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 7})
     client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 8})

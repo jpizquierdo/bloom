@@ -62,7 +62,7 @@ export const systemHealthOptions = (options?: Options<SystemHealthData>) => quer
 /**
  * Login
  *
- * Exchange email (``username``) + password for a JWT access token.
+ * Exchange an email or username (``username`` field) + password for a JWT access token.
  */
 export const authLoginMutation = (options?: Partial<Options<AuthLoginData>>): UseMutationOptions<AuthLoginResponse, AuthLoginError, Options<AuthLoginData>> => {
     const mutationOptions: UseMutationOptions<AuthLoginResponse, AuthLoginError, Options<AuthLoginData>> = {

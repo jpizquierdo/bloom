@@ -28,7 +28,7 @@ export const systemHealth = <ThrowOnError extends boolean = false>(options?: Opt
 /**
  * Login
  *
- * Exchange email (``username``) + password for a JWT access token.
+ * Exchange an email or username (``username`` field) + password for a JWT access token.
  */
 export const authLogin = <ThrowOnError extends boolean = false>(options: Options<AuthLoginData, ThrowOnError>): RequestResult<AuthLoginResponses, AuthLoginErrors, ThrowOnError> => (options.client ?? client).post<AuthLoginResponses, AuthLoginErrors, ThrowOnError>({
     ...urlSearchParamsBodySerializer,

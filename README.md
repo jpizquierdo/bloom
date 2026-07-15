@@ -82,7 +82,7 @@ There is no public sign-up. The first admin is bootstrapped from the env vars ab
 admins create further users (who default to the `user` role) via `POST /users`.
 
 ```bash
-# Get a token (OAuth2 password flow; username = email)
+# Get a token (OAuth2 password flow; the username field takes an email or a handle)
 curl -s -X POST http://localhost:8000/api/v1/auth/token \
   -d 'username=admin@example.com&password=your-password'
 

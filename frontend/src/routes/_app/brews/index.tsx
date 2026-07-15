@@ -66,6 +66,14 @@ function BrewsPage() {
       cell: ({ row }) => formatDateTime(row.original.brewed_at),
     },
     {
+      id: "author",
+      accessorFn: (brew) => brew.author.username,
+      header: "By",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.original.author.username}</span>
+      ),
+    },
+    {
       id: "recipe",
       header: "Dose → yield",
       enableSorting: false,

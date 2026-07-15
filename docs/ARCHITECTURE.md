@@ -110,6 +110,11 @@ Design points:
 - The **first admin is bootstrapped from env vars** (`BLOOM_ADMIN_EMAIL` /
   `BLOOM_ADMIN_PASSWORD`), created only if it does not exist. There is **no public sign-up**:
   admins create further accounts, which default to `user`.
+- Each account has a unique **`username`** handle (unique on `lower(username)`) alongside its
+  email; the login form's single field accepts **either** an email or a handle. Handles are
+  set by an admin today and will be supplied by the IdP (Keycloak/Authentik) once automated
+  provisioning lands. Brews and tastings embed their author as a nested `{ id, username }`
+  object so the UI can name who pulled or scored a cup without reading the admin-only user list.
 - **Everything is a shared log** (household/café model, 11). Any authenticated user can
   read all beans, brews and tastings, and can add beans, brew from any bean, and taste any
   brew. Each row records who created it — `bean.user_id` (owner), `brew.user_id` (author),
@@ -147,7 +152,7 @@ Every row carries who created it: `bean.user_id` (owner), `brew.user_id` (author
 
 | Table         | Purpose                                                             |
 |---------------|---------------------------------------------------------------------|
-| `user`        | Accounts with a role (`admin` / `user`). Owns beans, authors brews, makes tastings. |
+| `user`        | Accounts with a role (`admin` / `user`) and a unique `username` handle. Owns beans, authors brews, makes tastings. |
 | `bean`        | A physical bag/lot of coffee. Shared; `user_id` is the owner.        |
 | `roaster`     | Who roasted the bean. User-creatable, unique on `lower(name)` (see 13). |
 | `brew_method` | Lookup: V60, Espresso, AeroPress… with a category.                  |

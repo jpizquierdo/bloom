@@ -42,12 +42,20 @@ import { z } from "zod"
 
 export const Route = createFileRoute("/_app/users")({ component: UsersPage })
 
+const username = z
+  .string()
+  .min(3, "At least 3 characters")
+  .max(32)
+  .regex(/^[a-z0-9_.-]+$/, "Lowercase letters, digits, and . _ - only")
+
 const createSchema = z.object({
   email: z.email("Enter a valid email address"),
+  username,
   password: z.string().min(8, "At least 8 characters").max(128),
 })
 
 const editSchema = z.object({
+  username,
   role: z.enum(["admin", "user"]),
   is_active: z.boolean(),
 })
@@ -69,11 +77,11 @@ function UsersPage() {
 
   const createForm = useForm<CreateValues>({
     resolver: zodResolver(createSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: "", username: "", password: "" },
   })
   const editForm = useForm<EditValues>({
     resolver: zodResolver(editSchema),
-    defaultValues: { role: "user", is_active: true },
+    defaultValues: { username: "", role: "user", is_active: true },
   })
 
   const create = useMutation({
@@ -96,6 +104,7 @@ function UsersPage() {
   }
 
   const columns: ColumnDef<UserRead, unknown>[] = [
+    { accessorKey: "username", header: "Username" },
     { accessorKey: "email", header: "Email" },
     {
       accessorKey: "role",
@@ -133,6 +142,7 @@ function UsersPage() {
             onEdit={() => {
               setEditing(row.original)
               editForm.reset({
+                username: row.original.username,
                 role: row.original.role === "admin" ? "admin" : "user",
                 is_active: row.original.is_active,
               })
@@ -152,7 +162,7 @@ function UsersPage() {
         actions={
           <Button
             onClick={() => {
-              createForm.reset({ email: "", password: "" })
+              createForm.reset({ email: "", username: "", password: "" })
               setCreateOpen(true)
             }}
           >
@@ -196,6 +206,20 @@ function UsersPage() {
         />
         <FormField
           control={createForm.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input placeholder="barista" autoComplete="off" {...field} />
+              </FormControl>
+              <FormDescription>Unique handle they can also log in with.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={createForm.control}
           name="password"
           render={({ field }) => (
             <FormItem>
@@ -225,6 +249,19 @@ function UsersPage() {
         }}
         isPending={update.isPending}
       >
+        <FormField
+          control={editForm.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input placeholder="barista" autoComplete="off" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={editForm.control}
           name="role"

@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, Integer, Text, func, text
+from sqlalchemy import Boolean, CheckConstraint, DateTime, Index, Integer, Text, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from bloom.db.base import Base
@@ -22,10 +22,17 @@ class User(Base):
     """
 
     __tablename__ = "user"
-    __table_args__ = (CheckConstraint("role IN ('admin', 'user')", name="ck_user_role"),)
+    __table_args__ = (
+        CheckConstraint("role IN ('admin', 'user')", name="ck_user_role"),
+        CheckConstraint("btrim(username) <> ''", name="ck_user_username_not_blank"),
+        Index("uq_user_username_lower", text("lower(username)"), unique=True),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    # Login handle, unique case-insensitively. Set by an admin today; will be
+    # supplied by the IdP (Keycloak/Authentik) once automated provisioning lands.
+    username: Mapped[str] = mapped_column(Text, nullable=False)
     hashed_password: Mapped[str] = mapped_column(Text, nullable=False)
     role: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("'user'"))
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))

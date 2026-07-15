@@ -6,6 +6,7 @@ from typing import Annotated
 from pydantic import BaseModel, ConfigDict, Field
 
 from bloom.schemas.common import reject_null
+from bloom.schemas.user import AuthorRead
 
 # A 1-10 subjective score (nullable), matching the DB CHECK constraints.
 Score = Annotated[int | None, Field(default=None, ge=1, le=10, description="Score from 1 to 10.", examples=[8])]
@@ -50,4 +51,5 @@ class TastingRead(TastingBase):
 
     id: int = Field(examples=[1])
     brew_id: int = Field(examples=[1])
-    user_id: int = Field(description="Taster (who scored the brew).", examples=[1])
+    user_id: int = Field(description="Taster id (who scored the brew).", examples=[1])
+    author: AuthorRead = Field(description="Taster (who scored the brew).")

@@ -5,6 +5,24 @@ export type ClientOptions = {
 };
 
 /**
+ * AuthorRead
+ *
+ * Minimal public projection of a user, embedded as the author of a brew or tasting.
+ */
+export type AuthorRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Username
+     *
+     * Author's handle.
+     */
+    username: string;
+};
+
+/**
  * BeanCreate
  */
 export type BeanCreate = {
@@ -551,9 +569,13 @@ export type BrewRead = {
     /**
      * User Id
      *
-     * Author (who prepared the brew).
+     * Author id (who prepared the brew).
      */
     user_id: number;
+    /**
+     * Author (who prepared the brew).
+     */
+    author: AuthorRead;
     /**
      * Bean Id
      */
@@ -1008,9 +1030,13 @@ export type TastingRead = {
     /**
      * User Id
      *
-     * Taster (who scored the brew).
+     * Taster id (who scored the brew).
      */
     user_id: number;
+    /**
+     * Taster (who scored the brew).
+     */
+    author: AuthorRead;
 };
 
 /**
@@ -1112,6 +1138,12 @@ export type UserCreate = {
      */
     email: string;
     /**
+     * Username
+     *
+     * Login handle (unique). Lowercase letters, digits, and . _ - only.
+     */
+    username: string;
+    /**
      * Password
      *
      * Plaintext password (8-128 chars); stored hashed.
@@ -1134,6 +1166,10 @@ export type UserRead = {
      */
     email: string;
     /**
+     * Username
+     */
+    username: string;
+    /**
      * Role
      */
     role: string;
@@ -1150,9 +1186,15 @@ export type UserRead = {
 /**
  * UserUpdate
  *
- * Admin-editable user fields: promote/demote and activate/deactivate.
+ * Admin-editable user fields: rename, promote/demote and activate/deactivate.
  */
 export type UserUpdate = {
+    /**
+     * Username
+     *
+     * New login handle (unique).
+     */
+    username?: string | null;
     /**
      * Role
      *

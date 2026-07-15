@@ -18,12 +18,12 @@ def login(
     db: DbSession,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
-    """Exchange email (``username``) + password for a JWT access token."""
+    """Exchange an email or username (``username`` field) + password for a JWT access token."""
     user = auth_service.authenticate(db, form_data.username, form_data.password)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return Token(access_token=create_access_token(str(user.id)))

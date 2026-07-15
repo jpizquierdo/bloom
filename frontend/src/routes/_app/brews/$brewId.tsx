@@ -84,6 +84,7 @@ function BrewDetailPage() {
           bean?.roaster.name,
           method?.name,
           formatDateTime(brew.brewed_at),
+          `by ${brew.author.username}`,
         ]
           .filter(Boolean)
           .join(" · ")}
@@ -176,7 +177,9 @@ function BrewDetailPage() {
                 <CardTitle className="text-base">
                   {tasting.overall ? `${tasting.overall}/10 overall` : "Tasting"}
                 </CardTitle>
-                <CardDescription>{formatDateTime(tasting.tasted_at)}</CardDescription>
+                <CardDescription>
+                  {tasting.author.username} · {formatDateTime(tasting.tasted_at)}
+                </CardDescription>
                 <CardAction>
                   <RowActions
                     canEdit={canEdit(tasting, user)}

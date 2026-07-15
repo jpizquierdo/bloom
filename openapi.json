@@ -37,7 +37,7 @@
           "auth"
         ],
         "summary": "Login",
-        "description": "Exchange email (``username``) + password for a JWT access token.",
+        "description": "Exchange an email or username (``username`` field) + password for a JWT access token.",
         "operationId": "auth-login",
         "requestBody": {
           "content": {
@@ -1548,6 +1548,32 @@
   },
   "components": {
     "schemas": {
+      "AuthorRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "Author's handle.",
+            "examples": [
+              "barista"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username"
+        ],
+        "title": "AuthorRead",
+        "description": "Minimal public projection of a user, embedded as the author of a brew or tasting."
+      },
       "BeanCreate": {
         "properties": {
           "origin_country": {
@@ -2890,10 +2916,14 @@
           "user_id": {
             "type": "integer",
             "title": "User Id",
-            "description": "Author (who prepared the brew).",
+            "description": "Author id (who prepared the brew).",
             "examples": [
               1
             ]
+          },
+          "author": {
+            "$ref": "#/components/schemas/AuthorRead",
+            "description": "Author (who prepared the brew)."
           },
           "bean_id": {
             "type": "integer",
@@ -2948,6 +2978,7 @@
         "required": [
           "id",
           "user_id",
+          "author",
           "bean_id",
           "method_id",
           "dose_grams"
@@ -3967,17 +3998,22 @@
           "user_id": {
             "type": "integer",
             "title": "User Id",
-            "description": "Taster (who scored the brew).",
+            "description": "Taster id (who scored the brew).",
             "examples": [
               1
             ]
+          },
+          "author": {
+            "$ref": "#/components/schemas/AuthorRead",
+            "description": "Taster (who scored the brew)."
           }
         },
         "type": "object",
         "required": [
           "id",
           "brew_id",
-          "user_id"
+          "user_id",
+          "author"
         ],
         "title": "TastingRead"
       },
@@ -4195,6 +4231,17 @@
               "barista@example.com"
             ]
           },
+          "username": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 3,
+            "pattern": "^[a-z0-9_.-]+$",
+            "title": "Username",
+            "description": "Login handle (unique). Lowercase letters, digits, and . _ - only.",
+            "examples": [
+              "barista"
+            ]
+          },
           "password": {
             "type": "string",
             "maxLength": 128,
@@ -4209,6 +4256,7 @@
         "type": "object",
         "required": [
           "email",
+          "username",
           "password"
         ],
         "title": "UserCreate",
@@ -4228,6 +4276,13 @@
             "title": "Email",
             "examples": [
               "barista@example.com"
+            ]
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "examples": [
+              "barista"
             ]
           },
           "role": {
@@ -4257,6 +4312,7 @@
         "required": [
           "id",
           "email",
+          "username",
           "role",
           "is_active",
           "created_at"
@@ -4266,6 +4322,24 @@
       },
       "UserUpdate": {
         "properties": {
+          "username": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32,
+                "minLength": 3,
+                "pattern": "^[a-z0-9_.-]+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "New login handle (unique).",
+            "examples": [
+              "head-barista"
+            ]
+          },
           "role": {
             "anyOf": [
               {
@@ -4303,7 +4377,7 @@
         },
         "type": "object",
         "title": "UserUpdate",
-        "description": "Admin-editable user fields: promote/demote and activate/deactivate."
+        "description": "Admin-editable user fields: rename, promote/demote and activate/deactivate."
       },
       "ValidationError": {
         "properties": {

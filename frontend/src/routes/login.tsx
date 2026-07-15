@@ -25,7 +25,7 @@ export const Route = createFileRoute("/login")({
 })
 
 const schema = z.object({
-  email: z.email("Enter a valid email address"),
+  identifier: z.string().min(1, "Enter your email or username"),
   password: z.string().min(1, "Enter your password"),
 })
 
@@ -33,7 +33,7 @@ function LoginPage() {
   const { login, error, isPending } = useLogin()
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { identifier: "", password: "" },
   })
 
   return (
@@ -51,20 +51,20 @@ function LoginPage() {
     >
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit((values) => login(values.email, values.password))}
+          onSubmit={form.handleSubmit((values) => login(values.identifier, values.password))}
           className="grid gap-4"
         >
           <FormField
             control={form.control}
-            name="email"
+            name="identifier"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Email or username</FormLabel>
                 <FormControl>
                   <Input
-                    type="email"
+                    type="text"
                     autoComplete="username"
-                    placeholder="you@example.com"
+                    placeholder="you@example.com or barista"
                     {...field}
                   />
                 </FormControl>

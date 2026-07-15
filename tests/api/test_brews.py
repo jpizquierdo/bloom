@@ -20,6 +20,20 @@ def test_brew_on_finished_bean_is_allowed(client, alice_headers, lookups, bean_i
     assert resp.status_code == 201
 
 
+def test_brew_embeds_author(client, alice_headers, lookups, bean_id):
+    # The brew carries its author as a nested object so the UI can show who
+    # pulled it without resolving the (admin-only) user list.
+    resp = client.post(
+        "/brews",
+        headers=alice_headers,
+        json={"bean_id": bean_id, "method_id": lookups["filter"]["id"], "dose_grams": "15"},
+    )
+    assert resp.status_code == 201
+    author = resp.json()["author"]
+    assert author["username"] == "alice"
+    assert author["id"] == resp.json()["user_id"]
+
+
 def test_extraction_yield_computed_and_stored(client, alice_headers, lookups, bean_id):
     resp = client.post(
         "/brews",
