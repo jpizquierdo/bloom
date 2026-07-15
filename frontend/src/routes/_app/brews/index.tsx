@@ -3,6 +3,7 @@ import {
   brewMethodsListBrewMethodsOptions,
   brewsDeleteBrewMutation,
   brewsListBrewsOptions,
+  roastersListRoastersOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { BrewRead } from "@/client/types.gen"
 import { BrewDialog } from "@/components/brews/brew-dialog"
@@ -12,13 +13,21 @@ import { DeleteAlert } from "@/components/data/delete-alert"
 import { PageHeader } from "@/components/data/page-header"
 import { RowActions } from "@/components/data/row-actions"
 import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { canEdit, useCurrentUser } from "@/lib/auth"
+import { beanLabel } from "@/lib/domain"
 import { formatDateTime, formatNumber, formatSeconds } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
-import { Plus } from "lucide-react"
+import { Plus, X } from "lucide-react"
 import { useState } from "react"
 
 export const Route = createFileRoute("/_app/brews/")({ component: BrewsPage })
@@ -31,10 +40,13 @@ function BrewsPage() {
   const { data, isLoading } = useQuery(brewsListBrewsOptions())
   const { data: beans } = useQuery(beansListBeansOptions())
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
+  const { data: roasters } = useQuery(roastersListRoastersOptions())
 
   const [editing, setEditing] = useState<BrewRead | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState<BrewRead | null>(null)
+  const [roasterFilter, setRoasterFilter] = useState("all")
+  const [beanFilter, setBeanFilter] = useState("all")
 
   const remove = useMutation({
     ...brewsDeleteBrewMutation(),
@@ -45,6 +57,33 @@ function BrewsPage() {
   const beanName = (id: number) => beans?.find((bean) => bean.id === id)?.name ?? `#${id}`
   const methodName = (id: number) =>
     methods?.find((method) => method.id === id)?.name ?? `#${id}`
+  const roasterIdForBean = (beanId: number) =>
+    beans?.find((bean) => bean.id === beanId)?.roaster.id
+
+  // When a roaster is picked, the bean dropdown only offers that roaster's beans.
+  const beanOptions = (beans ?? []).filter(
+    (bean) => roasterFilter === "all" || String(bean.roaster.id) === roasterFilter,
+  )
+
+  const filtered = (data ?? []).filter((brew) => {
+    if (roasterFilter !== "all" && String(roasterIdForBean(brew.bean_id)) !== roasterFilter) {
+      return false
+    }
+    if (beanFilter !== "all" && String(brew.bean_id) !== beanFilter) return false
+    return true
+  })
+
+  const hasFilters = roasterFilter !== "all" || beanFilter !== "all"
+
+  function pickRoaster(value: string) {
+    setRoasterFilter(value)
+    setBeanFilter("all") // the previously chosen bean may not belong to the new roaster
+  }
+
+  function clearFilters() {
+    setRoasterFilter("all")
+    setBeanFilter("all")
+  }
 
   const columns: ColumnDef<BrewRead, unknown>[] = [
     {
@@ -153,11 +192,49 @@ function BrewsPage() {
 
       <DataTable
         columns={columns}
-        data={data}
+        data={filtered}
         isLoading={isLoading}
         searchPlaceholder="Search brews…"
         emptyMessage="No brews yet. Log the last coffee you made."
         onRowClick={(brew) => navigate({ to: "/brews/$brewId", params: { brewId: String(brew.id) } })}
+        toolbar={
+          <>
+            <Select value={roasterFilter} onValueChange={pickRoaster}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="All roasters" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All roasters</SelectItem>
+                {(roasters ?? []).map((roaster) => (
+                  <SelectItem key={roaster.id} value={String(roaster.id)}>
+                    {roaster.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={beanFilter} onValueChange={setBeanFilter}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="All beans" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All beans</SelectItem>
+                {beanOptions.map((bean) => (
+                  <SelectItem key={bean.id} value={String(bean.id)}>
+                    {beanLabel(bean)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {hasFilters ? (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <X className="size-4" />
+                Clear
+              </Button>
+            ) : null}
+          </>
+        }
       />
 
       <BrewDialog open={dialogOpen} onOpenChange={setDialogOpen} brew={editing} />

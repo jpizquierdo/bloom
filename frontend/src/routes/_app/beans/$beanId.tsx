@@ -4,6 +4,7 @@ import {
   brewsListBrewsOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { BrewRead } from "@/client/types.gen"
+import { BrewDialog } from "@/components/brews/brew-dialog"
 import { DataTable } from "@/components/data/data-table"
 import { PageHeader } from "@/components/data/page-header"
 import { Badge } from "@/components/ui/badge"
@@ -14,8 +15,9 @@ import { formatDate, formatDateTime, formatNumber, humanize } from "@/lib/format
 import { useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Plus } from "lucide-react"
 import type { ReactNode } from "react"
+import { useState } from "react"
 
 export const Route = createFileRoute("/_app/beans/$beanId")({ component: BeanDetailPage })
 
@@ -27,6 +29,8 @@ function BeanDetailPage() {
   const { data: bean, isLoading } = useQuery(beansGetBeanOptions({ path: { bean_id: id } }))
   const { data: allBrews } = useQuery(brewsListBrewsOptions())
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
+
+  const [brewDialogOpen, setBrewDialogOpen] = useState(false)
 
   if (isLoading || !bean) {
     return <Skeleton className="h-64 w-full" />
@@ -159,9 +163,15 @@ function BeanDetailPage() {
         </Card>
       ) : null}
 
-      <h2 className="mt-8 mb-4 text-lg font-semibold">
-        Brews <span className="text-muted-foreground">({brews.length})</span>
-      </h2>
+      <div className="mt-8 mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold">
+          Brews <span className="text-muted-foreground">({brews.length})</span>
+        </h2>
+        <Button variant="outline" onClick={() => setBrewDialogOpen(true)}>
+          <Plus className="size-4" />
+          Log brew
+        </Button>
+      </div>
 
       <DataTable
         columns={brewColumns}
@@ -170,6 +180,13 @@ function BeanDetailPage() {
         onRowClick={(brew) =>
           navigate({ to: "/brews/$brewId", params: { brewId: String(brew.id) } })
         }
+      />
+
+      <BrewDialog
+        open={brewDialogOpen}
+        onOpenChange={setBrewDialogOpen}
+        brew={null}
+        defaultBeanId={bean.id}
       />
     </>
   )
