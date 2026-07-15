@@ -213,9 +213,13 @@ export type BeanRead = {
     /**
      * User Id
      *
-     * Owner (who added the bean).
+     * Owner id (who added the bean).
      */
     user_id: number;
+    /**
+     * Owner (who added the bean).
+     */
+    owner: AuthorRead;
     /**
      * Name
      */

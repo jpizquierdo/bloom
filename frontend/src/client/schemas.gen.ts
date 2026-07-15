@@ -508,10 +508,14 @@ export const BeanReadSchema = {
         user_id: {
             type: 'integer',
             title: 'User Id',
-            description: 'Owner (who added the bean).',
+            description: 'Owner id (who added the bean).',
             examples: [
                 1
             ]
+        },
+        owner: {
+            $ref: '#/components/schemas/AuthorRead',
+            description: 'Owner (who added the bean).'
         },
         name: {
             type: 'string',
@@ -544,6 +548,7 @@ export const BeanReadSchema = {
     required: [
         'id',
         'user_id',
+        'owner',
         'name',
         'roaster',
         'is_finished',

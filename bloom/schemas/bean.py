@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from bloom.schemas.common import reject_null
 from bloom.schemas.roaster import RoasterName, RoasterRead
+from bloom.schemas.user import AuthorRead
 
 Process = Literal["washed", "natural", "honey", "anaerobic", "carbonic_maceration", "other"]
 RoastLevel = Literal["light", "medium_light", "medium", "medium_dark", "dark"]
@@ -60,7 +61,8 @@ class BeanRead(BeanBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int = Field(examples=[1])
-    user_id: int = Field(description="Owner (who added the bean).", examples=[1])
+    user_id: int = Field(description="Owner id (who added the bean).", examples=[1])
+    owner: AuthorRead = Field(description="Owner (who added the bean).")
     name: str = Field(examples=["Guji Natural"])
     roaster: RoasterRead = Field(description="The roaster this bean came from.")
     is_finished: bool = Field(examples=[False])

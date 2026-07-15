@@ -225,6 +225,14 @@ function BeansPage() {
         ),
     },
     {
+      id: "owner",
+      accessorFn: (bean) => bean.owner.username,
+      header: "Owner",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.original.owner.username}</span>
+      ),
+    },
+    {
       id: "actions",
       header: "",
       enableSorting: false,
