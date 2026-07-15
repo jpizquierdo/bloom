@@ -6,6 +6,7 @@ import {
   equipmentListEquipmentOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { BrewRead } from "@/client/types.gen"
+import { Combobox } from "@/components/data/combobox"
 import { ResourceDialog } from "@/components/data/resource-dialog"
 import {
   FormControl,
@@ -172,20 +173,19 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
         render={({ field }) => (
           <FormItem>
             <FormLabel>Bean</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange} disabled={brew !== null}>
-              <FormControl>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a bean" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {(beans ?? []).map((bean) => (
-                  <SelectItem key={bean.id} value={String(bean.id)}>
-                    {beanLabel(bean)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <FormControl>
+              <Combobox
+                value={field.value}
+                onChange={field.onChange}
+                options={(beans ?? []).map((bean) => ({
+                  value: String(bean.id),
+                  label: beanLabel(bean),
+                }))}
+                placeholder="Select a bean"
+                searchPlaceholder="Search beans…"
+                disabled={brew !== null}
+              />
+            </FormControl>
             {brew ? <FormDescription>The bean cannot be changed.</FormDescription> : null}
             <FormMessage />
           </FormItem>

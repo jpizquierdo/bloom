@@ -8,6 +8,7 @@ import {
 import type { BrewRead } from "@/client/types.gen"
 import { BrewDialog } from "@/components/brews/brew-dialog"
 import { BrewDiagnostics } from "@/components/brews/diagnostics"
+import { Combobox } from "@/components/data/combobox"
 import { DataTable } from "@/components/data/data-table"
 import { DeleteAlert } from "@/components/data/delete-alert"
 import { PageHeader } from "@/components/data/page-header"
@@ -213,19 +214,17 @@ function BrewsPage() {
               </SelectContent>
             </Select>
 
-            <Select value={beanFilter} onValueChange={setBeanFilter}>
-              <SelectTrigger className="w-44">
-                <SelectValue placeholder="All beans" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All beans</SelectItem>
-                {beanOptions.map((bean) => (
-                  <SelectItem key={bean.id} value={String(bean.id)}>
-                    {beanLabel(bean)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+              value={beanFilter}
+              onChange={setBeanFilter}
+              options={[
+                { value: "all", label: "All beans" },
+                ...beanOptions.map((bean) => ({ value: String(bean.id), label: beanLabel(bean) })),
+              ]}
+              placeholder="All beans"
+              searchPlaceholder="Search beans…"
+              className="w-56"
+            />
 
             {hasFilters ? (
               <Button variant="ghost" size="sm" onClick={clearFilters}>
