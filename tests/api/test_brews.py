@@ -58,7 +58,7 @@ def test_brew_embeds_author(client, alice_headers, lookups, bean_id):
     assert author["id"] == resp.json()["user_id"]
 
 
-def test_extraction_yield_computed_and_stored(client, alice_headers, lookups, bean_id):
+def test_extraction_yield_computed_on_read(client, alice_headers, lookups, bean_id):
     resp = client.post(
         "/brews",
         headers=alice_headers,
@@ -95,7 +95,29 @@ def test_extraction_yield_null_without_yield_mass(client, alice_headers, lookups
     assert resp.json()["extraction_yield_percent"] is None
 
 
-def test_explicit_extraction_yield_is_kept(client, alice_headers, lookups, bean_id):
+def test_extraction_yield_recomputed_on_update(client, alice_headers, lookups, bean_id):
+    # Regression: EY used to be computed only at create, so adding the
+    # measurements afterwards left it null. It is now derived on read, so a later
+    # edit that supplies TDS + yield is reflected immediately.
+    brew = client.post(
+        "/brews",
+        headers=alice_headers,
+        json={"bean_id": bean_id, "method_id": lookups["filter"]["id"], "dose_grams": "15"},
+    ).json()
+    assert brew["extraction_yield_percent"] is None
+
+    resp = client.patch(
+        f"/brews/{brew['id']}",
+        headers=alice_headers,
+        json={"yield_grams": "250", "tds_percent": "1.35"},
+    )
+    assert resp.status_code == 200
+    # (1.35 * 250) / 15 = 22.50 — no explicit EY was ever sent.
+    assert resp.json()["extraction_yield_percent"] == "22.50"
+
+
+def test_extraction_yield_field_is_read_only(client, alice_headers, lookups, bean_id):
+    # A client-supplied EY is ignored: the value always follows the measurements.
     resp = client.post(
         "/brews",
         headers=alice_headers,
@@ -108,7 +130,8 @@ def test_explicit_extraction_yield_is_kept(client, alice_headers, lookups, bean_
             "extraction_yield_percent": "20.00",
         },
     )
-    assert resp.json()["extraction_yield_percent"] == "20.00"
+    # The bogus 20.00 is dropped; the computed 22.50 wins.
+    assert resp.json()["extraction_yield_percent"] == "22.50"
 
 
 def test_espresso_ratio_uses_yield(client, alice_headers, lookups, bean_id):

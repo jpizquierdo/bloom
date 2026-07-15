@@ -48,7 +48,6 @@ const schema = z.object({
   water_temp_celsius: z.string(),
   brew_time_seconds: z.string(),
   tds_percent: z.string(),
-  extraction_yield_percent: z.string(),
   brewed_at: z.string(),
   notes: z.string(),
 })
@@ -67,7 +66,6 @@ const EMPTY: FormValues = {
   water_temp_celsius: "",
   brew_time_seconds: "",
   tds_percent: "",
-  extraction_yield_percent: "",
   brewed_at: "",
   notes: "",
 }
@@ -116,7 +114,6 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
             water_temp_celsius: brew.water_temp_celsius ?? "",
             brew_time_seconds: brew.brew_time_seconds?.toString() ?? "",
             tds_percent: brew.tds_percent ?? "",
-            extraction_yield_percent: brew.extraction_yield_percent ?? "",
             brewed_at: toDateTimeLocal(brew.brewed_at),
             notes: brew.notes ?? "",
           }
@@ -164,10 +161,6 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
       brew_time_seconds:
         values.brew_time_seconds === "" ? undefined : Number(values.brew_time_seconds),
       tds_percent: values.tds_percent === "" ? undefined : Number(values.tds_percent),
-      extraction_yield_percent:
-        values.extraction_yield_percent === ""
-          ? undefined
-          : Number(values.extraction_yield_percent),
       brewed_at: values.brewed_at === "" ? undefined : new Date(values.brewed_at).toISOString(),
       grind_setting: values.grind_setting,
       notes: values.notes,
@@ -410,19 +403,6 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
               <Input type="number" step="0.01" placeholder="1.35" {...field} />
             </FormControl>
             <FormDescription>From the refractometer.</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="extraction_yield_percent"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Extraction yield (%)</FormLabel>
-            <FormControl>
-              <Input type="number" step="0.01" placeholder="20.5" {...field} />
-            </FormControl>
             <FormMessage />
           </FormItem>
         )}

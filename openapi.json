@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Bloom",
-    "version": "0.1.1"
+    "version": "0.2.0"
   },
   "paths": {
     "/health": {
@@ -2901,26 +2901,6 @@
               "1.35"
             ]
           },
-          "extraction_yield_percent": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Extraction Yield Percent",
-            "description": "Extraction yield %; computed and stored from TDS if omitted.",
-            "examples": [
-              "22.50"
-            ]
-          },
           "notes": {
             "anyOf": [
               {
@@ -3221,22 +3201,6 @@
               "1.35"
             ]
           },
-          "extraction_yield_percent": {
-            "anyOf": [
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Extraction Yield Percent",
-            "description": "Extraction yield %; computed and stored from TDS if omitted.",
-            "examples": [
-              "22.50"
-            ]
-          },
           "notes": {
             "anyOf": [
               {
@@ -3307,6 +3271,22 @@
             "description": "Computed brew ratio (never stored).",
             "examples": [
               "16.67"
+            ]
+          },
+          "extraction_yield_percent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Yield Percent",
+            "description": "Extraction yield % \u2014 computed from TDS, yield and dose on read (never stored).",
+            "examples": [
+              "22.50"
             ]
           },
           "diagnostics": {
@@ -3487,26 +3467,6 @@
             "description": "Measured TDS % (refractometer).",
             "examples": [
               "1.35"
-            ]
-          },
-          "extraction_yield_percent": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Extraction Yield Percent",
-            "description": "Extraction yield %; computed and stored from TDS if omitted.",
-            "examples": [
-              "22.50"
             ]
           },
           "notes": {

@@ -473,12 +473,6 @@ export type BrewCreate = {
      */
     tds_percent?: number | string | null;
     /**
-     * Extraction Yield Percent
-     *
-     * Extraction yield %; computed and stored from TDS if omitted.
-     */
-    extraction_yield_percent?: number | string | null;
-    /**
      * Notes
      *
      * Free-form notes.
@@ -609,12 +603,6 @@ export type BrewRead = {
      */
     tds_percent?: string | null;
     /**
-     * Extraction Yield Percent
-     *
-     * Extraction yield %; computed and stored from TDS if omitted.
-     */
-    extraction_yield_percent?: string | null;
-    /**
      * Notes
      *
      * Free-form notes.
@@ -652,6 +640,12 @@ export type BrewRead = {
      * Computed brew ratio (never stored).
      */
     ratio?: string | null;
+    /**
+     * Extraction Yield Percent
+     *
+     * Extraction yield % — computed from TDS, yield and dose on read (never stored).
+     */
+    extraction_yield_percent?: string | null;
     diagnostics?: ExtractionDiagnosticsRead | null;
 };
 
@@ -715,12 +709,6 @@ export type BrewUpdate = {
      * Measured TDS % (refractometer).
      */
     tds_percent?: number | string | null;
-    /**
-     * Extraction Yield Percent
-     *
-     * Extraction yield %; computed and stored from TDS if omitted.
-     */
-    extraction_yield_percent?: number | string | null;
     /**
      * Notes
      *

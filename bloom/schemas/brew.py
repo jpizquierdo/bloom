@@ -27,12 +27,6 @@ class BrewBase(BaseModel):
     water_temp_celsius: Decimal | None = Field(default=None, description="Water temperature (°C).", examples=["93.0"])
     brew_time_seconds: int | None = Field(default=None, gt=0, description="Total brew time (s).", examples=[150])
     tds_percent: Decimal | None = Field(default=None, ge=0, description="Measured TDS % (refractometer).", examples=["1.35"])
-    extraction_yield_percent: Decimal | None = Field(
-        default=None,
-        ge=0,
-        description="Extraction yield %; computed and stored from TDS if omitted.",
-        examples=["22.50"],
-    )
     notes: str | None = Field(default=None, description="Free-form notes.", examples=["Even extraction"])
 
 
@@ -68,4 +62,9 @@ class BrewRead(BrewBase):
     dose_grams: Decimal = Field(examples=["15"])
 
     ratio: Decimal | None = Field(default=None, description="Computed brew ratio (never stored).", examples=["16.67"])
+    extraction_yield_percent: Decimal | None = Field(
+        default=None,
+        description="Extraction yield % — computed from TDS, yield and dose on read (never stored).",
+        examples=["22.50"],
+    )
     diagnostics: ExtractionDiagnosticsRead | None = None

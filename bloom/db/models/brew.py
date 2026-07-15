@@ -34,9 +34,9 @@ if TYPE_CHECKING:
 class Brew(Base):
     """A single extraction and its objective parameters.
 
-    ``ratio`` is never stored (computed in the domain layer). ``tds_percent``
-    and ``extraction_yield_percent`` are real refractometer measurements; EY is
-    computed once at write time when only TDS is provided.
+    ``ratio`` and ``extraction_yield_percent`` are never stored — both are pure
+    functions of the measured columns (``tds_percent``, ``yield_grams``,
+    ``dose_grams``) and are computed in the domain layer on read.
 
     ``user_id`` is the **author** — who prepared this brew. Beans are shared
     across the instance, so the author is not necessarily the bean's owner.
@@ -49,7 +49,6 @@ class Brew(Base):
         CheckConstraint("water_grams > 0", name="ck_brew_water_positive"),
         CheckConstraint("brew_time_seconds > 0", name="ck_brew_time_positive"),
         CheckConstraint("tds_percent >= 0", name="ck_brew_tds_nonneg"),
-        CheckConstraint("extraction_yield_percent >= 0", name="ck_brew_ey_nonneg"),
         Index("idx_brew_bean_id", "bean_id"),
         Index("idx_brew_lot_id", "lot_id"),
         Index("idx_brew_method_id", "method_id"),
@@ -78,9 +77,9 @@ class Brew(Base):
     water_temp_celsius: Mapped[Decimal | None] = mapped_column(Numeric(4, 1))
     brew_time_seconds: Mapped[int | None] = mapped_column(Integer)
 
-    # Measured extraction (nullable; requires a refractometer)
+    # Measured strength (nullable; requires a refractometer). Extraction yield is
+    # derived from this plus yield/dose in the domain layer, never stored.
     tds_percent: Mapped[Decimal | None] = mapped_column(Numeric(4, 2))
-    extraction_yield_percent: Mapped[Decimal | None] = mapped_column(Numeric(4, 2))
 
     notes: Mapped[str | None] = mapped_column(Text)
 
