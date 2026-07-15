@@ -15,12 +15,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
-import { Route as AppRoastersRouteImport } from './routes/_app/roasters'
 import { Route as AppEquipmentRouteImport } from './routes/_app/equipment'
 import { Route as AppBrewMethodsRouteImport } from './routes/_app/brew-methods'
-import { Route as AppBeansRouteImport } from './routes/_app/beans'
+import { Route as AppRoastersIndexRouteImport } from './routes/_app/roasters/index'
 import { Route as AppBrewsIndexRouteImport } from './routes/_app/brews/index'
+import { Route as AppBeansIndexRouteImport } from './routes/_app/beans/index'
+import { Route as AppRoastersRoasterIdRouteImport } from './routes/_app/roasters/$roasterId'
 import { Route as AppBrewsBrewIdRouteImport } from './routes/_app/brews/$brewId'
+import { Route as AppBeansBeanIdRouteImport } from './routes/_app/beans/$beanId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -51,11 +53,6 @@ const AppUsersRoute = AppUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AppRoute,
 } as any)
-const AppRoastersRoute = AppRoastersRouteImport.update({
-  id: '/roasters',
-  path: '/roasters',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppEquipmentRoute = AppEquipmentRouteImport.update({
   id: '/equipment',
   path: '/equipment',
@@ -66,9 +63,9 @@ const AppBrewMethodsRoute = AppBrewMethodsRouteImport.update({
   path: '/brew-methods',
   getParentRoute: () => AppRoute,
 } as any)
-const AppBeansRoute = AppBeansRouteImport.update({
-  id: '/beans',
-  path: '/beans',
+const AppRoastersIndexRoute = AppRoastersIndexRouteImport.update({
+  id: '/roasters/',
+  path: '/roasters/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppBrewsIndexRoute = AppBrewsIndexRouteImport.update({
@@ -76,9 +73,24 @@ const AppBrewsIndexRoute = AppBrewsIndexRouteImport.update({
   path: '/brews/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBeansIndexRoute = AppBeansIndexRouteImport.update({
+  id: '/beans/',
+  path: '/beans/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRoastersRoasterIdRoute = AppRoastersRoasterIdRouteImport.update({
+  id: '/roasters/$roasterId',
+  path: '/roasters/$roasterId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppBrewsBrewIdRoute = AppBrewsBrewIdRouteImport.update({
   id: '/brews/$brewId',
   path: '/brews/$brewId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBeansBeanIdRoute = AppBeansBeanIdRouteImport.update({
+  id: '/beans/$beanId',
+  path: '/beans/$beanId',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -87,26 +99,30 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/signup': typeof SignupRoute
-  '/beans': typeof AppBeansRoute
   '/brew-methods': typeof AppBrewMethodsRoute
   '/equipment': typeof AppEquipmentRoute
-  '/roasters': typeof AppRoastersRoute
   '/users': typeof AppUsersRoute
+  '/beans/$beanId': typeof AppBeansBeanIdRoute
   '/brews/$brewId': typeof AppBrewsBrewIdRoute
+  '/roasters/$roasterId': typeof AppRoastersRoasterIdRoute
+  '/beans/': typeof AppBeansIndexRoute
   '/brews/': typeof AppBrewsIndexRoute
+  '/roasters/': typeof AppRoastersIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/signup': typeof SignupRoute
-  '/beans': typeof AppBeansRoute
   '/brew-methods': typeof AppBrewMethodsRoute
   '/equipment': typeof AppEquipmentRoute
-  '/roasters': typeof AppRoastersRoute
   '/users': typeof AppUsersRoute
   '/': typeof AppIndexRoute
+  '/beans/$beanId': typeof AppBeansBeanIdRoute
   '/brews/$brewId': typeof AppBrewsBrewIdRoute
+  '/roasters/$roasterId': typeof AppRoastersRoasterIdRoute
+  '/beans': typeof AppBeansIndexRoute
   '/brews': typeof AppBrewsIndexRoute
+  '/roasters': typeof AppRoastersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,14 +130,16 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/signup': typeof SignupRoute
-  '/_app/beans': typeof AppBeansRoute
   '/_app/brew-methods': typeof AppBrewMethodsRoute
   '/_app/equipment': typeof AppEquipmentRoute
-  '/_app/roasters': typeof AppRoastersRoute
   '/_app/users': typeof AppUsersRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/beans/$beanId': typeof AppBeansBeanIdRoute
   '/_app/brews/$brewId': typeof AppBrewsBrewIdRoute
+  '/_app/roasters/$roasterId': typeof AppRoastersRoasterIdRoute
+  '/_app/beans/': typeof AppBeansIndexRoute
   '/_app/brews/': typeof AppBrewsIndexRoute
+  '/_app/roasters/': typeof AppRoastersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -130,40 +148,46 @@ export interface FileRouteTypes {
     | '/login'
     | '/recover-password'
     | '/signup'
-    | '/beans'
     | '/brew-methods'
     | '/equipment'
-    | '/roasters'
     | '/users'
+    | '/beans/$beanId'
     | '/brews/$brewId'
+    | '/roasters/$roasterId'
+    | '/beans/'
     | '/brews/'
+    | '/roasters/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/recover-password'
     | '/signup'
-    | '/beans'
     | '/brew-methods'
     | '/equipment'
-    | '/roasters'
     | '/users'
     | '/'
+    | '/beans/$beanId'
     | '/brews/$brewId'
+    | '/roasters/$roasterId'
+    | '/beans'
     | '/brews'
+    | '/roasters'
   id:
     | '__root__'
     | '/_app'
     | '/login'
     | '/recover-password'
     | '/signup'
-    | '/_app/beans'
     | '/_app/brew-methods'
     | '/_app/equipment'
-    | '/_app/roasters'
     | '/_app/users'
     | '/_app/'
+    | '/_app/beans/$beanId'
     | '/_app/brews/$brewId'
+    | '/_app/roasters/$roasterId'
+    | '/_app/beans/'
     | '/_app/brews/'
+    | '/_app/roasters/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -217,13 +241,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUsersRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/roasters': {
-      id: '/_app/roasters'
-      path: '/roasters'
-      fullPath: '/roasters'
-      preLoaderRoute: typeof AppRoastersRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/equipment': {
       id: '/_app/equipment'
       path: '/equipment'
@@ -238,11 +255,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBrewMethodsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/beans': {
-      id: '/_app/beans'
-      path: '/beans'
-      fullPath: '/beans'
-      preLoaderRoute: typeof AppBeansRouteImport
+    '/_app/roasters/': {
+      id: '/_app/roasters/'
+      path: '/roasters'
+      fullPath: '/roasters/'
+      preLoaderRoute: typeof AppRoastersIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/brews/': {
@@ -252,6 +269,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBrewsIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/beans/': {
+      id: '/_app/beans/'
+      path: '/beans'
+      fullPath: '/beans/'
+      preLoaderRoute: typeof AppBeansIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/roasters/$roasterId': {
+      id: '/_app/roasters/$roasterId'
+      path: '/roasters/$roasterId'
+      fullPath: '/roasters/$roasterId'
+      preLoaderRoute: typeof AppRoastersRoasterIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/brews/$brewId': {
       id: '/_app/brews/$brewId'
       path: '/brews/$brewId'
@@ -259,29 +290,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBrewsBrewIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/beans/$beanId': {
+      id: '/_app/beans/$beanId'
+      path: '/beans/$beanId'
+      fullPath: '/beans/$beanId'
+      preLoaderRoute: typeof AppBeansBeanIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
-  AppBeansRoute: typeof AppBeansRoute
   AppBrewMethodsRoute: typeof AppBrewMethodsRoute
   AppEquipmentRoute: typeof AppEquipmentRoute
-  AppRoastersRoute: typeof AppRoastersRoute
   AppUsersRoute: typeof AppUsersRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppBeansBeanIdRoute: typeof AppBeansBeanIdRoute
   AppBrewsBrewIdRoute: typeof AppBrewsBrewIdRoute
+  AppRoastersRoasterIdRoute: typeof AppRoastersRoasterIdRoute
+  AppBeansIndexRoute: typeof AppBeansIndexRoute
   AppBrewsIndexRoute: typeof AppBrewsIndexRoute
+  AppRoastersIndexRoute: typeof AppRoastersIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppBeansRoute: AppBeansRoute,
   AppBrewMethodsRoute: AppBrewMethodsRoute,
   AppEquipmentRoute: AppEquipmentRoute,
-  AppRoastersRoute: AppRoastersRoute,
   AppUsersRoute: AppUsersRoute,
   AppIndexRoute: AppIndexRoute,
+  AppBeansBeanIdRoute: AppBeansBeanIdRoute,
   AppBrewsBrewIdRoute: AppBrewsBrewIdRoute,
+  AppRoastersRoasterIdRoute: AppRoastersRoasterIdRoute,
+  AppBeansIndexRoute: AppBeansIndexRoute,
   AppBrewsIndexRoute: AppBrewsIndexRoute,
+  AppRoastersIndexRoute: AppRoastersIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

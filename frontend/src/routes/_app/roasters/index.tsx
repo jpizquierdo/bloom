@@ -25,14 +25,14 @@ import { stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Plus } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-export const Route = createFileRoute("/_app/roasters")({ component: RoastersPage })
+export const Route = createFileRoute("/_app/roasters/")({ component: RoastersPage })
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -48,6 +48,7 @@ const EMPTY: FormValues = { name: "", country: "", city: "", website: "", notes:
 
 function RoastersPage() {
   const { user } = useCurrentUser()
+  const navigate = useNavigate()
   const feedback = useCrudFeedback()
   const { data, isLoading } = useQuery(roastersListRoastersOptions())
 
@@ -160,6 +161,9 @@ function RoastersPage() {
         isLoading={isLoading}
         searchPlaceholder="Search roasters…"
         emptyMessage="No roasters yet. Add one, or just name it when you create a bean."
+        onRowClick={(roaster) =>
+          navigate({ to: "/roasters/$roasterId", params: { roasterId: String(roaster.id) } })
+        }
       />
 
       <ResourceDialog

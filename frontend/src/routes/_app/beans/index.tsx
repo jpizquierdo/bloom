@@ -38,14 +38,14 @@ import { formatDate, formatNumber, humanize, stripEmpty, toDateInput } from "@/l
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Plus } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-export const Route = createFileRoute("/_app/beans")({ component: BeansPage })
+export const Route = createFileRoute("/_app/beans/")({ component: BeansPage })
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -106,6 +106,7 @@ function toPayload(values: FormValues) {
 
 function BeansPage() {
   const { user } = useCurrentUser()
+  const navigate = useNavigate()
   const feedback = useCrudFeedback()
   const { data, isLoading } = useQuery(beansListBeansOptions())
   const { data: roasters } = useQuery(roastersListRoastersOptions())
@@ -267,6 +268,9 @@ function BeansPage() {
         isLoading={isLoading}
         searchPlaceholder="Search beans…"
         emptyMessage="No beans yet. Add the bag you are drinking."
+        onRowClick={(bean) =>
+          navigate({ to: "/beans/$beanId", params: { beanId: String(bean.id) } })
+        }
       />
 
       <ResourceDialog
