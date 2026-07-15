@@ -9,6 +9,7 @@ import {
 import type { BeanLotRead, BrewRead } from "@/client/types.gen"
 import { Combobox } from "@/components/data/combobox"
 import { ResourceDialog } from "@/components/data/resource-dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   FormControl,
   FormDescription,
@@ -31,7 +32,7 @@ import { stripEmpty, toDateTimeLocal } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -91,11 +92,13 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
 
   // The lot picker offers the selected bean's lots (a brew's lot must belong to its bean).
   const beanId = form.watch("bean_id")
-  const lotId = form.watch("lot_id")
   const { data: lots } = useQuery({
     ...lotsListLotsOptions({ path: { bean_id: Number(beanId) } }),
     enabled: beanId !== "",
   })
+  const [showFinished, setShowFinished] = useState(false)
+  // The bean we've already defaulted the lot for, so a manual choice is not overridden.
+  const autoLotBeanRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -121,12 +124,23 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
     )
   }, [open, brew, defaultBeanId, form])
 
-  // Drop the lot when it does not belong to the currently selected bean (bean changed).
+  // Fresh dialog: hide finished lots and allow the lot to be auto-selected again.
   useEffect(() => {
-    if (lotId && lots && !lots.some((lot) => String(lot.id) === lotId)) {
-      form.setValue("lot_id", "")
+    if (open) {
+      setShowFinished(false)
+      autoLotBeanRef.current = null
     }
-  }, [lots, lotId, form])
+  }, [open])
+
+  // On create, default the lot to the bean's most recent OPEN lot (once per bean). This also
+  // clears a stale lot when the bean changes; editing keeps the brew's own lot untouched.
+  useEffect(() => {
+    if (!open || brew || beanId === "" || !lots) return
+    if (autoLotBeanRef.current === beanId) return
+    autoLotBeanRef.current = beanId
+    const mostRecentOpen = lots.find((lot) => !lot.is_finished)
+    form.setValue("lot_id", mostRecentOpen ? String(mostRecentOpen.id) : "")
+  }, [open, brew, beanId, lots, form])
 
   const create = useMutation({
     ...brewsCreateBrewMutation(),
@@ -229,13 +243,28 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none">No specific lot</SelectItem>
-                  {(lots ?? []).map((lot) => (
-                    <SelectItem key={lot.id} value={String(lot.id)}>
-                      {lotLabel(lot)}
-                    </SelectItem>
-                  ))}
+                  {(lots ?? [])
+                    .filter(
+                      (lot) =>
+                        showFinished || !lot.is_finished || String(lot.id) === field.value,
+                    )
+                    .map((lot) => (
+                      <SelectItem key={lot.id} value={String(lot.id)}>
+                        {lotLabel(lot)}
+                        {lot.is_finished ? " · finished" : ""}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
+              {(lots ?? []).some((lot) => lot.is_finished) ? (
+                <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Checkbox
+                    checked={showFinished}
+                    onCheckedChange={(checked) => setShowFinished(checked === true)}
+                  />
+                  Show finished
+                </label>
+              ) : null}
               <FormDescription>Which bag this brew came from (optional).</FormDescription>
               <FormMessage />
             </FormItem>
