@@ -10,6 +10,11 @@ from bloom.schemas.user import AuthorRead
 
 
 class BrewBase(BaseModel):
+    lot_id: int | None = Field(
+        default=None,
+        description="Optional: the physical lot this brew came from (must belong to the bean).",
+        examples=[1],
+    )
     grinder_id: int | None = Field(default=None, description="Grinder used (equipment id).", examples=[1])
     brewed_at: datetime | None = Field(
         default=None,

@@ -24,7 +24,6 @@ function DashboardPage() {
   const { data: tastings } = useQuery(tastingsListAllTastingsOptions())
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
 
-  const openBeans = (beans ?? []).filter((bean) => !bean.is_finished)
   const recentBrews = [...(brews ?? [])]
     .sort((a, b) => (b.brewed_at ?? "").localeCompare(a.brewed_at ?? ""))
     .slice(0, 5)
@@ -41,7 +40,7 @@ function DashboardPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Beans open" value={openBeans.length} hint={`${beans?.length ?? 0} total`} icon={Bean} />
+        <Stat label="Coffees" value={beans?.length ?? 0} icon={Bean} />
         <Stat label="Brews" value={brews?.length ?? 0} icon={Coffee} />
         <Stat label="Tastings" value={tastings?.length ?? 0} icon={NotebookPen} />
       </div>

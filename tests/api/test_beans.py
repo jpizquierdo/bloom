@@ -8,7 +8,7 @@ def _make_bean(client, headers, **overrides):
 
 
 def test_create_and_get_bean(client, alice_headers, users):
-    resp = _make_bean(client, alice_headers, process="washed", roast_level="medium", weight_grams=250)
+    resp = _make_bean(client, alice_headers, process="washed", roast_level="medium")
     assert resp.status_code == 201
     bean = resp.json()
     assert bean["user_id"] == users["alice"].id
@@ -16,6 +16,9 @@ def test_create_and_get_bean(client, alice_headers, users):
     assert bean["owner"] == {"id": users["alice"].id, "username": "alice"}
     # The roaster is returned as a nested object, created on the fly from its name.
     assert bean["roaster"]["name"] == "Nomad"
+    # Physical, per-purchase fields moved to bean_lot — the bean is now the coffee concept.
+    for moved in ("roast_date", "purchase_date", "weight_grams", "price", "is_finished"):
+        assert moved not in bean, f"{moved} should live on the lot now"
 
     got = client.get(f"/beans/{bean['id']}", headers=alice_headers)
     assert got.status_code == 200
@@ -56,15 +59,15 @@ def test_non_owner_can_read_but_not_modify_bean(client, alice_headers, bob_heade
     # A non-owner can read a shared bean...
     assert client.get(f"/beans/{bean_id}", headers=bob_headers).status_code == 200
     # ...but cannot edit or delete it.
-    assert client.patch(f"/beans/{bean_id}", headers=bob_headers, json={"is_finished": True}).status_code == 403
+    assert client.patch(f"/beans/{bean_id}", headers=bob_headers, json={"notes": "mine now"}).status_code == 403
     assert client.delete(f"/beans/{bean_id}", headers=bob_headers).status_code == 403
 
 
 def test_update_bean(client, alice_headers):
     bean_id = _make_bean(client, alice_headers).json()["id"]
-    resp = client.patch(f"/beans/{bean_id}", headers=alice_headers, json={"is_finished": True})
+    resp = client.patch(f"/beans/{bean_id}", headers=alice_headers, json={"notes": "Great as filter"})
     assert resp.status_code == 200
-    assert resp.json()["is_finished"] is True
+    assert resp.json()["notes"] == "Great as filter"
 
 
 def test_update_bean_roaster_moves_it_to_a_new_roaster(client, alice_headers):
@@ -131,7 +134,7 @@ def test_explicit_null_on_a_required_field_422(client, alice_headers):
     bean_id = _make_bean(client, alice_headers).json()["id"]
     # These columns are NOT NULL: omitting them leaves them unchanged, but sending an
     # explicit null must be a validation error, not a database failure.
-    for field in ["name", "roaster", "is_finished"]:
+    for field in ["name", "roaster"]:
         resp = client.patch(f"/beans/{bean_id}", headers=alice_headers, json={field: None})
         assert resp.status_code == 422, f"{field} accepted a null"
 
@@ -143,7 +146,3 @@ def test_explicit_null_on_a_required_field_422(client, alice_headers):
 
 def test_invalid_process_422(client, alice_headers):
     assert _make_bean(client, alice_headers, process="rocket-fuel").status_code == 422
-
-
-def test_nonpositive_weight_422(client, alice_headers):
-    assert _make_bean(client, alice_headers, weight_grams=0).status_code == 422

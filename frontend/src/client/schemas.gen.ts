@@ -134,6 +134,79 @@ export const BeanCreateSchema = {
                 'medium_light'
             ]
         },
+        altitude_masl: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Altitude Masl',
+            description: 'Growing altitude (metres above sea level).',
+            examples: [
+                2100
+            ]
+        },
+        tasting_notes_label: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tasting Notes Label',
+            description: 'Tasting notes printed on the bag.',
+            examples: [
+                'Peach, jasmine, black tea'
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes',
+            description: 'Your own notes.',
+            examples: [
+                'Great as filter'
+            ]
+        },
+        name: {
+            type: 'string',
+            minLength: 1,
+            title: 'Name',
+            description: 'Coffee name.',
+            examples: [
+                'Guji Natural'
+            ]
+        },
+        roaster: {
+            type: 'string',
+            title: 'Roaster',
+            description: 'Roaster name. Matched case-insensitively; created if it does not exist yet.',
+            examples: [
+                'Nomad Coffee'
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'name',
+        'roaster'
+    ],
+    title: 'BeanCreate'
+} as const;
+
+export const BeanLotCreateSchema = {
+    properties: {
         roast_date: {
             anyOf: [
                 {
@@ -202,68 +275,6 @@ export const BeanCreateSchema = {
                 '18.50'
             ]
         },
-        altitude_masl: {
-            anyOf: [
-                {
-                    type: 'integer'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Altitude Masl',
-            description: 'Growing altitude (metres above sea level).',
-            examples: [
-                2100
-            ]
-        },
-        tasting_notes_label: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Tasting Notes Label',
-            description: 'Tasting notes printed on the bag.',
-            examples: [
-                'Peach, jasmine, black tea'
-            ]
-        },
-        notes: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Notes',
-            description: 'Your own notes.',
-            examples: [
-                'Great as filter'
-            ]
-        },
-        name: {
-            type: 'string',
-            minLength: 1,
-            title: 'Name',
-            description: 'Coffee name.',
-            examples: [
-                'Guji Natural'
-            ]
-        },
-        roaster: {
-            type: 'string',
-            title: 'Roaster',
-            description: 'Roaster name. Matched case-insensitively; created if it does not exist yet.',
-            examples: [
-                'Nomad Coffee'
-            ]
-        },
         is_finished: {
             type: 'boolean',
             title: 'Is Finished',
@@ -275,11 +286,218 @@ export const BeanCreateSchema = {
         }
     },
     type: 'object',
+    title: 'BeanLotCreate'
+} as const;
+
+export const BeanLotReadSchema = {
+    properties: {
+        roast_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Roast Date',
+            description: 'Roast date.',
+            examples: [
+                '2026-07-01'
+            ]
+        },
+        purchase_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Purchase Date',
+            description: 'Purchase date.',
+            examples: [
+                '2026-07-05'
+            ]
+        },
+        weight_grams: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weight Grams',
+            description: 'Bag weight in grams.',
+            examples: [
+                250
+            ]
+        },
+        price: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Price',
+            description: 'Price paid for the bag.',
+            examples: [
+                '18.50'
+            ]
+        },
+        id: {
+            type: 'integer',
+            title: 'Id',
+            examples: [
+                1
+            ]
+        },
+        bean_id: {
+            type: 'integer',
+            title: 'Bean Id',
+            examples: [
+                1
+            ]
+        },
+        user_id: {
+            type: 'integer',
+            title: 'User Id',
+            description: 'Owner id (who bought this bag).',
+            examples: [
+                1
+            ]
+        },
+        owner: {
+            $ref: '#/components/schemas/AuthorRead',
+            description: 'Owner (who bought this bag).'
+        },
+        is_finished: {
+            type: 'boolean',
+            title: 'Is Finished',
+            examples: [
+                false
+            ]
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At',
+            examples: [
+                '2026-07-05T09:30:00Z'
+            ]
+        }
+    },
+    type: 'object',
     required: [
-        'name',
-        'roaster'
+        'id',
+        'bean_id',
+        'user_id',
+        'owner',
+        'is_finished',
+        'created_at'
     ],
-    title: 'BeanCreate'
+    title: 'BeanLotRead'
+} as const;
+
+export const BeanLotUpdateSchema = {
+    properties: {
+        roast_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Roast Date',
+            description: 'Roast date.',
+            examples: [
+                '2026-07-01'
+            ]
+        },
+        purchase_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Purchase Date',
+            description: 'Purchase date.',
+            examples: [
+                '2026-07-05'
+            ]
+        },
+        weight_grams: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Weight Grams',
+            description: 'Bag weight in grams.',
+            examples: [
+                250
+            ]
+        },
+        price: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Price',
+            description: 'Price paid for the bag.',
+            examples: [
+                '18.50'
+            ]
+        },
+        is_finished: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Finished',
+            description: 'Whether the bag is used up.',
+            examples: [
+                true
+            ]
+        }
+    },
+    type: 'object',
+    title: 'BeanLotUpdate',
+    description: 'All fields optional; only provided fields are applied (PATCH semantics).'
 } as const;
 
 export const BeanReadSchema = {
@@ -389,70 +607,6 @@ export const BeanReadSchema = {
                 'medium_light'
             ]
         },
-        roast_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Roast Date',
-            description: 'Roast date.',
-            examples: [
-                '2026-07-01'
-            ]
-        },
-        purchase_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Purchase Date',
-            description: 'Purchase date.',
-            examples: [
-                '2026-07-05'
-            ]
-        },
-        weight_grams: {
-            anyOf: [
-                {
-                    type: 'integer',
-                    exclusiveMinimum: 0
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Weight Grams',
-            description: 'Bag weight in grams.',
-            examples: [
-                250
-            ]
-        },
-        price: {
-            anyOf: [
-                {
-                    type: 'string',
-                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Price',
-            description: 'Price paid for the bag.',
-            examples: [
-                '18.50'
-            ]
-        },
         altitude_masl: {
             anyOf: [
                 {
@@ -528,13 +682,6 @@ export const BeanReadSchema = {
             $ref: '#/components/schemas/RoasterRead',
             description: 'The roaster this bean came from.'
         },
-        is_finished: {
-            type: 'boolean',
-            title: 'Is Finished',
-            examples: [
-                false
-            ]
-        },
         created_at: {
             type: 'string',
             format: 'date-time',
@@ -551,7 +698,6 @@ export const BeanReadSchema = {
         'owner',
         'name',
         'roaster',
-        'is_finished',
         'created_at'
     ],
     title: 'BeanRead'
@@ -664,74 +810,6 @@ export const BeanUpdateSchema = {
                 'medium_light'
             ]
         },
-        roast_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Roast Date',
-            description: 'Roast date.',
-            examples: [
-                '2026-07-01'
-            ]
-        },
-        purchase_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Purchase Date',
-            description: 'Purchase date.',
-            examples: [
-                '2026-07-05'
-            ]
-        },
-        weight_grams: {
-            anyOf: [
-                {
-                    type: 'integer',
-                    exclusiveMinimum: 0
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Weight Grams',
-            description: 'Bag weight in grams.',
-            examples: [
-                250
-            ]
-        },
-        price: {
-            anyOf: [
-                {
-                    type: 'number',
-                    minimum: 0
-                },
-                {
-                    type: 'string',
-                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Price',
-            description: 'Price paid for the bag.',
-            examples: [
-                '18.50'
-            ]
-        },
         altitude_masl: {
             anyOf: [
                 {
@@ -807,21 +885,6 @@ export const BeanUpdateSchema = {
             examples: [
                 'Nomad Coffee'
             ]
-        },
-        is_finished: {
-            anyOf: [
-                {
-                    type: 'boolean'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Is Finished',
-            description: 'Whether the bag is used up.',
-            examples: [
-                true
-            ]
         }
     },
     type: 'object',
@@ -891,6 +954,21 @@ export const Body_auth_loginSchema = {
 
 export const BrewCreateSchema = {
     properties: {
+        lot_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Lot Id',
+            description: 'Optional: the physical lot this brew came from (must belong to the bean).',
+            examples: [
+                1
+            ]
+        },
         grinder_id: {
             anyOf: [
                 {
@@ -1214,6 +1292,21 @@ export const BrewMethodReadSchema = {
 
 export const BrewReadSchema = {
     properties: {
+        lot_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Lot Id',
+            description: 'Optional: the physical lot this brew came from (must belong to the bean).',
+            examples: [
+                1
+            ]
+        },
         grinder_id: {
             anyOf: [
                 {
@@ -1453,6 +1546,21 @@ export const BrewReadSchema = {
 
 export const BrewUpdateSchema = {
     properties: {
+        lot_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Lot Id',
+            description: 'Optional: the physical lot this brew came from (must belong to the bean).',
+            examples: [
+                1
+            ]
+        },
         grinder_id: {
             anyOf: [
                 {

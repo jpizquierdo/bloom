@@ -5,14 +5,15 @@ from decimal import Decimal
 from sqlalchemy.orm import Session
 
 from bloom.core.logger import get_logger
+from bloom.db.models.bean_lot import BeanLot
 from bloom.db.models.brew import Brew
 from bloom.db.models.user import User
 from bloom.domain.calculations import brew_ratio, classify_extraction, extraction_yield
 from bloom.repositories import brews as brews_repo
 from bloom.schemas.brew import BrewCreate, BrewRead, BrewUpdate, ExtractionDiagnosticsRead
-from bloom.services import bean_service, lookups_service
+from bloom.services import bean_lot_service, bean_service, lookups_service
 from bloom.services.access import owns_or_admin
-from bloom.services.errors import ForbiddenError, NotFoundError
+from bloom.services.errors import ForbiddenError, NotFoundError, UnprocessableError
 
 logger = get_logger(__name__)
 
@@ -62,10 +63,11 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
     only TDS was measured (and beverage mass is known); an explicit value is kept.
     """
     # The bean only needs to exist — beans are shared, not owned per-brew.
-    bean = bean_service.get_bean(db, data.bean_id)
+    bean_service.get_bean(db, data.bean_id)
     lookups_service.get_brew_method(db, data.method_id)
     if data.grinder_id is not None:
         lookups_service.get_equipment(db, data.grinder_id)
+    lot = _resolve_lot(db, data.lot_id, data.bean_id) if data.lot_id is not None else None
 
     ey = data.extraction_yield_percent
     if ey is None and data.tds_percent is not None:
@@ -81,14 +83,24 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
     db.commit()
     db.refresh(brew)
     logger.info("Brew %s created by user %s (bean %s)", brew.id, user.id, brew.bean_id)
-    if bean.is_finished:
-        logger.warning("Brew %s created on a finished bean (%s)", brew.id, bean.id)
+    if lot is not None and lot.is_finished:
+        logger.warning("Brew %s created on a finished lot (%s)", brew.id, lot.id)
     return brew
+
+
+def _resolve_lot(db: Session, lot_id: int, bean_id: int) -> BeanLot:
+    """Load a lot and confirm it belongs to ``bean_id`` (else 404 / 422)."""
+    lot = bean_lot_service.get_lot(db, lot_id)  # 404 if the lot does not exist
+    if lot.bean_id != bean_id:
+        raise UnprocessableError("The lot does not belong to this bean")
+    return lot
 
 
 def update_brew(db: Session, brew: Brew, data: BrewUpdate) -> Brew:
     """Apply a partial update to an already-authorized brew."""
     changes = data.model_dump(exclude_unset=True)
+    if changes.get("lot_id") is not None:
+        _resolve_lot(db, changes["lot_id"], brew.bean_id)  # 404 / 422 if it does not fit the bean
     for field, value in changes.items():
         setattr(brew, field, value)
     db.commit()

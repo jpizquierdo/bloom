@@ -5,7 +5,6 @@ import {
 import type { BeanRead } from "@/client/types.gen"
 import { DataTable } from "@/components/data/data-table"
 import { PageHeader } from "@/components/data/page-header"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { humanize } from "@/lib/format"
@@ -44,16 +43,6 @@ function RoasterDetailPage() {
       accessorKey: "roast_level",
       header: "Roast",
       cell: ({ row }) => humanize(row.original.roast_level) || "—",
-    },
-    {
-      accessorKey: "is_finished",
-      header: "Status",
-      cell: ({ row }) =>
-        row.original.is_finished ? (
-          <Badge variant="outline">Finished</Badge>
-        ) : (
-          <Badge variant="secondary">Open</Badge>
-        ),
     },
     {
       id: "owner",

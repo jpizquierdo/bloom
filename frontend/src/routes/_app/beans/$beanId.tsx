@@ -2,17 +2,24 @@ import {
   beansGetBeanOptions,
   brewMethodsListBrewMethodsOptions,
   brewsListBrewsOptions,
+  lotsDeleteLotMutation,
+  lotsListLotsOptions,
 } from "@/client/@tanstack/react-query.gen"
-import type { BrewRead } from "@/client/types.gen"
+import type { BeanLotRead, BrewRead } from "@/client/types.gen"
+import { LotDialog } from "@/components/beans/lot-dialog"
 import { BrewDialog } from "@/components/brews/brew-dialog"
 import { DataTable } from "@/components/data/data-table"
+import { DeleteAlert } from "@/components/data/delete-alert"
 import { PageHeader } from "@/components/data/page-header"
+import { RowActions } from "@/components/data/row-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { canEdit, useCurrentUser } from "@/lib/auth"
 import { formatDate, formatDateTime, formatNumber, humanize } from "@/lib/format"
-import { useQuery } from "@tanstack/react-query"
+import { useCrudFeedback } from "@/lib/mutations"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 import { ArrowLeft, Plus } from "lucide-react"
@@ -25,12 +32,24 @@ function BeanDetailPage() {
   const { beanId } = Route.useParams()
   const id = Number(beanId)
   const navigate = useNavigate()
+  const { user } = useCurrentUser()
+  const feedback = useCrudFeedback()
 
   const { data: bean, isLoading } = useQuery(beansGetBeanOptions({ path: { bean_id: id } }))
+  const { data: lots } = useQuery(lotsListLotsOptions({ path: { bean_id: id } }))
   const { data: allBrews } = useQuery(brewsListBrewsOptions())
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
 
   const [brewDialogOpen, setBrewDialogOpen] = useState(false)
+  const [lotDialogOpen, setLotDialogOpen] = useState(false)
+  const [editingLot, setEditingLot] = useState<BeanLotRead | null>(null)
+  const [deletingLot, setDeletingLot] = useState<BeanLotRead | null>(null)
+
+  const removeLot = useMutation({
+    ...lotsDeleteLotMutation(),
+    onSuccess: feedback.onSuccess("Lot deleted"),
+    onError: feedback.onError,
+  })
 
   if (isLoading || !bean) {
     return <Skeleton className="h-64 w-full" />
@@ -39,6 +58,65 @@ function BeanDetailPage() {
   const brews = allBrews?.filter((brew) => brew.bean_id === id) ?? []
   const methodName = (methodId: number) =>
     methods?.find((method) => method.id === methodId)?.name ?? `#${methodId}`
+
+  const lotColumns: ColumnDef<BeanLotRead, unknown>[] = [
+    {
+      accessorKey: "purchase_date",
+      header: "Bought",
+      cell: ({ row }) => formatDate(row.original.purchase_date),
+    },
+    {
+      accessorKey: "roast_date",
+      header: "Roasted",
+      cell: ({ row }) => formatDate(row.original.roast_date),
+    },
+    {
+      accessorKey: "weight_grams",
+      header: "Weight",
+      cell: ({ row }) =>
+        row.original.weight_grams ? `${formatNumber(row.original.weight_grams, 0)} g` : "—",
+    },
+    {
+      accessorKey: "price",
+      header: "Price",
+      cell: ({ row }) => (row.original.price ? formatNumber(row.original.price, 2) : "—"),
+    },
+    {
+      accessorKey: "is_finished",
+      header: "Status",
+      cell: ({ row }) =>
+        row.original.is_finished ? (
+          <Badge variant="outline">Finished</Badge>
+        ) : (
+          <Badge variant="secondary">Open</Badge>
+        ),
+    },
+    {
+      id: "owner",
+      accessorFn: (lot) => lot.owner.username,
+      header: "By",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.original.owner.username}</span>
+      ),
+    },
+    {
+      id: "actions",
+      header: "",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <div className="text-right">
+          <RowActions
+            canEdit={canEdit(row.original, user)}
+            onEdit={() => {
+              setEditingLot(row.original)
+              setLotDialogOpen(true)
+            }}
+            onDelete={() => setDeletingLot(row.original)}
+          />
+        </div>
+      ),
+    },
+  ]
 
   const brewColumns: ColumnDef<BrewRead, unknown>[] = [
     {
@@ -91,16 +169,9 @@ function BeanDetailPage() {
             {bean.owner.username}
           </>
         }
-        actions={
-          bean.is_finished ? (
-            <Badge variant="outline">Finished</Badge>
-          ) : (
-            <Badge variant="secondary">Open</Badge>
-          )
-        }
       />
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Origin</CardTitle>
@@ -120,48 +191,37 @@ function BeanDetailPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Roast</CardTitle>
+            <CardTitle>Roast &amp; notes</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-            <Field label="Level" value={humanize(bean.roast_level)} />
-            <Field label="Roasted" value={formatDate(bean.roast_date)} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Purchase</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-            <Field label="Bought" value={formatDate(bean.purchase_date)} />
-            <Field label="Price" value={bean.price ? formatNumber(bean.price, 2) : null} />
-            <Field
-              label="Weight"
-              value={bean.weight_grams ? `${formatNumber(bean.weight_grams, 0)} g` : null}
-            />
+          <CardContent className="grid gap-4">
+            <Field label="Roast level" value={humanize(bean.roast_level)} />
+            <Field label="Tasting notes (label)" value={bean.tasting_notes_label} />
+            {bean.notes ? <Field label="Your notes" value={bean.notes} /> : null}
           </CardContent>
         </Card>
       </div>
 
-      {bean.tasting_notes_label ? (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Tasting notes (label)</CardTitle>
-          </CardHeader>
-          <CardContent className="whitespace-pre-wrap text-sm">
-            {bean.tasting_notes_label}
-          </CardContent>
-        </Card>
-      ) : null}
+      <div className="mt-8 mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold">
+          Lots <span className="text-muted-foreground">({lots?.length ?? 0})</span>
+        </h2>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setEditingLot(null)
+            setLotDialogOpen(true)
+          }}
+        >
+          <Plus className="size-4" />
+          Add lot
+        </Button>
+      </div>
 
-      {bean.notes ? (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Notes</CardTitle>
-          </CardHeader>
-          <CardContent className="whitespace-pre-wrap text-sm">{bean.notes}</CardContent>
-        </Card>
-      ) : null}
+      <DataTable
+        columns={lotColumns}
+        data={lots}
+        emptyMessage="No lots yet. Add the bag you bought."
+      />
 
       <div className="mt-8 mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">
@@ -182,11 +242,22 @@ function BeanDetailPage() {
         }
       />
 
+      <LotDialog open={lotDialogOpen} onOpenChange={setLotDialogOpen} beanId={bean.id} lot={editingLot} />
       <BrewDialog
         open={brewDialogOpen}
         onOpenChange={setBrewDialogOpen}
         brew={null}
         defaultBeanId={bean.id}
+      />
+      <DeleteAlert
+        open={deletingLot !== null}
+        onOpenChange={(open) => !open && setDeletingLot(null)}
+        description="Delete this lot? Brews attributed to it keep their history."
+        isPending={removeLot.isPending}
+        onConfirm={() => {
+          if (deletingLot) removeLot.mutate({ path: { lot_id: deletingLot.id } })
+          setDeletingLot(null)
+        }}
       />
     </>
   )

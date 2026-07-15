@@ -63,30 +63,6 @@ export type BeanCreate = {
      */
     roast_level?: 'light' | 'medium_light' | 'medium' | 'medium_dark' | 'dark' | null;
     /**
-     * Roast Date
-     *
-     * Roast date.
-     */
-    roast_date?: string | null;
-    /**
-     * Purchase Date
-     *
-     * Purchase date.
-     */
-    purchase_date?: string | null;
-    /**
-     * Weight Grams
-     *
-     * Bag weight in grams.
-     */
-    weight_grams?: number | null;
-    /**
-     * Price
-     *
-     * Price paid for the bag.
-     */
-    price?: number | string | null;
-    /**
      * Altitude Masl
      *
      * Growing altitude (metres above sea level).
@@ -116,12 +92,136 @@ export type BeanCreate = {
      * Roaster name. Matched case-insensitively; created if it does not exist yet.
      */
     roaster: string;
+};
+
+/**
+ * BeanLotCreate
+ */
+export type BeanLotCreate = {
+    /**
+     * Roast Date
+     *
+     * Roast date.
+     */
+    roast_date?: string | null;
+    /**
+     * Purchase Date
+     *
+     * Purchase date.
+     */
+    purchase_date?: string | null;
+    /**
+     * Weight Grams
+     *
+     * Bag weight in grams.
+     */
+    weight_grams?: number | null;
+    /**
+     * Price
+     *
+     * Price paid for the bag.
+     */
+    price?: number | string | null;
     /**
      * Is Finished
      *
      * Whether the bag is used up.
      */
     is_finished?: boolean;
+};
+
+/**
+ * BeanLotRead
+ */
+export type BeanLotRead = {
+    /**
+     * Roast Date
+     *
+     * Roast date.
+     */
+    roast_date?: string | null;
+    /**
+     * Purchase Date
+     *
+     * Purchase date.
+     */
+    purchase_date?: string | null;
+    /**
+     * Weight Grams
+     *
+     * Bag weight in grams.
+     */
+    weight_grams?: number | null;
+    /**
+     * Price
+     *
+     * Price paid for the bag.
+     */
+    price?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Bean Id
+     */
+    bean_id: number;
+    /**
+     * User Id
+     *
+     * Owner id (who bought this bag).
+     */
+    user_id: number;
+    /**
+     * Owner (who bought this bag).
+     */
+    owner: AuthorRead;
+    /**
+     * Is Finished
+     */
+    is_finished: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * BeanLotUpdate
+ *
+ * All fields optional; only provided fields are applied (PATCH semantics).
+ */
+export type BeanLotUpdate = {
+    /**
+     * Roast Date
+     *
+     * Roast date.
+     */
+    roast_date?: string | null;
+    /**
+     * Purchase Date
+     *
+     * Purchase date.
+     */
+    purchase_date?: string | null;
+    /**
+     * Weight Grams
+     *
+     * Bag weight in grams.
+     */
+    weight_grams?: number | null;
+    /**
+     * Price
+     *
+     * Price paid for the bag.
+     */
+    price?: number | string | null;
+    /**
+     * Is Finished
+     *
+     * Whether the bag is used up.
+     */
+    is_finished?: boolean | null;
 };
 
 /**
@@ -165,30 +265,6 @@ export type BeanRead = {
      */
     roast_level?: 'light' | 'medium_light' | 'medium' | 'medium_dark' | 'dark' | null;
     /**
-     * Roast Date
-     *
-     * Roast date.
-     */
-    roast_date?: string | null;
-    /**
-     * Purchase Date
-     *
-     * Purchase date.
-     */
-    purchase_date?: string | null;
-    /**
-     * Weight Grams
-     *
-     * Bag weight in grams.
-     */
-    weight_grams?: number | null;
-    /**
-     * Price
-     *
-     * Price paid for the bag.
-     */
-    price?: string | null;
-    /**
      * Altitude Masl
      *
      * Growing altitude (metres above sea level).
@@ -228,10 +304,6 @@ export type BeanRead = {
      * The roaster this bean came from.
      */
     roaster: RoasterRead;
-    /**
-     * Is Finished
-     */
-    is_finished: boolean;
     /**
      * Created At
      */
@@ -281,30 +353,6 @@ export type BeanUpdate = {
      */
     roast_level?: 'light' | 'medium_light' | 'medium' | 'medium_dark' | 'dark' | null;
     /**
-     * Roast Date
-     *
-     * Roast date.
-     */
-    roast_date?: string | null;
-    /**
-     * Purchase Date
-     *
-     * Purchase date.
-     */
-    purchase_date?: string | null;
-    /**
-     * Weight Grams
-     *
-     * Bag weight in grams.
-     */
-    weight_grams?: number | null;
-    /**
-     * Price
-     *
-     * Price paid for the bag.
-     */
-    price?: number | string | null;
-    /**
      * Altitude Masl
      *
      * Growing altitude (metres above sea level).
@@ -334,12 +382,6 @@ export type BeanUpdate = {
      * Move the bean to this roaster. Matched case-insensitively; created if it does not exist yet.
      */
     roaster?: string | null;
-    /**
-     * Is Finished
-     *
-     * Whether the bag is used up.
-     */
-    is_finished?: boolean | null;
 };
 
 /**
@@ -376,6 +418,12 @@ export type BodyAuthLogin = {
  * BrewCreate
  */
 export type BrewCreate = {
+    /**
+     * Lot Id
+     *
+     * Optional: the physical lot this brew came from (must belong to the bean).
+     */
+    lot_id?: number | null;
     /**
      * Grinder Id
      *
@@ -507,6 +555,12 @@ export type BrewMethodRead = {
  */
 export type BrewRead = {
     /**
+     * Lot Id
+     *
+     * Optional: the physical lot this brew came from (must belong to the bean).
+     */
+    lot_id?: number | null;
+    /**
      * Grinder Id
      *
      * Grinder used (equipment id).
@@ -607,6 +661,12 @@ export type BrewRead = {
  * Partial update. bean_id/method_id are immutable after creation.
  */
 export type BrewUpdate = {
+    /**
+     * Lot Id
+     *
+     * Optional: the physical lot this brew came from (must belong to the bean).
+     */
+    lot_id?: number | null;
     /**
      * Grinder Id
      *
@@ -1684,6 +1744,158 @@ export type BeansUpdateBeanResponses = {
 };
 
 export type BeansUpdateBeanResponse = BeansUpdateBeanResponses[keyof BeansUpdateBeanResponses];
+
+export type LotsListLotsData = {
+    body?: never;
+    path: {
+        /**
+         * Bean Id
+         */
+        bean_id: number;
+    };
+    query?: never;
+    url: '/api/v1/beans/{bean_id}/lots';
+};
+
+export type LotsListLotsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LotsListLotsError = LotsListLotsErrors[keyof LotsListLotsErrors];
+
+export type LotsListLotsResponses = {
+    /**
+     * Response Lots-List Lots
+     *
+     * Successful Response
+     */
+    200: Array<BeanLotRead>;
+};
+
+export type LotsListLotsResponse = LotsListLotsResponses[keyof LotsListLotsResponses];
+
+export type LotsCreateLotData = {
+    body: BeanLotCreate;
+    path: {
+        /**
+         * Bean Id
+         */
+        bean_id: number;
+    };
+    query?: never;
+    url: '/api/v1/beans/{bean_id}/lots';
+};
+
+export type LotsCreateLotErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LotsCreateLotError = LotsCreateLotErrors[keyof LotsCreateLotErrors];
+
+export type LotsCreateLotResponses = {
+    /**
+     * Successful Response
+     */
+    201: BeanLotRead;
+};
+
+export type LotsCreateLotResponse = LotsCreateLotResponses[keyof LotsCreateLotResponses];
+
+export type LotsDeleteLotData = {
+    body?: never;
+    path: {
+        /**
+         * Lot Id
+         */
+        lot_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lots/{lot_id}';
+};
+
+export type LotsDeleteLotErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LotsDeleteLotError = LotsDeleteLotErrors[keyof LotsDeleteLotErrors];
+
+export type LotsDeleteLotResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type LotsDeleteLotResponse = LotsDeleteLotResponses[keyof LotsDeleteLotResponses];
+
+export type LotsGetLotData = {
+    body?: never;
+    path: {
+        /**
+         * Lot Id
+         */
+        lot_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lots/{lot_id}';
+};
+
+export type LotsGetLotErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LotsGetLotError = LotsGetLotErrors[keyof LotsGetLotErrors];
+
+export type LotsGetLotResponses = {
+    /**
+     * Successful Response
+     */
+    200: BeanLotRead;
+};
+
+export type LotsGetLotResponse = LotsGetLotResponses[keyof LotsGetLotResponses];
+
+export type LotsUpdateLotData = {
+    body: BeanLotUpdate;
+    path: {
+        /**
+         * Lot Id
+         */
+        lot_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lots/{lot_id}';
+};
+
+export type LotsUpdateLotErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LotsUpdateLotError = LotsUpdateLotErrors[keyof LotsUpdateLotErrors];
+
+export type LotsUpdateLotResponses = {
+    /**
+     * Successful Response
+     */
+    200: BeanLotRead;
+};
+
+export type LotsUpdateLotResponse = LotsUpdateLotResponses[keyof LotsUpdateLotResponses];
 
 export type BrewMethodsListBrewMethodsData = {
     body?: never;

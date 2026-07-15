@@ -47,7 +47,7 @@ bloom/
 │   │   ├── base.py            # SQLAlchemy DeclarativeBase
 │   │   ├── session.py         # engine + session factory
 │   │   └── models/            # ORM models (one concern per file)
-│   │       ├── user.py  bean.py  brew.py  brew_method.py  equipment.py  tasting.py
+│   │       ├── user.py  bean.py  bean_lot.py  brew.py  brew_method.py  equipment.py  tasting.py
 │   ├── schemas/               # Pydantic v2 DTOs (request/response)
 │   │   ├── user.py  bean.py  brew.py  tasting.py  lookups.py
 │   ├── domain/                # PURE functions — no ORM, no FastAPI imports
@@ -130,34 +130,39 @@ Design points:
 
 ## Data model
 
-Seven tables. `brew` is the central, highest-volume entity.
+Eight tables. `brew` is the central, highest-volume entity.
 
 ```
 Entities:
-    roaster 1 ──< bean 1 ──< brew >── 1 brew_method
-                              │  └─── 1 equipment   (grinder, nullable)
-                              │
-                              └──< tasting          (1:N)
+    roaster 1 ──< bean 1 ──< bean_lot        (1:N — one bag bought each)
+                     │  1
+                     │  └──< brew >── 1 brew_method
+                     │          │ └─ 1 equipment   (grinder, nullable)
+                     │          └─── 1 bean_lot    (lot brewed, nullable)
+                     │
+                     └ (brew) ──< tasting          (1:N)
 
 Ownership (who created each row):
     user 1 ──< bean       (owner)
+    user 1 ──< bean_lot   (buyer)
     user 1 ──< brew       (author)
     user 1 ──< tasting    (taster)
 ```
 
-Every row carries who created it: `bean.user_id` (owner), `brew.user_id` (author) and
-`tasting.user_id` (taster). These are often different people — one member buys a bag
-(bean owner), another brews from it (brew author), and several may score that brew
-(tasters).
+Every row carries who created it: `bean.user_id` (owner), `bean_lot.user_id` (buyer),
+`brew.user_id` (author) and `tasting.user_id` (taster). These are often different people — one
+member buys a bag (lot buyer), another brews from it (brew author), and several may score that
+brew (tasters).
 
 | Table         | Purpose                                                             |
 |---------------|---------------------------------------------------------------------|
 | `user`        | Accounts with a role (`admin` / `user`) and a unique `username` handle. Owns beans, authors brews, makes tastings. |
-| `bean`        | A physical bag/lot of coffee. Shared; `user_id` is the owner.        |
+| `bean`        | A coffee (farm/lot from a roaster): its stable identity. Shared; `user_id` is the owner (see 1). |
+| `bean_lot`    | One physical bag bought of a bean: roast/purchase date, weight, price, `is_finished`. Shared; `user_id` is the buyer. |
 | `roaster`     | Who roasted the bean. User-creatable, unique on `lower(name)` (see 13). |
 | `brew_method` | Lookup: V60, Espresso, AeroPress… with a category.                  |
 | `equipment`   | Grinders, machines, kettles — one table, `type` discriminator.      |
-| `brew`        | A single extraction: the objective parameters. Central entity; `user_id` is the author. |
+| `brew`        | A single extraction: the objective parameters. Central entity; `user_id` is the author, `lot_id` the optional lot brewed. |
 | `tasting`     | A subjective evaluation of a brew (1:N — several per brew, by different users); `user_id` is the taster. |
 
 The live schema is owned by **Alembic migrations** (`alembic/versions/`); the ORM models in
@@ -174,9 +179,19 @@ docker exec bloom-db pg_dump -U bloom -d bloom --schema-only
 
 Each decision was made explicitly.
 
-### 1 — `bean` is a physical lot, not an abstract coffee
-One `bean` row = one bag bought, with its own purchase date, price and weight. If needed
-later, this splits into `coffee` (concept) + `bean_lot` (physical).
+### 1 — `bean` is the coffee concept; `bean_lot` is the physical purchase
+A `bean` is a coffee (a farm/lot from a roaster) — its stable identity: name, roaster,
+origin, variety, process, roast level, altitude, tasting notes. Each physical bag bought is a
+**`bean_lot`**, carrying the per-purchase data (roast date, purchase date, weight, price,
+`is_finished`). One coffee bought several times has several lots, so brews stay aggregated
+under a single `bean` instead of scattering across a new row per bag.
+
+Originally a `bean` row *was* one bag (the fields now on `bean_lot` lived on `bean`). It split
+once buying the same coffee repeatedly started forcing duplicate beans. **Brews still reference
+the `bean`** (`brew.bean_id`, required); they may additionally name the specific `brew.lot_id`
+(optional) they came from — the only behaviour tied to a lot is the finished-bag warning, which
+now fires when a brew names a finished lot. A lot is a shared, creator-owned row like a bean:
+anyone reads it, only its buyer (or an admin) edits it.
 
 ### 2 — Derived vs. measured fields: a hybrid rule
 - **`ratio` is computed in the domain layer, never stored.**
@@ -375,7 +390,7 @@ long, pagination is a backend change first and the tables follow.
   to `user` (no public registration).
 - **JWT / OAuth2 password flow**, access token only; passwords hashed with argon2id.
 - **Shared read across the instance**; **each row edited/deleted only by its creator** (or an
-  admin), tracked by `bean.user_id` / `brew.user_id` / `tasting.user_id`.
+  admin), tracked by `bean.user_id` / `bean_lot.user_id` / `brew.user_id` / `tasting.user_id`.
 - **Soft-delete** of users (`is_active`) instead of hard deletion.
 
 ### Cross-cutting choices
@@ -383,12 +398,15 @@ long, pagination is a backend change first and the tables follow.
 - **`NUMERIC` for all weights and measures**, never floating point (the domain layer uses
   `Decimal` end to end for the same reason).
 - **`ON DELETE` policies**:
-  - `bean` → `brew` → `tasting`: **CASCADE**. Note: because beans are shared, deleting a
-    bean removes *every* user's brews on it (only the owner can trigger this).
+  - `bean` → `brew` → `tasting` and `bean` → `bean_lot`: **CASCADE**. Note: because beans are
+    shared, deleting a bean removes *every* user's brews and lots on it (only the owner can
+    trigger this).
   - `brew.method_id`: **RESTRICT** (a method in use cannot be deleted).
   - `bean.roaster_id`: **RESTRICT** (a roaster with beans is merged away, never deleted — see 13).
-  - `brew.grinder_id`: **SET NULL** (deleting a grinder preserves brew history).
-  - `user` → `bean` (owner), `user` → `brew` (author), `user` → `tasting` (taster): all
+  - `brew.grinder_id` and `brew.lot_id`: **SET NULL** (deleting a grinder, or a lot, preserves
+    brew history — the brew keeps its measurements, just loses the reference).
+  - `user` → `bean` (owner), `user` → `bean_lot` (buyer), `user` → `brew` (author),
+    `user` → `tasting` (taster): all
     **RESTRICT**, paired with **soft-delete** of users (an `is_active` flag). Accounts are
     never hard-deleted, so history is never silently destroyed.
 

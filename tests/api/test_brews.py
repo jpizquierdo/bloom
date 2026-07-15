@@ -8,16 +8,40 @@ def bean_id(client, alice_headers):
     return client.post("/beans", headers=alice_headers, json={"name": "Kenya AA", "roaster": "Nomad"}).json()["id"]
 
 
-def test_brew_on_finished_bean_is_allowed(client, alice_headers, lookups, bean_id):
-    # Marking a bag as finished does not block logging a brew (retroactive logging);
+def test_brew_on_finished_lot_is_allowed(client, alice_headers, lookups, bean_id):
+    # Brewing from a finished lot does not block logging (retroactive logging);
     # the service only emits a warning.
-    client.patch(f"/beans/{bean_id}", headers=alice_headers, json={"is_finished": True})
+    lot_id = client.post(f"/beans/{bean_id}/lots", headers=alice_headers, json={"is_finished": True}).json()["id"]
+    resp = client.post(
+        "/brews",
+        headers=alice_headers,
+        json={"bean_id": bean_id, "lot_id": lot_id, "method_id": lookups["filter"]["id"], "dose_grams": "15"},
+    )
+    assert resp.status_code == 201
+    assert resp.json()["lot_id"] == lot_id
+
+
+def test_brew_without_a_lot_is_allowed(client, alice_headers, lookups, bean_id):
+    # The lot is optional: a brew can name only the coffee.
     resp = client.post(
         "/brews",
         headers=alice_headers,
         json={"bean_id": bean_id, "method_id": lookups["filter"]["id"], "dose_grams": "15"},
     )
     assert resp.status_code == 201
+    assert resp.json()["lot_id"] is None
+
+
+def test_brew_with_lot_from_another_bean_422(client, alice_headers, lookups, bean_id):
+    # A lot must belong to the brew's bean, else the reference is unprocessable.
+    other_bean = client.post("/beans", headers=alice_headers, json={"name": "Other", "roaster": "Nomad"}).json()["id"]
+    other_lot = client.post(f"/beans/{other_bean}/lots", headers=alice_headers, json={}).json()["id"]
+    resp = client.post(
+        "/brews",
+        headers=alice_headers,
+        json={"bean_id": bean_id, "lot_id": other_lot, "method_id": lookups["filter"]["id"], "dose_grams": "15"},
+    )
+    assert resp.status_code == 422
 
 
 def test_brew_embeds_author(client, alice_headers, lookups, bean_id):

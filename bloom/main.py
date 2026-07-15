@@ -16,8 +16,8 @@ from bloom.core.config import get_settings
 from bloom.core.dependencies import get_db
 from bloom.core.logger import configure_logging
 from bloom.db import init_db
-from bloom.routes import auth, beans, brew_methods, brews, equipment, roasters, tastings, users
-from bloom.services.errors import ConflictError, ForbiddenError, NotFoundError
+from bloom.routes import auth, bean_lots, beans, brew_methods, brews, equipment, roasters, tastings, users
+from bloom.services.errors import ConflictError, ForbiddenError, NotFoundError, UnprocessableError
 
 
 @asynccontextmanager
@@ -86,6 +86,10 @@ def create_app() -> FastAPI:
     async def _conflict_handler(request: Request, exc: ConflictError) -> JSONResponse:
         return JSONResponse(status_code=409, content={"detail": str(exc) or "Conflict"})
 
+    @app.exception_handler(UnprocessableError)
+    async def _unprocessable_handler(request: Request, exc: UnprocessableError) -> JSONResponse:
+        return JSONResponse(status_code=422, content={"detail": str(exc) or "Unprocessable"})
+
     # Deliberately outside the API prefix: container healthchecks probe /health.
     @app.get("/health", tags=["system"])
     def health(db: Session = Depends(get_db)) -> dict[str, str]:
@@ -98,6 +102,7 @@ def create_app() -> FastAPI:
         users.router,
         roasters.router,
         beans.router,
+        bean_lots.router,
         brew_methods.router,
         equipment.router,
         brews.router,

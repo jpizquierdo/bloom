@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, type Options as Options2, type RequestResult, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthReadCurrentUserData, AuthReadCurrentUserResponses, BeansCreateBeanData, BeansCreateBeanErrors, BeansCreateBeanResponses, BeansDeleteBeanData, BeansDeleteBeanErrors, BeansDeleteBeanResponses, BeansGetBeanData, BeansGetBeanErrors, BeansGetBeanResponses, BeansListBeansData, BeansListBeansErrors, BeansListBeansResponses, BeansUpdateBeanData, BeansUpdateBeanErrors, BeansUpdateBeanResponses, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodErrors, BrewMethodsCreateBrewMethodResponses, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodErrors, BrewMethodsGetBrewMethodResponses, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponses, BrewsCreateBrewData, BrewsCreateBrewErrors, BrewsCreateBrewResponses, BrewsDeleteBrewData, BrewsDeleteBrewErrors, BrewsDeleteBrewResponses, BrewsGetBrewData, BrewsGetBrewErrors, BrewsGetBrewResponses, BrewsListBrewsData, BrewsListBrewsErrors, BrewsListBrewsResponses, BrewsUpdateBrewData, BrewsUpdateBrewErrors, BrewsUpdateBrewResponses, EquipmentCreateEquipmentData, EquipmentCreateEquipmentErrors, EquipmentCreateEquipmentResponses, EquipmentGetEquipmentData, EquipmentGetEquipmentErrors, EquipmentGetEquipmentResponses, EquipmentListEquipmentData, EquipmentListEquipmentResponses, RoastersCreateRoasterData, RoastersCreateRoasterErrors, RoastersCreateRoasterResponses, RoastersDeleteRoasterData, RoastersDeleteRoasterErrors, RoastersDeleteRoasterResponses, RoastersGetRoasterData, RoastersGetRoasterErrors, RoastersGetRoasterResponses, RoastersListRoastersData, RoastersListRoastersResponses, RoastersMergeRoasterData, RoastersMergeRoasterErrors, RoastersMergeRoasterResponses, RoastersUpdateRoasterData, RoastersUpdateRoasterErrors, RoastersUpdateRoasterResponses, SystemHealthData, SystemHealthResponses, TastingsCreateTastingData, TastingsCreateTastingErrors, TastingsCreateTastingResponses, TastingsDeleteTastingData, TastingsDeleteTastingErrors, TastingsDeleteTastingResponses, TastingsGetTastingData, TastingsGetTastingErrors, TastingsGetTastingResponses, TastingsListAllTastingsData, TastingsListAllTastingsErrors, TastingsListAllTastingsResponses, TastingsListTastingsData, TastingsListTastingsErrors, TastingsListTastingsResponses, TastingsUpdateTastingData, TastingsUpdateTastingErrors, TastingsUpdateTastingResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen';
+import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthReadCurrentUserData, AuthReadCurrentUserResponses, BeansCreateBeanData, BeansCreateBeanErrors, BeansCreateBeanResponses, BeansDeleteBeanData, BeansDeleteBeanErrors, BeansDeleteBeanResponses, BeansGetBeanData, BeansGetBeanErrors, BeansGetBeanResponses, BeansListBeansData, BeansListBeansErrors, BeansListBeansResponses, BeansUpdateBeanData, BeansUpdateBeanErrors, BeansUpdateBeanResponses, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodErrors, BrewMethodsCreateBrewMethodResponses, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodErrors, BrewMethodsGetBrewMethodResponses, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponses, BrewsCreateBrewData, BrewsCreateBrewErrors, BrewsCreateBrewResponses, BrewsDeleteBrewData, BrewsDeleteBrewErrors, BrewsDeleteBrewResponses, BrewsGetBrewData, BrewsGetBrewErrors, BrewsGetBrewResponses, BrewsListBrewsData, BrewsListBrewsErrors, BrewsListBrewsResponses, BrewsUpdateBrewData, BrewsUpdateBrewErrors, BrewsUpdateBrewResponses, EquipmentCreateEquipmentData, EquipmentCreateEquipmentErrors, EquipmentCreateEquipmentResponses, EquipmentGetEquipmentData, EquipmentGetEquipmentErrors, EquipmentGetEquipmentResponses, EquipmentListEquipmentData, EquipmentListEquipmentResponses, LotsCreateLotData, LotsCreateLotErrors, LotsCreateLotResponses, LotsDeleteLotData, LotsDeleteLotErrors, LotsDeleteLotResponses, LotsGetLotData, LotsGetLotErrors, LotsGetLotResponses, LotsListLotsData, LotsListLotsErrors, LotsListLotsResponses, LotsUpdateLotData, LotsUpdateLotErrors, LotsUpdateLotResponses, RoastersCreateRoasterData, RoastersCreateRoasterErrors, RoastersCreateRoasterResponses, RoastersDeleteRoasterData, RoastersDeleteRoasterErrors, RoastersDeleteRoasterResponses, RoastersGetRoasterData, RoastersGetRoasterErrors, RoastersGetRoasterResponses, RoastersListRoastersData, RoastersListRoastersResponses, RoastersMergeRoasterData, RoastersMergeRoasterErrors, RoastersMergeRoasterResponses, RoastersUpdateRoasterData, RoastersUpdateRoasterErrors, RoastersUpdateRoasterResponses, SystemHealthData, SystemHealthResponses, TastingsCreateTastingData, TastingsCreateTastingErrors, TastingsCreateTastingResponses, TastingsDeleteTastingData, TastingsDeleteTastingErrors, TastingsDeleteTastingResponses, TastingsGetTastingData, TastingsGetTastingErrors, TastingsGetTastingResponses, TastingsListAllTastingsData, TastingsListAllTastingsErrors, TastingsListAllTastingsResponses, TastingsListTastingsData, TastingsListTastingsErrors, TastingsListTastingsResponses, TastingsUpdateTastingData, TastingsUpdateTastingErrors, TastingsUpdateTastingResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -228,6 +228,69 @@ export const beansGetBean = <ThrowOnError extends boolean = false>(options: Opti
 export const beansUpdateBean = <ThrowOnError extends boolean = false>(options: Options<BeansUpdateBeanData, ThrowOnError>): RequestResult<BeansUpdateBeanResponses, BeansUpdateBeanErrors, ThrowOnError> => (options.client ?? client).patch<BeansUpdateBeanResponses, BeansUpdateBeanErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/beans/{bean_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List Lots
+ *
+ * List a bean's lots (shared). Any authenticated user.
+ */
+export const lotsListLots = <ThrowOnError extends boolean = false>(options: Options<LotsListLotsData, ThrowOnError>): RequestResult<LotsListLotsResponses, LotsListLotsErrors, ThrowOnError> => (options.client ?? client).get<LotsListLotsResponses, LotsListLotsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/beans/{bean_id}/lots',
+    ...options
+});
+
+/**
+ * Create Lot
+ *
+ * Add a lot (a physical bag bought) to a bean; you are recorded as its buyer.
+ */
+export const lotsCreateLot = <ThrowOnError extends boolean = false>(options: Options<LotsCreateLotData, ThrowOnError>): RequestResult<LotsCreateLotResponses, LotsCreateLotErrors, ThrowOnError> => (options.client ?? client).post<LotsCreateLotResponses, LotsCreateLotErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/beans/{bean_id}/lots',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Lot
+ *
+ * Delete a lot. Only its buyer (or an admin) may delete it.
+ */
+export const lotsDeleteLot = <ThrowOnError extends boolean = false>(options: Options<LotsDeleteLotData, ThrowOnError>): RequestResult<LotsDeleteLotResponses, LotsDeleteLotErrors, ThrowOnError> => (options.client ?? client).delete<LotsDeleteLotResponses, LotsDeleteLotErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/lots/{lot_id}',
+    ...options
+});
+
+/**
+ * Get Lot
+ *
+ * Get a lot by id. Any authenticated user.
+ */
+export const lotsGetLot = <ThrowOnError extends boolean = false>(options: Options<LotsGetLotData, ThrowOnError>): RequestResult<LotsGetLotResponses, LotsGetLotErrors, ThrowOnError> => (options.client ?? client).get<LotsGetLotResponses, LotsGetLotErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/lots/{lot_id}',
+    ...options
+});
+
+/**
+ * Update Lot
+ *
+ * Update a lot. Only its buyer (or an admin) may edit it.
+ */
+export const lotsUpdateLot = <ThrowOnError extends boolean = false>(options: Options<LotsUpdateLotData, ThrowOnError>): RequestResult<LotsUpdateLotResponses, LotsUpdateLotErrors, ThrowOnError> => (options.client ?? client).patch<LotsUpdateLotResponses, LotsUpdateLotErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/lots/{lot_id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
