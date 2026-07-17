@@ -38,7 +38,7 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    payload = decode_token(token)
+    payload = decode_token(token, expected_type="access")
     if payload is None:
         raise credentials_exception
     subject = payload.get("sub")

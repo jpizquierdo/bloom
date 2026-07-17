@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.6;">Hi {{ username }},</p>
+<p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6;">
+  An account was created for you on Bloom, a place to track what you brew. Your username is
+  <strong>{{ username }}</strong>. Set a password to get started.
+</p>
+<p style="margin: 0 0 24px;">
+  <a href="{{ link }}" style="display: inline-block; padding: 12px 20px; background-color: #1c1917; color: #ffffff; font-size: 15px; font-weight: 500; text-decoration: none; border-radius: 8px;">Set your password</a>
+</p>
+<p style="margin: 0 0 8px; font-size: 13px; line-height: 1.6; color: #57534e;">
+  The link expires in {{ expire_minutes }} minutes. If it does, use "Forgot password?" on the
+  login page to get a fresh one.
+</p>
+<p style="margin: 0; font-size: 13px; line-height: 1.6; color: #57534e;">
+  If the button doesn't work, paste this into your browser:<br />
+  <a href="{{ link }}" style="color: #57534e; word-break: break-all;">{{ link }}</a>
+</p>
+{% endblock %}

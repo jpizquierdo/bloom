@@ -1,0 +1,9 @@
+Hi {{ username }},
+
+An account was created for you on Bloom, a place to track what you brew.
+Your username is {{ username }}. Set a password to get started:
+
+{{ link }}
+
+The link expires in {{ expire_minutes }} minutes. If it does, use "Forgot password?"
+on the login page to get a fresh one.

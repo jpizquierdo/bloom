@@ -24,10 +24,11 @@ class UserCreate(BaseModel):
         description="Login handle (unique). Lowercase letters, digits, and . _ - only.",
         examples=["barista"],
     )
-    password: str = Field(
+    password: str | None = Field(
+        default=None,
         min_length=8,
         max_length=128,
-        description="Plaintext password (8-128 chars); stored hashed.",
+        description="Plaintext password (8-128 chars); stored hashed. Omit to email the user an invite so they set their own.",
         examples=["s3cure-passw0rd"],
     )
 
@@ -47,6 +48,24 @@ class UserUpdate(BaseModel):
     is_active: bool | None = Field(default=None, description="Activate or deactivate the account.", examples=[False])
 
     _no_null = reject_null("username", "role", "is_active")
+
+
+class RecoverPassword(BaseModel):
+    """Payload for requesting a password-reset link."""
+
+    email: EmailStr = Field(description="Email address of the account to recover.", examples=["barista@example.com"])
+
+
+class ResetPassword(BaseModel):
+    """Payload for spending a reset token on a new password."""
+
+    token: str = Field(description="Token from the emailed reset link.", examples=["eyJhbGciOiJIUzI1Ni..."])
+    new_password: str = Field(
+        min_length=8,
+        max_length=128,
+        description="The new plaintext password (8-128 chars); stored hashed.",
+        examples=["s3cure-passw0rd"],
+    )
 
 
 class AuthorRead(BaseModel):

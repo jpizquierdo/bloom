@@ -51,15 +51,27 @@ Settings come from environment variables or a local `.env` (copy `.env.example`)
 | `POSTGRES_SERVER` / `POSTGRES_PORT` / `POSTGRES_DB` | Postgres host, port and database (default `localhost` / `5432` / `bloom`). |
 | `JWT_SECRET` | Access-token signing key — **set a strong value in production**. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Access-token lifetime (default 60). |
+| `RESET_TOKEN_EXPIRE_MINUTES` | Lifetime of a password-reset link (default 30). |
+| `SMTP_HOST` / `SMTP_PORT` | Outgoing mail server (default port `587`). Leave the host blank to disable sending — links are written to the log instead. |
+| `SMTP_USER` / `SMTP_PASSWORD` | SMTP credentials, if the server needs them. |
+| `SMTP_TLS` / `SMTP_SSL` | STARTTLS (default `true`, port 587) or implicit TLS (`SMTP_SSL=true`, port 465). |
+| `EMAILS_FROM_EMAIL` / `EMAILS_FROM_NAME` | Sender address and display name (default name `Bloom`). Mail is only sent once the address is set. |
 | `LOG_LEVEL` | Logging level for the `bloom` logger (default `INFO`). |
-| `FRONTEND_HOST` | Origin of the Vite dev server, allowed by CORS (default `http://localhost:5173`). Not needed in production: the image serves the UI from the API's own origin. |
+| `FRONTEND_HOST` | Origin of the Vite dev server, allowed by CORS (default `http://localhost:5173`). Also the base of the links in outgoing emails, so set it to your public URL in production. |
 | `BACKEND_CORS_ORIGINS` | Comma-separated list of extra browser origins allowed by CORS. |
 | `BLOOM_ADMIN_EMAIL` / `BLOOM_ADMIN_PASSWORD` | First admin, bootstrapped on startup if absent. |
 
 ## Authentication
 
 There is no public sign-up. The first admin is bootstrapped from the env vars above; admins
-create further users (default role `user`) via `POST /users`.
+create further users (default role `user`) via `POST /users`. New users are emailed a link to
+set their own password, so the admin never has to invent one — omit `password` and that link
+is the only way in.
+
+Users who forget their password recover it themselves from **Forgot password?** on the login
+page (`POST /auth/recover-password` → `POST /auth/reset-password`). Reset links expire after
+`RESET_TOKEN_EXPIRE_MINUTES` and work only once. Both need SMTP configured; without it the app
+runs fine and logs the links instead of mailing them.
 
 ```bash
 # Get a token (OAuth2 password flow; the username field takes an email or a handle)
@@ -70,6 +82,12 @@ curl -s -X POST http://localhost:8000/api/v1/auth/token \
 curl http://localhost:8000/api/v1/auth/me -H "Authorization: Bearer <token>"
 ```
 
+### Email in development
+
+`docker/docker-compose.yml` ships [Mailpit](https://mailpit.axllent.org/): it accepts
+everything on port 1025 and delivers nothing, so you can read the real rendered mail at
+<http://localhost:8025>. The templates live in `bloom/templates/email/`.
+
 ## API overview
 
 Everything is served under `/api/v1` (`/health` stays at the root, for container healthchecks).
@@ -78,7 +96,7 @@ explore the API.
 
 | Area | Endpoints |
 |------|-----------|
-| Auth | `POST /auth/token`, `GET /auth/me` |
+| Auth | `POST /auth/token`, `GET /auth/me`, `POST /auth/recover-password`, `POST /auth/reset-password` |
 | Users (admin) | `POST /users`, `GET /users`, `PATCH /users/{id}` |
 | Beans | `POST/GET /beans` (`?mine=true`), `GET/PATCH/DELETE /beans/{id}` |
 | Lots | `POST/GET /beans/{id}/lots`, `GET/PATCH/DELETE /lots/{id}` |
@@ -138,8 +156,8 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the data model, the
 ## Status
 
 Backend API and data layer are implemented (users/auth, beans, lots, brews, tastings, lookups),
-and the web UI covers all of them. Sign-up and password reset do not exist yet: the UI shows
-those screens but leaves them inert, and admins create accounts.
+and the web UI covers all of them. Password reset works over email; sign-up does not exist yet
+(the UI shows that screen but leaves it inert), and admins create accounts.
 
 ## License
 

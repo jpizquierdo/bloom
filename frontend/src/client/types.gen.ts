@@ -814,6 +814,52 @@ export type HttpValidationError = {
 };
 
 /**
+ * Message
+ *
+ * A human-readable outcome, for endpoints with nothing else to return.
+ */
+export type Message = {
+    /**
+     * Message
+     */
+    message: string;
+};
+
+/**
+ * RecoverPassword
+ *
+ * Payload for requesting a password-reset link.
+ */
+export type RecoverPassword = {
+    /**
+     * Email
+     *
+     * Email address of the account to recover.
+     */
+    email: string;
+};
+
+/**
+ * ResetPassword
+ *
+ * Payload for spending a reset token on a new password.
+ */
+export type ResetPassword = {
+    /**
+     * Token
+     *
+     * Token from the emailed reset link.
+     */
+    token: string;
+    /**
+     * New Password
+     *
+     * The new plaintext password (8-128 chars); stored hashed.
+     */
+    new_password: string;
+};
+
+/**
  * RoasterCreate
  */
 export type RoasterCreate = {
@@ -1198,9 +1244,9 @@ export type UserCreate = {
     /**
      * Password
      *
-     * Plaintext password (8-128 chars); stored hashed.
+     * Plaintext password (8-128 chars); stored hashed. Omit to email the user an invite so they set their own.
      */
-    password: string;
+    password?: string | null;
 };
 
 /**
@@ -1333,6 +1379,56 @@ export type AuthLoginResponses = {
 };
 
 export type AuthLoginResponse = AuthLoginResponses[keyof AuthLoginResponses];
+
+export type AuthRecoverPasswordData = {
+    body: RecoverPassword;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/recover-password';
+};
+
+export type AuthRecoverPasswordErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AuthRecoverPasswordError = AuthRecoverPasswordErrors[keyof AuthRecoverPasswordErrors];
+
+export type AuthRecoverPasswordResponses = {
+    /**
+     * Successful Response
+     */
+    202: Message;
+};
+
+export type AuthRecoverPasswordResponse = AuthRecoverPasswordResponses[keyof AuthRecoverPasswordResponses];
+
+export type AuthResetPasswordData = {
+    body: ResetPassword;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/reset-password';
+};
+
+export type AuthResetPasswordErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AuthResetPasswordError = AuthResetPasswordErrors[keyof AuthResetPasswordErrors];
+
+export type AuthResetPasswordResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type AuthResetPasswordResponse = AuthResetPasswordResponses[keyof AuthResetPasswordResponses];
 
 export type AuthReadCurrentUserData = {
     body?: never;

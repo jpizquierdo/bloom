@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Bloom",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "paths": {
     "/health": {
@@ -56,6 +56,90 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/recover-password": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Recover Password",
+        "description": "Email a password-reset link. Public.\n\nAlways answers 202 with the same message, whether or not the address has an account,\nso it cannot be used to discover who is registered.",
+        "operationId": "auth-recover_password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoverPassword"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/reset-password": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Reset Password",
+        "description": "Set a new password using a token from a reset email. Public; the token is single-use.",
+        "operationId": "auth-reset_password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPassword"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
                 }
               }
             }
@@ -135,7 +219,7 @@
           "users"
         ],
         "summary": "Create User",
-        "description": "Create a new user (role 'user'). Admin-only.",
+        "description": "Create a new user (role 'user'). Admin-only.\n\nEmails them a welcome message with a link to set their own password; omitting\n``password`` makes that link the only way in.",
         "operationId": "users-create_user",
         "requestBody": {
           "content": {
@@ -3697,6 +3781,71 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "Message": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "examples": [
+              "If that email is registered, a reset link is on its way."
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "Message",
+        "description": "A human-readable outcome, for endpoints with nothing else to return."
+      },
+      "RecoverPassword": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Email address of the account to recover.",
+            "examples": [
+              "barista@example.com"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "RecoverPassword",
+        "description": "Payload for requesting a password-reset link."
+      },
+      "ResetPassword": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "description": "Token from the emailed reset link.",
+            "examples": [
+              "eyJhbGciOiJIUzI1Ni..."
+            ]
+          },
+          "new_password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "New Password",
+            "description": "The new plaintext password (8-128 chars); stored hashed.",
+            "examples": [
+              "s3cure-passw0rd"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "new_password"
+        ],
+        "title": "ResetPassword",
+        "description": "Payload for spending a reset token on a new password."
+      },
       "RoasterCreate": {
         "properties": {
           "country": {
@@ -4564,11 +4713,18 @@
             ]
           },
           "password": {
-            "type": "string",
-            "maxLength": 128,
-            "minLength": 8,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Password",
-            "description": "Plaintext password (8-128 chars); stored hashed.",
+            "description": "Plaintext password (8-128 chars); stored hashed. Omit to email the user an invite so they set their own.",
             "examples": [
               "s3cure-passw0rd"
             ]
@@ -4577,8 +4733,7 @@
         "type": "object",
         "required": [
           "email",
-          "username",
-          "password"
+          "username"
         ],
         "title": "UserCreate",
         "description": "Payload for creating a user (admin-only). New users default to role 'user'."

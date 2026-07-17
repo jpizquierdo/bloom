@@ -42,7 +42,9 @@ bloom/
 │   ├── core/                  # cross-cutting concerns
 │   │   ├── config.py          # settings (pydantic-settings, reads env/.env)
 │   │   ├── security.py        # argon2 password hashing, JWT create/verify
+│   │   ├── email.py           # SMTP delivery + Jinja rendering
 │   │   └── dependencies.py    # FastAPI deps: get_db, get_current_user, require_admin
+│   ├── templates/email/       # Jinja templates for the transactional emails
 │   ├── db/
 │   │   ├── base.py            # SQLAlchemy DeclarativeBase
 │   │   ├── session.py         # engine + session factory
@@ -57,6 +59,7 @@ bloom/
 │   │   ├── users.py  beans.py  brews.py  tastings.py  lookups.py
 │   ├── services/              # business logic orchestrating repos + domain
 │   │   ├── auth_service.py    users_service.py  bean_service.py
+│   │   ├── email_service.py   # composes the emails; delivery lives in core/email.py
 │   │   ├── brew_service.py    tasting_service.py  lookups_service.py
 │   │   ├── access.py          # ownership helper (owns_or_admin)
 │   │   └── errors.py          # NotFoundError (framework-agnostic)
@@ -124,7 +127,8 @@ Design points:
 - **Users are soft-deleted** via an `is_active` flag — never hard-deleted — so history is
   always preserved.
 - Auth is JWT via the OAuth2 password flow (access token only). Passwords are hashed with
-  **argon2id**, never stored in plain text.
+  **argon2id**, never stored in plain text. Users recover a forgotten password by email
+  (decision 21); admins can create an account without choosing a password at all.
 
 ---
 
@@ -385,11 +389,44 @@ The API returns whole tables (no `limit`/`offset` anywhere), so the UI sorts and
 already has. This is honest for a household-sized log and wrong at scale; the day a list gets
 long, pagination is a backend change first and the tables follow.
 
+### 21 — Password resets are stateless tokens, not a table
+
+A reset link carries a JWT rather than a row in a `password_reset_token` table: the signing key
+already exists, and a self-hosted instance gains little from being able to list or revoke
+pending resets. Two properties that a token table would have given for free have to be bought
+back explicitly:
+
+- **A reset token is not an access token.** Every JWT carries a `type` claim (`access` /
+  `reset`) and `decode_token` demands the expected one, so a link mailed to an inbox cannot be
+  turned around and used as a bearer credential — and a stolen access token cannot change a
+  password. Without the claim the two are interchangeable, since both are just a signed `sub`.
+- **A reset token is single-use.** `user.password_changed_at` is stamped on every password
+  change, and a token whose issue time predates it is refused. Spending a link therefore
+  invalidates it, and it also invalidates every older link for that user.
+
+The issue time is compared at **millisecond** precision via a private `iat_ms` claim, because
+the standard `iat` is whole seconds — too coarse here. An invite mints its token in the same
+request that creates the row, so a second-granularity comparison sees the token as older than
+the account's `password_changed_at` and refuses it on first use. Both timestamps come from the
+app clock (the column's Python-side default, not the DB `now()`) so they are comparable.
+
+Mail is sent from a FastAPI `BackgroundTask`, keeping the SMTP round-trip off the request path;
+the route does that wiring so `email_service` stays framework-agnostic. Delivery uses stdlib
+`smtplib` — the app is sync throughout, and a mail library would have added an async stack for
+two templates. With no SMTP host configured, links are logged instead of sent, so the app boots
+and the tests run with no mail config at all.
+
+`POST /auth/recover-password` always answers `202` with the same body, whether or not the
+address is registered, so it cannot be used to enumerate accounts. It is not rate-limited:
+real limiting needs shared state across workers, which is infrastructure this project does not
+otherwise have.
+
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
 - **First admin via env vars on startup**; further accounts are admin-created and default
-  to `user` (no public registration).
+  to `user` (no public registration), and are invited by email.
 - **JWT / OAuth2 password flow**, access token only; passwords hashed with argon2id.
+- **Password reset by emailed link**, stateless and single-use (decision 21).
 - **Shared read across the instance**; **each row edited/deleted only by its creator** (or an
   admin), tracked by `bean.user_id` / `bean_lot.user_id` / `brew.user_id` / `tasting.user_id`.
 - **Soft-delete** of users (`is_active`) instead of hard deletion.

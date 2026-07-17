@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, CheckConstraint, DateTime, Index, Integer, Text, func, text
@@ -34,6 +34,12 @@ class User(Base):
     # supplied by the IdP (Keycloak/Authentik) once automated provisioning lands.
     username: Mapped[str] = mapped_column(Text, nullable=False)
     hashed_password: Mapped[str] = mapped_column(Text, nullable=False)
+    # Bumped on every password change; a reset token issued before it is refused, which is
+    # what makes a reset link single-use. Stamped from the app clock, the same one that
+    # signs the tokens it is compared against — the server_default only backfills old rows.
+    password_changed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC), server_default=func.now()
+    )
     role: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("'user'"))
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
