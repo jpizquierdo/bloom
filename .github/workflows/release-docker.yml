@@ -21,12 +21,24 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Extract release version
-        id: get_version
+      - name: Compute image tags
+        id: tags
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "MINOR_VERSION=$(echo $VERSION | cut -d '.' -f1,2)" >> $GITHUB_ENV
+          # Always tag the exact version. A prerelease (e.g. v0.3.0-rc1) stops
+          # there — it must not move the floating `latest` or minor tags that
+          # point at the newest stable release.
+          TAGS="jpizquierdo/bloom:${VERSION}"
+          if [ "${{ github.event.release.prerelease }}" != "true" ]; then
+            MINOR_VERSION=$(echo "$VERSION" | cut -d '.' -f1,2)
+            TAGS="${TAGS}"$'\n'"jpizquierdo/bloom:${MINOR_VERSION}"
+            TAGS="${TAGS}"$'\n'"jpizquierdo/bloom:latest"
+          fi
+          {
+            echo "tags<<EOF"
+            echo "$TAGS"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -34,7 +46,4 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: |
-            jpizquierdo/bloom:${{ env.VERSION }}
-            jpizquierdo/bloom:${{ env.MINOR_VERSION }}
-            jpizquierdo/bloom:latest
+          tags: ${{ steps.tags.outputs.tags }}
