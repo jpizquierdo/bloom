@@ -45,6 +45,9 @@ services:
       SMTP_PORT: 1025
       SMTP_TLS: "false"
       EMAILS_FROM_EMAIL: bloom@example.com
+      # The image serves UI + API on the same port, so email links must point here,
+      # not at the Vite dev server. In production set this to your public URL.
+      FRONTEND_HOST: http://localhost:8000
     ports:
       # The image serves the web UI and the API together: http://localhost:8000
       - "8000:8000"
