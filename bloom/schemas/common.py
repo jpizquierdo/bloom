@@ -2,7 +2,13 @@
 
 from typing import Any
 
-from pydantic import field_validator
+from pydantic import BaseModel, Field, field_validator
+
+
+class Message(BaseModel):
+    """A human-readable outcome, for endpoints with nothing else to return."""
+
+    message: str = Field(examples=["If that email is registered, a reset link is on its way."])
 
 
 def reject_null(*fields: str) -> Any:

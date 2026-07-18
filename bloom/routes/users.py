@@ -1,23 +1,32 @@
 """User-management routes (admin-only). No public self-registration."""
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
 from bloom.core.dependencies import AdminUser, DbSession
+from bloom.core.security import create_password_reset_token
 from bloom.repositories import users as users_repo
 from bloom.schemas.user import UserCreate, UserRead, UserUpdate
-from bloom.services import users_service
+from bloom.services import email_service, users_service
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-def create_user(data: UserCreate, db: DbSession, _admin: AdminUser) -> UserRead:
-    """Create a new user (role 'user'). Admin-only."""
+def create_user(data: UserCreate, db: DbSession, background_tasks: BackgroundTasks, _admin: AdminUser) -> UserRead:
+    """Create a new user (role 'user'). Admin-only.
+
+    Emails them a welcome message with a link to set their own password; omitting
+    ``password`` makes that link the only way in.
+    """
     if users_repo.get_by_email(db, data.email) is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
     if users_repo.get_by_username(db, data.username) is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already taken")
-    return users_service.create_user(db, email=data.email, username=data.username, password=data.password)
+
+    user = users_service.create_user(db, email=data.email, username=data.username, password=data.password)
+    token = create_password_reset_token(str(user.id))
+    background_tasks.add_task(email_service.send_new_account_email, email=user.email, username=user.username, token=token)
+    return user
 
 
 @router.get("", response_model=list[UserRead])

@@ -16,8 +16,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  mailpit:
+    image: axllent/mailpit:v1.21
+    container_name: bloom-mailpit
+    restart: unless-stopped
+    ports:
+      # Web UI at http://localhost:8025 — every email the app sends lands here.
+      - "8025:8025"
+      - "1025:1025"
+
   bloom:
-    image: jpizquierdo/bloom:0.2.0
+    image: jpizquierdo/bloom:0.3.0
     container_name: bloom-core
     restart: unless-stopped
     depends_on:
@@ -30,6 +39,12 @@ services:
       POSTGRES_USER: bloom
       POSTGRES_PASSWORD: bloom
       POSTGRES_SERVER: db
+      # Catch outgoing mail locally instead of delivering it. Point these at a real
+      # SMTP server (in .env) to send for real.
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_TLS: "false"
+      EMAILS_FROM_EMAIL: bloom@example.com
     ports:
       # The image serves the web UI and the API together: http://localhost:8000
       - "8000:8000"

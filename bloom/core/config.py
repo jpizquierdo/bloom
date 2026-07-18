@@ -42,8 +42,20 @@ class Settings(BaseSettings):
     JWT_SECRET: str = "change-me-in-production"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    RESET_TOKEN_EXPIRE_MINUTES: int = 30
 
     LOG_LEVEL: str = "INFO"
+
+    # Outgoing mail. With SMTP_HOST unset the app still boots and password-reset links are
+    # written to the log instead of being sent.
+    SMTP_HOST: str | None = None
+    SMTP_PORT: int = 587
+    SMTP_USER: str | None = None
+    SMTP_PASSWORD: str | None = None
+    SMTP_TLS: bool = True
+    SMTP_SSL: bool = False
+    EMAILS_FROM_EMAIL: str | None = None
+    EMAILS_FROM_NAME: str = "Bloom"
 
     FRONTEND_HOST: str = "http://localhost:5173"
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
@@ -51,6 +63,12 @@ class Settings(BaseSettings):
     # Leave empty to skip the first-admin bootstrap.
     BLOOM_ADMIN_EMAIL: str | None = None
     BLOOM_ADMIN_PASSWORD: str | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def emails_enabled(self) -> bool:
+        """True when there is enough SMTP configuration to actually send mail."""
+        return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)
 
     @computed_field  # type: ignore[prop-decorator]
     @property

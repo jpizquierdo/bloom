@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { isAdmin, useCurrentUser } from "@/lib/auth"
-import { formatDate } from "@/lib/format"
+import { formatDate, stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -51,7 +51,8 @@ const username = z
 const createSchema = z.object({
   email: z.email("Enter a valid email address"),
   username,
-  password: z.string().min(8, "At least 8 characters").max(128),
+  // Blank means "don't set one": stripEmpty drops the key and the API mails an invite.
+  password: z.union([z.literal(""), z.string().min(8, "At least 8 characters").max(128)]),
 })
 
 const editSchema = z.object({
@@ -183,10 +184,12 @@ function UsersPage() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         title="New user"
-        description="They log in with this password; there is no way to reset it yet."
+        description="They get a welcome email with a link to set their own password."
         form={createForm}
         onSubmit={(values) =>
-          submitAndClose(create.mutateAsync({ body: values }), () => setCreateOpen(false))
+          submitAndClose(create.mutateAsync({ body: stripEmpty(values) as CreateValues }), () =>
+            setCreateOpen(false),
+          )
         }
         isPending={create.isPending}
         submitLabel="Create user"
@@ -223,11 +226,14 @@ function UsersPage() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Password (optional)</FormLabel>
               <FormControl>
                 <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
-              <FormDescription>At least 8 characters.</FormDescription>
+              <FormDescription>
+                Leave blank to let them choose their own from the welcome email. At least 8
+                characters otherwise.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

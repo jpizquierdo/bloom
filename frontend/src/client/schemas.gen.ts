@@ -1915,6 +1915,74 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
+export const MessageSchema = {
+    properties: {
+        message: {
+            type: 'string',
+            title: 'Message',
+            examples: [
+                'If that email is registered, a reset link is on its way.'
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'message'
+    ],
+    title: 'Message',
+    description: 'A human-readable outcome, for endpoints with nothing else to return.'
+} as const;
+
+export const RecoverPasswordSchema = {
+    properties: {
+        email: {
+            type: 'string',
+            format: 'email',
+            title: 'Email',
+            description: 'Email address of the account to recover.',
+            examples: [
+                'barista@example.com'
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'email'
+    ],
+    title: 'RecoverPassword',
+    description: 'Payload for requesting a password-reset link.'
+} as const;
+
+export const ResetPasswordSchema = {
+    properties: {
+        token: {
+            type: 'string',
+            title: 'Token',
+            description: 'Token from the emailed reset link.',
+            examples: [
+                'eyJhbGciOiJIUzI1Ni...'
+            ]
+        },
+        new_password: {
+            type: 'string',
+            maxLength: 128,
+            minLength: 8,
+            title: 'New Password',
+            description: 'The new plaintext password (8-128 chars); stored hashed.',
+            examples: [
+                's3cure-passw0rd'
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'token',
+        'new_password'
+    ],
+    title: 'ResetPassword',
+    description: 'Payload for spending a reset token on a new password.'
+} as const;
+
 export const RoasterCreateSchema = {
     properties: {
         country: {
@@ -2790,11 +2858,18 @@ export const UserCreateSchema = {
             ]
         },
         password: {
-            type: 'string',
-            maxLength: 128,
-            minLength: 8,
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 128,
+                    minLength: 8
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Password',
-            description: 'Plaintext password (8-128 chars); stored hashed.',
+            description: 'Plaintext password (8-128 chars); stored hashed. Omit to email the user an invite so they set their own.',
             examples: [
                 's3cure-passw0rd'
             ]
@@ -2803,8 +2878,7 @@ export const UserCreateSchema = {
     type: 'object',
     required: [
         'email',
-        'username',
-        'password'
+        'username'
     ],
     title: 'UserCreate',
     description: 'Payload for creating a user (admin-only). New users default to role \'user\'.'

@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, type Options as Options2, type RequestResult, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthReadCurrentUserData, AuthReadCurrentUserResponses, BeansCreateBeanData, BeansCreateBeanErrors, BeansCreateBeanResponses, BeansDeleteBeanData, BeansDeleteBeanErrors, BeansDeleteBeanResponses, BeansGetBeanData, BeansGetBeanErrors, BeansGetBeanResponses, BeansListBeansData, BeansListBeansErrors, BeansListBeansResponses, BeansUpdateBeanData, BeansUpdateBeanErrors, BeansUpdateBeanResponses, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodErrors, BrewMethodsCreateBrewMethodResponses, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodErrors, BrewMethodsGetBrewMethodResponses, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponses, BrewsCreateBrewData, BrewsCreateBrewErrors, BrewsCreateBrewResponses, BrewsDeleteBrewData, BrewsDeleteBrewErrors, BrewsDeleteBrewResponses, BrewsGetBrewData, BrewsGetBrewErrors, BrewsGetBrewResponses, BrewsListBrewsData, BrewsListBrewsErrors, BrewsListBrewsResponses, BrewsUpdateBrewData, BrewsUpdateBrewErrors, BrewsUpdateBrewResponses, EquipmentCreateEquipmentData, EquipmentCreateEquipmentErrors, EquipmentCreateEquipmentResponses, EquipmentGetEquipmentData, EquipmentGetEquipmentErrors, EquipmentGetEquipmentResponses, EquipmentListEquipmentData, EquipmentListEquipmentResponses, LotsCreateLotData, LotsCreateLotErrors, LotsCreateLotResponses, LotsDeleteLotData, LotsDeleteLotErrors, LotsDeleteLotResponses, LotsGetLotData, LotsGetLotErrors, LotsGetLotResponses, LotsListLotsData, LotsListLotsErrors, LotsListLotsResponses, LotsUpdateLotData, LotsUpdateLotErrors, LotsUpdateLotResponses, RoastersCreateRoasterData, RoastersCreateRoasterErrors, RoastersCreateRoasterResponses, RoastersDeleteRoasterData, RoastersDeleteRoasterErrors, RoastersDeleteRoasterResponses, RoastersGetRoasterData, RoastersGetRoasterErrors, RoastersGetRoasterResponses, RoastersListRoastersData, RoastersListRoastersResponses, RoastersMergeRoasterData, RoastersMergeRoasterErrors, RoastersMergeRoasterResponses, RoastersUpdateRoasterData, RoastersUpdateRoasterErrors, RoastersUpdateRoasterResponses, SystemHealthData, SystemHealthResponses, TastingsCreateTastingData, TastingsCreateTastingErrors, TastingsCreateTastingResponses, TastingsDeleteTastingData, TastingsDeleteTastingErrors, TastingsDeleteTastingResponses, TastingsGetTastingData, TastingsGetTastingErrors, TastingsGetTastingResponses, TastingsListAllTastingsData, TastingsListAllTastingsErrors, TastingsListAllTastingsResponses, TastingsListTastingsData, TastingsListTastingsErrors, TastingsListTastingsResponses, TastingsUpdateTastingData, TastingsUpdateTastingErrors, TastingsUpdateTastingResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen';
+import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthReadCurrentUserData, AuthReadCurrentUserResponses, AuthRecoverPasswordData, AuthRecoverPasswordErrors, AuthRecoverPasswordResponses, AuthResetPasswordData, AuthResetPasswordErrors, AuthResetPasswordResponses, BeansCreateBeanData, BeansCreateBeanErrors, BeansCreateBeanResponses, BeansDeleteBeanData, BeansDeleteBeanErrors, BeansDeleteBeanResponses, BeansGetBeanData, BeansGetBeanErrors, BeansGetBeanResponses, BeansListBeansData, BeansListBeansErrors, BeansListBeansResponses, BeansUpdateBeanData, BeansUpdateBeanErrors, BeansUpdateBeanResponses, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodErrors, BrewMethodsCreateBrewMethodResponses, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodErrors, BrewMethodsGetBrewMethodResponses, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponses, BrewsCreateBrewData, BrewsCreateBrewErrors, BrewsCreateBrewResponses, BrewsDeleteBrewData, BrewsDeleteBrewErrors, BrewsDeleteBrewResponses, BrewsGetBrewData, BrewsGetBrewErrors, BrewsGetBrewResponses, BrewsListBrewsData, BrewsListBrewsErrors, BrewsListBrewsResponses, BrewsUpdateBrewData, BrewsUpdateBrewErrors, BrewsUpdateBrewResponses, EquipmentCreateEquipmentData, EquipmentCreateEquipmentErrors, EquipmentCreateEquipmentResponses, EquipmentGetEquipmentData, EquipmentGetEquipmentErrors, EquipmentGetEquipmentResponses, EquipmentListEquipmentData, EquipmentListEquipmentResponses, LotsCreateLotData, LotsCreateLotErrors, LotsCreateLotResponses, LotsDeleteLotData, LotsDeleteLotErrors, LotsDeleteLotResponses, LotsGetLotData, LotsGetLotErrors, LotsGetLotResponses, LotsListLotsData, LotsListLotsErrors, LotsListLotsResponses, LotsUpdateLotData, LotsUpdateLotErrors, LotsUpdateLotResponses, RoastersCreateRoasterData, RoastersCreateRoasterErrors, RoastersCreateRoasterResponses, RoastersDeleteRoasterData, RoastersDeleteRoasterErrors, RoastersDeleteRoasterResponses, RoastersGetRoasterData, RoastersGetRoasterErrors, RoastersGetRoasterResponses, RoastersListRoastersData, RoastersListRoastersResponses, RoastersMergeRoasterData, RoastersMergeRoasterErrors, RoastersMergeRoasterResponses, RoastersUpdateRoasterData, RoastersUpdateRoasterErrors, RoastersUpdateRoasterResponses, SystemHealthData, SystemHealthResponses, TastingsCreateTastingData, TastingsCreateTastingErrors, TastingsCreateTastingResponses, TastingsDeleteTastingData, TastingsDeleteTastingErrors, TastingsDeleteTastingResponses, TastingsGetTastingData, TastingsGetTastingErrors, TastingsGetTastingResponses, TastingsListAllTastingsData, TastingsListAllTastingsErrors, TastingsListAllTastingsResponses, TastingsListTastingsData, TastingsListTastingsErrors, TastingsListTastingsResponses, TastingsUpdateTastingData, TastingsUpdateTastingErrors, TastingsUpdateTastingResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -41,6 +41,37 @@ export const authLogin = <ThrowOnError extends boolean = false>(options: Options
 });
 
 /**
+ * Recover Password
+ *
+ * Email a password-reset link. Public.
+ *
+ * Always answers 202 with the same message, whether or not the address has an account,
+ * so it cannot be used to discover who is registered.
+ */
+export const authRecoverPassword = <ThrowOnError extends boolean = false>(options: Options<AuthRecoverPasswordData, ThrowOnError>): RequestResult<AuthRecoverPasswordResponses, AuthRecoverPasswordErrors, ThrowOnError> => (options.client ?? client).post<AuthRecoverPasswordResponses, AuthRecoverPasswordErrors, ThrowOnError>({
+    url: '/api/v1/auth/recover-password',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reset Password
+ *
+ * Set a new password using a token from a reset email. Public; the token is single-use.
+ */
+export const authResetPassword = <ThrowOnError extends boolean = false>(options: Options<AuthResetPasswordData, ThrowOnError>): RequestResult<AuthResetPasswordResponses, AuthResetPasswordErrors, ThrowOnError> => (options.client ?? client).post<AuthResetPasswordResponses, AuthResetPasswordErrors, ThrowOnError>({
+    url: '/api/v1/auth/reset-password',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Read Current User
  *
  * Return the authenticated user's profile.
@@ -66,6 +97,9 @@ export const usersListUsers = <ThrowOnError extends boolean = false>(options?: O
  * Create User
  *
  * Create a new user (role 'user'). Admin-only.
+ *
+ * Emails them a welcome message with a link to set their own password; omitting
+ * ``password`` makes that link the only way in.
  */
 export const usersCreateUser = <ThrowOnError extends boolean = false>(options: Options<UsersCreateUserData, ThrowOnError>): RequestResult<UsersCreateUserResponses, UsersCreateUserErrors, ThrowOnError> => (options.client ?? client).post<UsersCreateUserResponses, UsersCreateUserErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
