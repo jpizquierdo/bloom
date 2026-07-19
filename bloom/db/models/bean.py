@@ -11,8 +11,10 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    SmallInteger,
     Text,
     func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -42,6 +44,15 @@ class Bean(Base):
             "roast_level IN ('light', 'medium_light', 'medium', 'medium_dark', 'dark')",
             name="ck_bean_roast_level",
         ),
+        CheckConstraint(
+            "roast_type IN ('filter', 'espresso', 'omni', 'unknown')",
+            name="ck_bean_roast_type",
+        ),
+        CheckConstraint(
+            "blend IN ('single_origin', 'blend', 'unknown')",
+            name="ck_bean_blend",
+        ),
+        CheckConstraint("rating BETWEEN 1 AND 5", name="ck_bean_rating_range"),
         Index("idx_bean_roaster_id", "roaster_id"),
         Index("idx_bean_user_id", "user_id"),
     )
@@ -59,8 +70,14 @@ class Bean(Base):
     variety: Mapped[str | None] = mapped_column(Text)
     process: Mapped[str | None] = mapped_column(Text)
     roast_level: Mapped[str | None] = mapped_column(Text)
+    # Brewing intent this coffee is roasted for.
+    roast_type: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("'unknown'"))
+    blend: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("'single_origin'"))
     altitude_masl: Mapped[int | None] = mapped_column(Integer)
     tasting_notes_label: Mapped[str | None] = mapped_column(Text)
+    # Overall rating of the coffee itself (null = unrated), independent of any brew's tasting.
+    rating: Mapped[int | None] = mapped_column(SmallInteger)
+    website: Mapped[str | None] = mapped_column(Text)
     notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 

@@ -11,6 +11,10 @@ export const PROCESSES = [
 
 export const ROAST_LEVELS = ["light", "medium_light", "medium", "medium_dark", "dark"] as const
 
+export const ROAST_TYPES = ["filter", "espresso", "omni", "unknown"] as const
+
+export const BLENDS = ["single_origin", "blend", "unknown"] as const
+
 export const BREW_CATEGORIES = ["espresso", "filter", "immersion"] as const
 
 export const EQUIPMENT_TYPES = ["grinder", "espresso_machine", "kettle", "other"] as const

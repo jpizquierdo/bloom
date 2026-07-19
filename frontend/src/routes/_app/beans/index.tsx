@@ -29,9 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { StarRating } from "@/components/ui/star-rating"
 import { Textarea } from "@/components/ui/textarea"
 import { canEdit, useCurrentUser } from "@/lib/auth"
-import { PROCESSES, ROAST_LEVELS } from "@/lib/domain"
+import { BLENDS, PROCESSES, ROAST_LEVELS, ROAST_TYPES } from "@/lib/domain"
 import { humanize, stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -56,8 +57,12 @@ const schema = z.object({
   variety: z.string(),
   process: z.enum(PROCESSES).or(z.literal("")),
   roast_level: z.enum(ROAST_LEVELS).or(z.literal("")),
+  roast_type: z.enum(ROAST_TYPES),
+  blend: z.enum(BLENDS),
   altitude_masl: z.string(),
   tasting_notes_label: z.string(),
+  rating: z.number().int().min(0).max(5),
+  website: z.string(),
   notes: z.string(),
 })
 
@@ -72,19 +77,27 @@ const EMPTY: FormValues = {
   variety: "",
   process: "",
   roast_level: "",
+  roast_type: "unknown",
+  blend: "single_origin",
   altitude_masl: "",
   tasting_notes_label: "",
+  rating: 0,
+  website: "",
   notes: "",
 }
 
 /** Text inputs give strings; altitude wants a number, and empty means "absent". */
 function toPayload(values: FormValues) {
-  const { altitude_masl, process, roast_level, ...rest } = values
+  const { altitude_masl, process, roast_level, roast_type, blend, rating, ...rest } = values
   return {
     ...stripEmpty(rest),
     ...stripEmpty({ altitude_masl: altitude_masl === "" ? undefined : Number(altitude_masl) }),
     ...(process === "" ? {} : { process }),
     ...(roast_level === "" ? {} : { roast_level }),
+    roast_type,
+    blend,
+    // 0 stars means unrated — omit it (like the tasting scores) rather than send it.
+    ...(rating === 0 ? {} : { rating }),
   }
 }
 
@@ -139,8 +152,12 @@ function BeansPage() {
       variety: bean.variety ?? "",
       process: bean.process ?? "",
       roast_level: bean.roast_level ?? "",
+      roast_type: bean.roast_type ?? "unknown",
+      blend: bean.blend ?? "single_origin",
       altitude_masl: bean.altitude_masl?.toString() ?? "",
       tasting_notes_label: bean.tasting_notes_label ?? "",
+      rating: bean.rating ?? 0,
+      website: bean.website ?? "",
       notes: bean.notes ?? "",
     })
     setDialogOpen(true)
@@ -187,6 +204,16 @@ function BeansPage() {
       accessorKey: "roast_level",
       header: "Roast",
       cell: ({ row }) => humanize(row.original.roast_level),
+    },
+    {
+      accessorKey: "rating",
+      header: "Rating",
+      cell: ({ row }) =>
+        (row.original.rating ?? 0) > 0 ? (
+          <StarRating value={row.original.rating ?? 0} readOnly size={14} />
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
     },
     {
       id: "owner",
@@ -404,6 +431,54 @@ function BeansPage() {
         />
         <FormField
           control={form.control}
+          name="roast_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Roast type</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a roast type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {ROAST_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {humanize(type)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="blend"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Blend</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Single origin or blend" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {BLENDS.map((blend) => (
+                    <SelectItem key={blend} value={blend}>
+                      {humanize(blend)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="altitude_masl"
           render={({ field }) => (
             <FormItem>
@@ -424,6 +499,33 @@ function BeansPage() {
               <FormControl>
                 <Input placeholder="Blackcurrant, grapefruit" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Website</FormLabel>
+              <FormControl>
+                <Input type="url" placeholder="https://roaster.example/coffee" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="rating"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Rating</FormLabel>
+              <FormControl>
+                <StarRating value={field.value} onChange={field.onChange} aria-label="Bean rating" />
+              </FormControl>
+              <FormDescription>Leave empty if unrated.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

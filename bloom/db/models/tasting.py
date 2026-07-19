@@ -43,7 +43,7 @@ class Tasting(Base):
 
     __tablename__ = "tasting"
     __table_args__ = (
-        *(CheckConstraint(f"{column} BETWEEN 1 AND 10", name=f"ck_tasting_{column}_range") for column in _SCORE_COLUMNS),
+        *(CheckConstraint(f"{column} BETWEEN 1 AND 5", name=f"ck_tasting_{column}_range") for column in _SCORE_COLUMNS),
         Index("idx_tasting_brew_id", "brew_id"),
         Index("idx_tasting_user_id", "user_id"),
     )

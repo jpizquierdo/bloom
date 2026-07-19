@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { StarRating } from "@/components/ui/star-rating"
 import { canEdit, useCurrentUser } from "@/lib/auth"
 import { formatDate, formatDateTime, formatNumber, humanize } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
@@ -194,8 +195,35 @@ function BeanDetailPage() {
             <CardTitle>Roast &amp; notes</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Field label="Roast level" value={humanize(bean.roast_level)} />
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Roast level" value={humanize(bean.roast_level)} />
+              <Field label="Roast type" value={humanize(bean.roast_type)} />
+              <Field label="Blend" value={humanize(bean.blend)} />
+              <Field
+                label="Rating"
+                value={
+                  (bean.rating ?? 0) > 0 ? (
+                    <StarRating value={bean.rating ?? 0} readOnly size={16} />
+                  ) : null
+                }
+              />
+            </div>
             <Field label="Tasting notes (label)" value={bean.tasting_notes_label} />
+            {bean.website ? (
+              <Field
+                label="Website"
+                value={
+                  <a
+                    href={bean.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary underline-offset-4 hover:underline"
+                  >
+                    {bean.website}
+                  </a>
+                }
+              />
+            ) : null}
             {bean.notes ? <Field label="Your notes" value={bean.notes} /> : null}
           </CardContent>
         </Card>

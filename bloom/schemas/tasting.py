@@ -8,8 +8,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from bloom.schemas.common import reject_null
 from bloom.schemas.user import AuthorRead
 
-# A 1-10 subjective score (nullable), matching the DB CHECK constraints.
-Score = Annotated[int | None, Field(default=None, ge=1, le=10, description="Score from 1 to 10.", examples=[8])]
+# A 1-5 subjective score (nullable; null = unrated), matching the DB CHECK constraints.
+Score = Annotated[int | None, Field(default=None, ge=1, le=5, description="Score from 1 to 5.", examples=[4])]
 
 
 class TastingBase(BaseModel):

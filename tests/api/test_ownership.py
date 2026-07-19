@@ -12,7 +12,7 @@ def alice_stack(client, alice_headers, lookups):
         headers=alice_headers,
         json={"bean_id": bean_id, "method_id": lookups["filter"]["id"], "dose_grams": "15"},
     ).json()["id"]
-    tasting_id = client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 8}).json()["id"]
+    tasting_id = client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 4}).json()["id"]
     return {"bean": bean_id, "brew": brew_id, "tasting": tasting_id}
 
 
@@ -87,7 +87,7 @@ def test_non_author_cannot_edit_or_delete_brew(client, bob_headers, alice_stack)
 
 def test_multiple_users_can_taste_the_same_brew(client, alice_headers, bob_headers, alice_stack, users):
     # alice_stack already has alice's tasting on the brew; bob adds his own.
-    resp = client.post(f"/brews/{alice_stack['brew']}/tastings", headers=bob_headers, json={"overall": 6})
+    resp = client.post(f"/brews/{alice_stack['brew']}/tastings", headers=bob_headers, json={"overall": 4})
     assert resp.status_code == 201
     assert resp.json()["user_id"] == users["bob"].id
 

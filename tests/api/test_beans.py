@@ -20,9 +20,33 @@ def test_create_and_get_bean(client, alice_headers, users):
     for moved in ("roast_date", "purchase_date", "weight_grams", "price", "is_finished"):
         assert moved not in bean, f"{moved} should live on the lot now"
 
+    # New descriptive columns default when omitted: unknown roast type, single origin,
+    # unrated (null rating), and no website.
+    assert bean["roast_type"] == "unknown"
+    assert bean["blend"] == "single_origin"
+    assert bean["rating"] is None
+    assert bean["website"] is None
+
     got = client.get(f"/beans/{bean['id']}", headers=alice_headers)
     assert got.status_code == 200
     assert got.json()["name"] == "Kenya AA"
+
+
+def test_create_bean_with_new_fields(client, alice_headers):
+    resp = _make_bean(
+        client,
+        alice_headers,
+        roast_type="filter",
+        blend="blend",
+        rating=4,
+        website="https://nomadcoffee.es",
+    )
+    assert resp.status_code == 201
+    bean = resp.json()
+    assert bean["roast_type"] == "filter"
+    assert bean["blend"] == "blend"
+    assert bean["rating"] == 4
+    assert bean["website"] == "https://nomadcoffee.es"
 
 
 def test_creating_a_bean_creates_its_roaster_once(client, alice_headers, bob_headers):
@@ -134,15 +158,31 @@ def test_explicit_null_on_a_required_field_422(client, alice_headers):
     bean_id = _make_bean(client, alice_headers).json()["id"]
     # These columns are NOT NULL: omitting them leaves them unchanged, but sending an
     # explicit null must be a validation error, not a database failure.
-    for field in ["name", "roaster"]:
+    for field in ["name", "roaster", "roast_type", "blend"]:
         resp = client.patch(f"/beans/{bean_id}", headers=alice_headers, json={field: None})
         assert resp.status_code == 422, f"{field} accepted a null"
 
-    # A nullable field, in contrast, can still be cleared with an explicit null.
-    resp = client.patch(f"/beans/{bean_id}", headers=alice_headers, json={"notes": None})
-    assert resp.status_code == 200
-    assert resp.json()["notes"] is None
+    # Nullable fields, in contrast, can still be cleared with an explicit null — including
+    # rating (null = unrated), so a bean can be un-rated again.
+    for field in ["notes", "rating"]:
+        resp = client.patch(f"/beans/{bean_id}", headers=alice_headers, json={field: None})
+        assert resp.status_code == 200, f"{field} rejected a null"
+        assert resp.json()[field] is None
 
 
 def test_invalid_process_422(client, alice_headers):
     assert _make_bean(client, alice_headers, process="rocket-fuel").status_code == 422
+
+
+def test_invalid_roast_type_422(client, alice_headers):
+    assert _make_bean(client, alice_headers, roast_type="turbo").status_code == 422
+
+
+def test_invalid_blend_422(client, alice_headers):
+    assert _make_bean(client, alice_headers, blend="triple_origin").status_code == 422
+
+
+def test_rating_out_of_range_422(client, alice_headers):
+    # Rating is 1–5 (null = unrated); 0 and 6 are out of range.
+    assert _make_bean(client, alice_headers, rating=0).status_code == 422
+    assert _make_bean(client, alice_headers, rating=6).status_code == 422

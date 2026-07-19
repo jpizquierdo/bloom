@@ -185,7 +185,9 @@ Each decision was made explicitly.
 
 ### 1 — `bean` is the coffee concept; `bean_lot` is the physical purchase
 A `bean` is a coffee (a farm/lot from a roaster) — its stable identity: name, roaster,
-origin, variety, process, roast level, altitude, tasting notes. Each physical bag bought is a
+origin, variety, process, roast level, roast type (filter/espresso/omni), single-origin vs
+blend, altitude, tasting notes, an optional website, and an overall `rating` (1–5 stars, null =
+unrated) of the coffee itself, independent of any brew's tasting. Each physical bag bought is a
 **`bean_lot`**, carrying the per-purchase data (roast date, purchase date, weight, price,
 `is_finished`). One coffee bought several times has several lots, so brews stay aggregated
 under a single `bean` instead of scattering across a new row per bag.
@@ -223,8 +225,11 @@ records its taster (`tasting.user_id`), so several users can score the same brew
 ### 7 — `grind_setting` as `TEXT`, not numeric
 Every grinder has its own scale; a number would lose meaning across grinders.
 
-### 8 — Tasting scores as `SMALLINT` 1–10 with `CHECK`
-Enough resolution, no false precision, valid data guaranteed at the DB level.
+### 8 — Tasting scores as `SMALLINT` 1–5 with `CHECK`
+A 1–5 "stars" scale (null = unrated) matching how the UI presents them — enough
+resolution, no false precision, valid data guaranteed at the DB level. The bean's own
+`rating` (`SMALLINT`, nullable) uses the same 1–5 stars scale with null = unrated, so a
+bean can be logged now and rated later.
 
 ### 9 — `descriptors` as `TEXT[]`
 Flavor notes are a list. A controlled vocabulary (SCA flavor wheel join table) is a
