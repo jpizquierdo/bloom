@@ -63,6 +63,18 @@ export type BeanCreate = {
      */
     roast_level?: 'light' | 'medium_light' | 'medium' | 'medium_dark' | 'dark' | null;
     /**
+     * Roast Type
+     *
+     * Brewing intent this coffee is roasted for.
+     */
+    roast_type?: 'filter' | 'espresso' | 'omni' | 'unknown';
+    /**
+     * Blend
+     *
+     * Single origin or a blend.
+     */
+    blend?: 'single_origin' | 'blend' | 'unknown';
+    /**
      * Altitude Masl
      *
      * Growing altitude (metres above sea level).
@@ -74,6 +86,18 @@ export type BeanCreate = {
      * Tasting notes printed on the bag.
      */
     tasting_notes_label?: string | null;
+    /**
+     * Rating
+     *
+     * Overall rating of the coffee itself, 1–5 (null = unrated).
+     */
+    rating?: number | null;
+    /**
+     * Website
+     *
+     * URL with more info about the coffee or roaster.
+     */
+    website?: string | null;
     /**
      * Notes
      *
@@ -265,6 +289,18 @@ export type BeanRead = {
      */
     roast_level?: 'light' | 'medium_light' | 'medium' | 'medium_dark' | 'dark' | null;
     /**
+     * Roast Type
+     *
+     * Brewing intent this coffee is roasted for.
+     */
+    roast_type?: 'filter' | 'espresso' | 'omni' | 'unknown';
+    /**
+     * Blend
+     *
+     * Single origin or a blend.
+     */
+    blend?: 'single_origin' | 'blend' | 'unknown';
+    /**
      * Altitude Masl
      *
      * Growing altitude (metres above sea level).
@@ -276,6 +312,18 @@ export type BeanRead = {
      * Tasting notes printed on the bag.
      */
     tasting_notes_label?: string | null;
+    /**
+     * Rating
+     *
+     * Overall rating of the coffee itself, 1–5 (null = unrated).
+     */
+    rating?: number | null;
+    /**
+     * Website
+     *
+     * URL with more info about the coffee or roaster.
+     */
+    website?: string | null;
     /**
      * Notes
      *
@@ -353,6 +401,18 @@ export type BeanUpdate = {
      */
     roast_level?: 'light' | 'medium_light' | 'medium' | 'medium_dark' | 'dark' | null;
     /**
+     * Roast Type
+     *
+     * Brewing intent this coffee is roasted for.
+     */
+    roast_type?: 'filter' | 'espresso' | 'omni' | 'unknown' | null;
+    /**
+     * Blend
+     *
+     * Single origin or a blend.
+     */
+    blend?: 'single_origin' | 'blend' | 'unknown' | null;
+    /**
      * Altitude Masl
      *
      * Growing altitude (metres above sea level).
@@ -364,6 +424,18 @@ export type BeanUpdate = {
      * Tasting notes printed on the bag.
      */
     tasting_notes_label?: string | null;
+    /**
+     * Rating
+     *
+     * Overall rating of the coffee itself, 1–5 (null = unrated).
+     */
+    rating?: number | null;
+    /**
+     * Website
+     *
+     * URL with more info about the coffee or roaster.
+     */
+    website?: string | null;
     /**
      * Notes
      *
@@ -994,43 +1066,43 @@ export type TastingCreate = {
     /**
      * Aroma
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     aroma?: number | null;
     /**
      * Acidity
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     acidity?: number | null;
     /**
      * Sweetness
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     sweetness?: number | null;
     /**
      * Body
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     body?: number | null;
     /**
      * Bitterness
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     bitterness?: number | null;
     /**
      * Aftertaste
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     aftertaste?: number | null;
     /**
      * Overall
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     overall?: number | null;
     /**
@@ -1060,43 +1132,43 @@ export type TastingRead = {
     /**
      * Aroma
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     aroma?: number | null;
     /**
      * Acidity
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     acidity?: number | null;
     /**
      * Sweetness
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     sweetness?: number | null;
     /**
      * Body
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     body?: number | null;
     /**
      * Bitterness
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     bitterness?: number | null;
     /**
      * Aftertaste
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     aftertaste?: number | null;
     /**
      * Overall
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     overall?: number | null;
     /**
@@ -1146,43 +1218,43 @@ export type TastingUpdate = {
     /**
      * Aroma
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     aroma?: number | null;
     /**
      * Acidity
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     acidity?: number | null;
     /**
      * Sweetness
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     sweetness?: number | null;
     /**
      * Body
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     body?: number | null;
     /**
      * Bitterness
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     bitterness?: number | null;
     /**
      * Aftertaste
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     aftertaste?: number | null;
     /**
      * Overall
      *
-     * Score from 1 to 10.
+     * Score from 1 to 5.
      */
     overall?: number | null;
     /**

@@ -17,7 +17,7 @@ def test_create_and_list_tasting(client, alice_headers, brew_id):
     resp = client.post(
         f"/brews/{brew_id}/tastings",
         headers=alice_headers,
-        json={"aroma": 8, "acidity": 9, "overall": 8, "descriptors": ["floral", "citrus"]},
+        json={"aroma": 4, "acidity": 5, "overall": 4, "descriptors": ["floral", "citrus"]},
     )
     assert resp.status_code == 201
     tasting = resp.json()
@@ -31,26 +31,27 @@ def test_create_and_list_tasting(client, alice_headers, brew_id):
 def test_tasting_embeds_taster(client, bob_headers, brew_id):
     # Anyone can taste any brew; the tasting embeds its taster, who need not be
     # the brew's author (here bob tastes alice's brew).
-    resp = client.post(f"/brews/{brew_id}/tastings", headers=bob_headers, json={"overall": 7})
+    resp = client.post(f"/brews/{brew_id}/tastings", headers=bob_headers, json={"overall": 4})
     assert resp.status_code == 201
     assert resp.json()["author"]["username"] == "bob"
 
 
 def test_multiple_tastings_per_brew(client, alice_headers, brew_id):
-    client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 7})
-    client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 8})
+    client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 4})
+    client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 5})
     assert len(client.get(f"/brews/{brew_id}/tastings", headers=alice_headers).json()) == 2
 
 
 def test_score_out_of_range_rejected(client, alice_headers, brew_id):
-    assert client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"aroma": 11}).status_code == 422
+    # Scores are 1–5; 6 is over the top of the scale.
+    assert client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"aroma": 6}).status_code == 422
 
 
 def test_null_descriptors_rejected_but_scores_are_nullable(client, alice_headers, brew_id):
     tasting = client.post(
         f"/brews/{brew_id}/tastings",
         headers=alice_headers,
-        json={"aroma": 8, "descriptors": ["floral"]},
+        json={"aroma": 4, "descriptors": ["floral"]},
     ).json()
 
     # descriptors is NOT NULL (empty list, never null) — send [] to clear it.
@@ -64,4 +65,4 @@ def test_null_descriptors_rejected_but_scores_are_nullable(client, alice_headers
 
 
 def test_tasting_on_unknown_brew_404(client, alice_headers):
-    assert client.post("/brews/9999/tastings", headers=alice_headers, json={"overall": 8}).status_code == 404
+    assert client.post("/brews/9999/tastings", headers=alice_headers, json={"overall": 4}).status_code == 404

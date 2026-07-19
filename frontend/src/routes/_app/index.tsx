@@ -40,9 +40,9 @@ function DashboardPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Coffees" value={beans?.length ?? 0} icon={Bean} />
-        <Stat label="Brews" value={brews?.length ?? 0} icon={Coffee} />
-        <Stat label="Tastings" value={tastings?.length ?? 0} icon={NotebookPen} />
+        <Stat label="Coffees" value={beans?.length ?? 0} icon={Bean} to="/beans" />
+        <Stat label="Brews" value={brews?.length ?? 0} icon={Coffee} to="/brews" />
+        <Stat label="Tastings" value={tastings?.length ?? 0} icon={NotebookPen} to="/tastings" />
       </div>
 
       <Card className="mt-6">
@@ -92,14 +92,16 @@ function Stat({
   value,
   hint,
   icon: Icon,
+  to,
 }: {
   label: string
   value: number
   hint?: string
   icon: LucideIcon
+  to?: "/beans" | "/brews" | "/tastings"
 }) {
-  return (
-    <Card>
+  const card = (
+    <Card className={to ? "transition-colors hover:bg-muted/60" : undefined}>
       <CardContent className="flex items-center gap-4">
         <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
           <Icon className="size-5" />
@@ -113,5 +115,16 @@ function Stat({
         </div>
       </CardContent>
     </Card>
+  )
+
+  return to ? (
+    <Link
+      to={to}
+      className="rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+    >
+      {card}
+    </Link>
+  ) : (
+    card
   )
 }

@@ -19,6 +19,7 @@ import {
   Factory,
   LayoutDashboard,
   type LucideIcon,
+  NotebookPen,
   Settings2,
   Users,
   Wrench,
@@ -35,6 +36,7 @@ const LOG_ITEMS: NavItem[] = [
   { title: "Dashboard", to: "/", icon: LayoutDashboard },
   { title: "Beans", to: "/beans", icon: Bean },
   { title: "Brews", to: "/brews", icon: Coffee },
+  { title: "Tastings", to: "/tastings", icon: NotebookPen },
 ]
 
 const CATALOG_ITEMS: NavItem[] = [

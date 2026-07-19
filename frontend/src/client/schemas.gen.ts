@@ -134,6 +134,35 @@ export const BeanCreateSchema = {
                 'medium_light'
             ]
         },
+        roast_type: {
+            type: 'string',
+            enum: [
+                'filter',
+                'espresso',
+                'omni',
+                'unknown'
+            ],
+            title: 'Roast Type',
+            description: 'Brewing intent this coffee is roasted for.',
+            default: 'unknown',
+            examples: [
+                'filter'
+            ]
+        },
+        blend: {
+            type: 'string',
+            enum: [
+                'single_origin',
+                'blend',
+                'unknown'
+            ],
+            title: 'Blend',
+            description: 'Single origin or a blend.',
+            default: 'single_origin',
+            examples: [
+                'single_origin'
+            ]
+        },
         altitude_masl: {
             anyOf: [
                 {
@@ -162,6 +191,38 @@ export const BeanCreateSchema = {
             description: 'Tasting notes printed on the bag.',
             examples: [
                 'Peach, jasmine, black tea'
+            ]
+        },
+        rating: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    maximum: 5,
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rating',
+            description: 'Overall rating of the coffee itself, 1–5 (null = unrated).',
+            examples: [
+                4
+            ]
+        },
+        website: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Website',
+            description: 'URL with more info about the coffee or roaster.',
+            examples: [
+                'https://nomadcoffee.es'
             ]
         },
         notes: {
@@ -607,6 +668,35 @@ export const BeanReadSchema = {
                 'medium_light'
             ]
         },
+        roast_type: {
+            type: 'string',
+            enum: [
+                'filter',
+                'espresso',
+                'omni',
+                'unknown'
+            ],
+            title: 'Roast Type',
+            description: 'Brewing intent this coffee is roasted for.',
+            default: 'unknown',
+            examples: [
+                'filter'
+            ]
+        },
+        blend: {
+            type: 'string',
+            enum: [
+                'single_origin',
+                'blend',
+                'unknown'
+            ],
+            title: 'Blend',
+            description: 'Single origin or a blend.',
+            default: 'single_origin',
+            examples: [
+                'single_origin'
+            ]
+        },
         altitude_masl: {
             anyOf: [
                 {
@@ -635,6 +725,38 @@ export const BeanReadSchema = {
             description: 'Tasting notes printed on the bag.',
             examples: [
                 'Peach, jasmine, black tea'
+            ]
+        },
+        rating: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    maximum: 5,
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rating',
+            description: 'Overall rating of the coffee itself, 1–5 (null = unrated).',
+            examples: [
+                4
+            ]
+        },
+        website: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Website',
+            description: 'URL with more info about the coffee or roaster.',
+            examples: [
+                'https://nomadcoffee.es'
             ]
         },
         notes: {
@@ -810,6 +932,47 @@ export const BeanUpdateSchema = {
                 'medium_light'
             ]
         },
+        roast_type: {
+            anyOf: [
+                {
+                    type: 'string',
+                    enum: [
+                        'filter',
+                        'espresso',
+                        'omni',
+                        'unknown'
+                    ]
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Roast Type',
+            description: 'Brewing intent this coffee is roasted for.',
+            examples: [
+                'filter'
+            ]
+        },
+        blend: {
+            anyOf: [
+                {
+                    type: 'string',
+                    enum: [
+                        'single_origin',
+                        'blend',
+                        'unknown'
+                    ]
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Blend',
+            description: 'Single origin or a blend.',
+            examples: [
+                'single_origin'
+            ]
+        },
         altitude_masl: {
             anyOf: [
                 {
@@ -838,6 +1001,38 @@ export const BeanUpdateSchema = {
             description: 'Tasting notes printed on the bag.',
             examples: [
                 'Peach, jasmine, black tea'
+            ]
+        },
+        rating: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    maximum: 5,
+                    minimum: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rating',
+            description: 'Overall rating of the coffee itself, 1–5 (null = unrated).',
+            examples: [
+                4
+            ]
+        },
+        website: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Website',
+            description: 'URL with more info about the coffee or roaster.',
+            examples: [
+                'https://nomadcoffee.es'
             ]
         },
         notes: {
@@ -2262,7 +2457,7 @@ export const TastingCreateSchema = {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2270,16 +2465,16 @@ export const TastingCreateSchema = {
                 }
             ],
             title: 'Aroma',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         acidity: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2287,16 +2482,16 @@ export const TastingCreateSchema = {
                 }
             ],
             title: 'Acidity',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         sweetness: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2304,16 +2499,16 @@ export const TastingCreateSchema = {
                 }
             ],
             title: 'Sweetness',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         body: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2321,16 +2516,16 @@ export const TastingCreateSchema = {
                 }
             ],
             title: 'Body',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         bitterness: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2338,16 +2533,16 @@ export const TastingCreateSchema = {
                 }
             ],
             title: 'Bitterness',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         aftertaste: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2355,16 +2550,16 @@ export const TastingCreateSchema = {
                 }
             ],
             title: 'Aftertaste',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         overall: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2372,9 +2567,9 @@ export const TastingCreateSchema = {
                 }
             ],
             title: 'Overall',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         descriptors: {
@@ -2433,7 +2628,7 @@ export const TastingReadSchema = {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2441,16 +2636,16 @@ export const TastingReadSchema = {
                 }
             ],
             title: 'Aroma',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         acidity: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2458,16 +2653,16 @@ export const TastingReadSchema = {
                 }
             ],
             title: 'Acidity',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         sweetness: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2475,16 +2670,16 @@ export const TastingReadSchema = {
                 }
             ],
             title: 'Sweetness',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         body: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2492,16 +2687,16 @@ export const TastingReadSchema = {
                 }
             ],
             title: 'Body',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         bitterness: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2509,16 +2704,16 @@ export const TastingReadSchema = {
                 }
             ],
             title: 'Bitterness',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         aftertaste: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2526,16 +2721,16 @@ export const TastingReadSchema = {
                 }
             ],
             title: 'Aftertaste',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         overall: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2543,9 +2738,9 @@ export const TastingReadSchema = {
                 }
             ],
             title: 'Overall',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         descriptors: {
@@ -2636,7 +2831,7 @@ export const TastingUpdateSchema = {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2644,16 +2839,16 @@ export const TastingUpdateSchema = {
                 }
             ],
             title: 'Aroma',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         acidity: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2661,16 +2856,16 @@ export const TastingUpdateSchema = {
                 }
             ],
             title: 'Acidity',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         sweetness: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2678,16 +2873,16 @@ export const TastingUpdateSchema = {
                 }
             ],
             title: 'Sweetness',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         body: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2695,16 +2890,16 @@ export const TastingUpdateSchema = {
                 }
             ],
             title: 'Body',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         bitterness: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2712,16 +2907,16 @@ export const TastingUpdateSchema = {
                 }
             ],
             title: 'Bitterness',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         aftertaste: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2729,16 +2924,16 @@ export const TastingUpdateSchema = {
                 }
             ],
             title: 'Aftertaste',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         overall: {
             anyOf: [
                 {
                     type: 'integer',
-                    maximum: 10,
+                    maximum: 5,
                     minimum: 1
                 },
                 {
@@ -2746,9 +2941,9 @@ export const TastingUpdateSchema = {
                 }
             ],
             title: 'Overall',
-            description: 'Score from 1 to 10.',
+            description: 'Score from 1 to 5.',
             examples: [
-                8
+                4
             ]
         },
         descriptors: {

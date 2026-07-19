@@ -25,6 +25,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { StarRating } from "@/components/ui/star-rating"
 import { canEdit, useCurrentUser } from "@/lib/auth"
 import { TASTING_SCORES } from "@/lib/domain"
 import { formatDate, formatDateTime, formatNumber, formatSeconds, humanize } from "@/lib/format"
@@ -188,8 +189,13 @@ function BrewDetailPage() {
           {tastings.map((tasting) => (
             <Card key={tasting.id}>
               <CardHeader>
-                <CardTitle className="text-base">
-                  {tasting.overall ? `${tasting.overall}/10 overall` : "Tasting"}
+                <CardTitle className="flex items-center gap-2 text-base">
+                  Overall
+                  {tasting.overall ? (
+                    <StarRating value={tasting.overall} readOnly size={16} />
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </CardTitle>
                 <CardDescription>
                   {tasting.author.username} · {formatDateTime(tasting.tasted_at)}
@@ -212,13 +218,7 @@ function BrewDetailPage() {
                       <span className="w-24 shrink-0 text-muted-foreground">
                         {humanize(score)}
                       </span>
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                        <div
-                          className="h-full rounded-full bg-primary"
-                          style={{ width: `${(tasting[score] ?? 0) * 10}%` }}
-                        />
-                      </div>
-                      <span className="w-6 text-right tabular-nums">{tasting[score]}</span>
+                      <StarRating value={tasting[score] ?? 0} readOnly size={16} />
                     </div>
                   ))}
                 </div>

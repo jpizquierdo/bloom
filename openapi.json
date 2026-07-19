@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Bloom",
-    "version": "0.3.1"
+    "version": "0.4.0"
   },
   "paths": {
     "/health": {
@@ -2016,6 +2016,35 @@
               "medium_light"
             ]
           },
+          "roast_type": {
+            "type": "string",
+            "enum": [
+              "filter",
+              "espresso",
+              "omni",
+              "unknown"
+            ],
+            "title": "Roast Type",
+            "description": "Brewing intent this coffee is roasted for.",
+            "default": "unknown",
+            "examples": [
+              "filter"
+            ]
+          },
+          "blend": {
+            "type": "string",
+            "enum": [
+              "single_origin",
+              "blend",
+              "unknown"
+            ],
+            "title": "Blend",
+            "description": "Single origin or a blend.",
+            "default": "single_origin",
+            "examples": [
+              "single_origin"
+            ]
+          },
           "altitude_masl": {
             "anyOf": [
               {
@@ -2044,6 +2073,38 @@
             "description": "Tasting notes printed on the bag.",
             "examples": [
               "Peach, jasmine, black tea"
+            ]
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating",
+            "description": "Overall rating of the coffee itself, 1\u20135 (null = unrated).",
+            "examples": [
+              4
+            ]
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website",
+            "description": "URL with more info about the coffee or roaster.",
+            "examples": [
+              "https://nomadcoffee.es"
             ]
           },
           "notes": {
@@ -2485,6 +2546,35 @@
               "medium_light"
             ]
           },
+          "roast_type": {
+            "type": "string",
+            "enum": [
+              "filter",
+              "espresso",
+              "omni",
+              "unknown"
+            ],
+            "title": "Roast Type",
+            "description": "Brewing intent this coffee is roasted for.",
+            "default": "unknown",
+            "examples": [
+              "filter"
+            ]
+          },
+          "blend": {
+            "type": "string",
+            "enum": [
+              "single_origin",
+              "blend",
+              "unknown"
+            ],
+            "title": "Blend",
+            "description": "Single origin or a blend.",
+            "default": "single_origin",
+            "examples": [
+              "single_origin"
+            ]
+          },
           "altitude_masl": {
             "anyOf": [
               {
@@ -2513,6 +2603,38 @@
             "description": "Tasting notes printed on the bag.",
             "examples": [
               "Peach, jasmine, black tea"
+            ]
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating",
+            "description": "Overall rating of the coffee itself, 1\u20135 (null = unrated).",
+            "examples": [
+              4
+            ]
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website",
+            "description": "URL with more info about the coffee or roaster.",
+            "examples": [
+              "https://nomadcoffee.es"
             ]
           },
           "notes": {
@@ -2687,6 +2809,47 @@
               "medium_light"
             ]
           },
+          "roast_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "filter",
+                  "espresso",
+                  "omni",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roast Type",
+            "description": "Brewing intent this coffee is roasted for.",
+            "examples": [
+              "filter"
+            ]
+          },
+          "blend": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "single_origin",
+                  "blend",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blend",
+            "description": "Single origin or a blend.",
+            "examples": [
+              "single_origin"
+            ]
+          },
           "altitude_masl": {
             "anyOf": [
               {
@@ -2715,6 +2878,38 @@
             "description": "Tasting notes printed on the bag.",
             "examples": [
               "Peach, jasmine, black tea"
+            ]
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 5.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating",
+            "description": "Overall rating of the coffee itself, 1\u20135 (null = unrated).",
+            "examples": [
+              4
+            ]
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website",
+            "description": "URL with more info about the coffee or roaster.",
+            "examples": [
+              "https://nomadcoffee.es"
             ]
           },
           "notes": {
@@ -4121,7 +4316,7 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4129,16 +4324,16 @@
               }
             ],
             "title": "Aroma",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "acidity": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4146,16 +4341,16 @@
               }
             ],
             "title": "Acidity",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "sweetness": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4163,16 +4358,16 @@
               }
             ],
             "title": "Sweetness",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "body": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4180,16 +4375,16 @@
               }
             ],
             "title": "Body",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "bitterness": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4197,16 +4392,16 @@
               }
             ],
             "title": "Bitterness",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "aftertaste": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4214,16 +4409,16 @@
               }
             ],
             "title": "Aftertaste",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "overall": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4231,9 +4426,9 @@
               }
             ],
             "title": "Overall",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "descriptors": {
@@ -4291,7 +4486,7 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4299,16 +4494,16 @@
               }
             ],
             "title": "Aroma",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "acidity": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4316,16 +4511,16 @@
               }
             ],
             "title": "Acidity",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "sweetness": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4333,16 +4528,16 @@
               }
             ],
             "title": "Sweetness",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "body": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4350,16 +4545,16 @@
               }
             ],
             "title": "Body",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "bitterness": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4367,16 +4562,16 @@
               }
             ],
             "title": "Bitterness",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "aftertaste": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4384,16 +4579,16 @@
               }
             ],
             "title": "Aftertaste",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "overall": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4401,9 +4596,9 @@
               }
             ],
             "title": "Overall",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "descriptors": {
@@ -4493,7 +4688,7 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4501,16 +4696,16 @@
               }
             ],
             "title": "Aroma",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "acidity": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4518,16 +4713,16 @@
               }
             ],
             "title": "Acidity",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "sweetness": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4535,16 +4730,16 @@
               }
             ],
             "title": "Sweetness",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "body": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4552,16 +4747,16 @@
               }
             ],
             "title": "Body",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "bitterness": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4569,16 +4764,16 @@
               }
             ],
             "title": "Bitterness",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "aftertaste": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4586,16 +4781,16 @@
               }
             ],
             "title": "Aftertaste",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "overall": {
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 10.0,
+                "maximum": 5.0,
                 "minimum": 1.0
               },
               {
@@ -4603,9 +4798,9 @@
               }
             ],
             "title": "Overall",
-            "description": "Score from 1 to 10.",
+            "description": "Score from 1 to 5.",
             "examples": [
-              8
+              4
             ]
           },
           "descriptors": {

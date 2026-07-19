@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Slider } from "@/components/ui/slider"
+import { StarRating } from "@/components/ui/star-rating"
 import { Textarea } from "@/components/ui/textarea"
 import { TASTING_SCORES } from "@/lib/domain"
 import { humanize, stripEmpty, toDateTimeLocal } from "@/lib/format"
@@ -23,7 +23,7 @@ import { useMutation } from "@tanstack/react-query"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 
-/** Scores are 1–10 or absent; 0 on the slider means "not scored" and is dropped on submit. */
+/** Scores are 1–5 stars or absent; 0 means "not scored" and is dropped on submit. */
 type FormValues = {
   aroma: number
   acidity: number
@@ -93,16 +93,18 @@ export function TastingDialog({ open, onOpenChange, brewId, tasting }: TastingDi
   })
 
   function onSubmit(values: FormValues) {
+    // 0 stars = unrated: send an explicit null (not omit), and keep the scores out of
+    // stripEmpty (which would drop null), so clearing a score on PATCH actually clears it.
     const scores = Object.fromEntries(
-      TASTING_SCORES.map((score) => [score, values[score] === 0 ? undefined : values[score]]),
+      TASTING_SCORES.map((score) => [score, values[score] === 0 ? null : values[score]]),
     )
     const body = {
       ...stripEmpty({
-        ...scores,
         notes: values.notes,
         tasted_at:
           values.tasted_at === "" ? undefined : new Date(values.tasted_at).toISOString(),
       }),
+      ...scores,
       descriptors: values.descriptors,
     }
 
@@ -117,7 +119,7 @@ export function TastingDialog({ open, onOpenChange, brewId, tasting }: TastingDi
       open={open}
       onOpenChange={onOpenChange}
       title={tasting ? "Edit tasting" : "Add a tasting"}
-      description="Score what you noticed; leave a slider at zero to skip it."
+      description="Score what you noticed; leave a rating empty to skip it."
       form={form}
       onSubmit={onSubmit}
       isPending={create.isPending || update.isPending}
@@ -132,19 +134,14 @@ export function TastingDialog({ open, onOpenChange, brewId, tasting }: TastingDi
               <FormItem>
                 <div className="flex items-center justify-between">
                   <FormLabel>{humanize(score)}</FormLabel>
-                  <span className="text-sm tabular-nums text-muted-foreground">
-                    {field.value === 0 ? "—" : field.value}
-                  </span>
+                  <FormControl>
+                    <StarRating
+                      value={field.value}
+                      onChange={field.onChange}
+                      aria-label={humanize(score)}
+                    />
+                  </FormControl>
                 </div>
-                <FormControl>
-                  <Slider
-                    min={0}
-                    max={10}
-                    step={1}
-                    value={[field.value]}
-                    onValueChange={([next]) => field.onChange(next)}
-                  />
-                </FormControl>
               </FormItem>
             )}
           />

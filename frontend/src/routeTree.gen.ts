@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
+import { Route as AppTastingsRouteImport } from './routes/_app/tastings'
 import { Route as AppEquipmentRouteImport } from './routes/_app/equipment'
 import { Route as AppBrewMethodsRouteImport } from './routes/_app/brew-methods'
 import { Route as AppRoastersIndexRouteImport } from './routes/_app/roasters/index'
@@ -57,6 +58,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppUsersRoute = AppUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTastingsRoute = AppTastingsRouteImport.update({
+  id: '/tastings',
+  path: '/tastings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEquipmentRoute = AppEquipmentRouteImport.update({
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/brew-methods': typeof AppBrewMethodsRoute
   '/equipment': typeof AppEquipmentRoute
+  '/tastings': typeof AppTastingsRoute
   '/users': typeof AppUsersRoute
   '/beans/$beanId': typeof AppBeansBeanIdRoute
   '/brews/$brewId': typeof AppBrewsBrewIdRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/brew-methods': typeof AppBrewMethodsRoute
   '/equipment': typeof AppEquipmentRoute
+  '/tastings': typeof AppTastingsRoute
   '/users': typeof AppUsersRoute
   '/': typeof AppIndexRoute
   '/beans/$beanId': typeof AppBeansBeanIdRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_app/brew-methods': typeof AppBrewMethodsRoute
   '/_app/equipment': typeof AppEquipmentRoute
+  '/_app/tastings': typeof AppTastingsRoute
   '/_app/users': typeof AppUsersRoute
   '/_app/': typeof AppIndexRoute
   '/_app/beans/$beanId': typeof AppBeansBeanIdRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/brew-methods'
     | '/equipment'
+    | '/tastings'
     | '/users'
     | '/beans/$beanId'
     | '/brews/$brewId'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/brew-methods'
     | '/equipment'
+    | '/tastings'
     | '/users'
     | '/'
     | '/beans/$beanId'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_app/brew-methods'
     | '/_app/equipment'
+    | '/_app/tastings'
     | '/_app/users'
     | '/_app/'
     | '/_app/beans/$beanId'
@@ -261,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUsersRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tastings': {
+      id: '/_app/tastings'
+      path: '/tastings'
+      fullPath: '/tastings'
+      preLoaderRoute: typeof AppTastingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/equipment': {
       id: '/_app/equipment'
       path: '/equipment'
@@ -323,6 +342,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppBrewMethodsRoute: typeof AppBrewMethodsRoute
   AppEquipmentRoute: typeof AppEquipmentRoute
+  AppTastingsRoute: typeof AppTastingsRoute
   AppUsersRoute: typeof AppUsersRoute
   AppIndexRoute: typeof AppIndexRoute
   AppBeansBeanIdRoute: typeof AppBeansBeanIdRoute
@@ -336,6 +356,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppBrewMethodsRoute: AppBrewMethodsRoute,
   AppEquipmentRoute: AppEquipmentRoute,
+  AppTastingsRoute: AppTastingsRoute,
   AppUsersRoute: AppUsersRoute,
   AppIndexRoute: AppIndexRoute,
   AppBeansBeanIdRoute: AppBeansBeanIdRoute,
