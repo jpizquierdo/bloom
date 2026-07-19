@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Bloom",
-    "version": "0.4.1"
+    "version": "0.5.0"
   },
   "paths": {
     "/health": {
@@ -1209,6 +1209,101 @@
             }
           }
         }
+      },
+      "patch": {
+        "tags": [
+          "brew-methods"
+        ],
+        "summary": "Update Brew Method",
+        "description": "Edit a brew method (shared lookup data). Admin only; 409 if the name is taken.",
+        "operationId": "brew-methods-update_brew_method",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "method_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Method Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrewMethodUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrewMethodRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "brew-methods"
+        ],
+        "summary": "Delete Brew Method",
+        "description": "Delete a brew method. Admin only; 409 if a brew still uses it.",
+        "operationId": "brew-methods-delete_brew_method",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "method_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Method Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/equipment": {
@@ -1321,6 +1416,101 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "equipment"
+        ],
+        "summary": "Update Equipment",
+        "description": "Edit a piece of equipment (shared lookup data). Admin only.",
+        "operationId": "equipment-update_equipment",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "equipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Equipment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "equipment"
+        ],
+        "summary": "Delete Equipment",
+        "description": "Delete a piece of equipment. Admin only; any brew that used it keeps its data, unlinked.",
+        "operationId": "equipment-delete_equipment",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "equipment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Equipment Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
           },
           "422": {
             "description": "Validation Error",
@@ -3337,6 +3527,69 @@
         ],
         "title": "BrewMethodRead"
       },
+      "BrewMethodUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Unique method name.",
+            "examples": [
+              "V60"
+            ]
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "espresso",
+                  "filter",
+                  "immersion"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category",
+            "description": "Brewing family.",
+            "examples": [
+              "filter"
+            ]
+          },
+          "default_ratio": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Ratio",
+            "description": "Default brew ratio (grams of water per gram of coffee); null clears it.",
+            "examples": [
+              "16.00"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "BrewMethodUpdate",
+        "description": "Partial update; only provided fields are applied (PATCH semantics)."
+      },
       "BrewRead": {
         "properties": {
           "lot_id": {
@@ -3921,6 +4174,80 @@
           "created_at"
         ],
         "title": "EquipmentRead"
+      },
+      "EquipmentUpdate": {
+        "properties": {
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "grinder",
+                  "espresso_machine",
+                  "kettle",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "description": "Kind of equipment.",
+            "examples": [
+              "grinder"
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Model name.",
+            "examples": [
+              "Niche Zero"
+            ]
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand",
+            "description": "Manufacturer; null clears it.",
+            "examples": [
+              "Niche"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Free-form notes; null clears them.",
+            "examples": [
+              "Single dosing"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "EquipmentUpdate",
+        "description": "Partial update; only provided fields are applied (PATCH semantics)."
       },
       "ExtractionDiagnosticsRead": {
         "properties": {

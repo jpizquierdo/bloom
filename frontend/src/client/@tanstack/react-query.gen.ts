@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { authLogin, authReadCurrentUser, authRecoverPassword, authResetPassword, beansCreateBean, beansDeleteBean, beansGetBean, beansListBeans, beansUpdateBean, brewMethodsCreateBrewMethod, brewMethodsGetBrewMethod, brewMethodsListBrewMethods, brewsCreateBrew, brewsDeleteBrew, brewsGetBrew, brewsListBrews, brewsUpdateBrew, equipmentCreateEquipment, equipmentGetEquipment, equipmentListEquipment, lotsCreateLot, lotsDeleteLot, lotsGetLot, lotsListLots, lotsUpdateLot, type Options, roastersCreateRoaster, roastersDeleteRoaster, roastersGetRoaster, roastersListRoasters, roastersMergeRoaster, roastersUpdateRoaster, systemHealth, tastingsCreateTasting, tastingsDeleteTasting, tastingsGetTasting, tastingsListAllTastings, tastingsListTastings, tastingsUpdateTasting, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen';
-import type { AuthLoginData, AuthLoginError, AuthLoginResponse, AuthReadCurrentUserData, AuthReadCurrentUserResponse, AuthRecoverPasswordData, AuthRecoverPasswordError, AuthRecoverPasswordResponse, AuthResetPasswordData, AuthResetPasswordError, AuthResetPasswordResponse, BeansCreateBeanData, BeansCreateBeanError, BeansCreateBeanResponse, BeansDeleteBeanData, BeansDeleteBeanError, BeansDeleteBeanResponse, BeansGetBeanData, BeansGetBeanError, BeansGetBeanResponse, BeansListBeansData, BeansListBeansError, BeansListBeansResponse, BeansUpdateBeanData, BeansUpdateBeanError, BeansUpdateBeanResponse, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodError, BrewMethodsCreateBrewMethodResponse, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodError, BrewMethodsGetBrewMethodResponse, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponse, BrewsCreateBrewData, BrewsCreateBrewError, BrewsCreateBrewResponse, BrewsDeleteBrewData, BrewsDeleteBrewError, BrewsDeleteBrewResponse, BrewsGetBrewData, BrewsGetBrewError, BrewsGetBrewResponse, BrewsListBrewsData, BrewsListBrewsError, BrewsListBrewsResponse, BrewsUpdateBrewData, BrewsUpdateBrewError, BrewsUpdateBrewResponse, EquipmentCreateEquipmentData, EquipmentCreateEquipmentError, EquipmentCreateEquipmentResponse, EquipmentGetEquipmentData, EquipmentGetEquipmentError, EquipmentGetEquipmentResponse, EquipmentListEquipmentData, EquipmentListEquipmentResponse, LotsCreateLotData, LotsCreateLotError, LotsCreateLotResponse, LotsDeleteLotData, LotsDeleteLotError, LotsDeleteLotResponse, LotsGetLotData, LotsGetLotError, LotsGetLotResponse, LotsListLotsData, LotsListLotsError, LotsListLotsResponse, LotsUpdateLotData, LotsUpdateLotError, LotsUpdateLotResponse, RoastersCreateRoasterData, RoastersCreateRoasterError, RoastersCreateRoasterResponse, RoastersDeleteRoasterData, RoastersDeleteRoasterError, RoastersDeleteRoasterResponse, RoastersGetRoasterData, RoastersGetRoasterError, RoastersGetRoasterResponse, RoastersListRoastersData, RoastersListRoastersResponse, RoastersMergeRoasterData, RoastersMergeRoasterError, RoastersMergeRoasterResponse, RoastersUpdateRoasterData, RoastersUpdateRoasterError, RoastersUpdateRoasterResponse, SystemHealthData, SystemHealthResponse, TastingsCreateTastingData, TastingsCreateTastingError, TastingsCreateTastingResponse, TastingsDeleteTastingData, TastingsDeleteTastingError, TastingsDeleteTastingResponse, TastingsGetTastingData, TastingsGetTastingError, TastingsGetTastingResponse, TastingsListAllTastingsData, TastingsListAllTastingsError, TastingsListAllTastingsResponse, TastingsListTastingsData, TastingsListTastingsError, TastingsListTastingsResponse, TastingsUpdateTastingData, TastingsUpdateTastingError, TastingsUpdateTastingResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen';
+import { authLogin, authReadCurrentUser, authRecoverPassword, authResetPassword, beansCreateBean, beansDeleteBean, beansGetBean, beansListBeans, beansUpdateBean, brewMethodsCreateBrewMethod, brewMethodsDeleteBrewMethod, brewMethodsGetBrewMethod, brewMethodsListBrewMethods, brewMethodsUpdateBrewMethod, brewsCreateBrew, brewsDeleteBrew, brewsGetBrew, brewsListBrews, brewsUpdateBrew, equipmentCreateEquipment, equipmentDeleteEquipment, equipmentGetEquipment, equipmentListEquipment, equipmentUpdateEquipment, lotsCreateLot, lotsDeleteLot, lotsGetLot, lotsListLots, lotsUpdateLot, type Options, roastersCreateRoaster, roastersDeleteRoaster, roastersGetRoaster, roastersListRoasters, roastersMergeRoaster, roastersUpdateRoaster, systemHealth, tastingsCreateTasting, tastingsDeleteTasting, tastingsGetTasting, tastingsListAllTastings, tastingsListTastings, tastingsUpdateTasting, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen';
+import type { AuthLoginData, AuthLoginError, AuthLoginResponse, AuthReadCurrentUserData, AuthReadCurrentUserResponse, AuthRecoverPasswordData, AuthRecoverPasswordError, AuthRecoverPasswordResponse, AuthResetPasswordData, AuthResetPasswordError, AuthResetPasswordResponse, BeansCreateBeanData, BeansCreateBeanError, BeansCreateBeanResponse, BeansDeleteBeanData, BeansDeleteBeanError, BeansDeleteBeanResponse, BeansGetBeanData, BeansGetBeanError, BeansGetBeanResponse, BeansListBeansData, BeansListBeansError, BeansListBeansResponse, BeansUpdateBeanData, BeansUpdateBeanError, BeansUpdateBeanResponse, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodError, BrewMethodsCreateBrewMethodResponse, BrewMethodsDeleteBrewMethodData, BrewMethodsDeleteBrewMethodError, BrewMethodsDeleteBrewMethodResponse, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodError, BrewMethodsGetBrewMethodResponse, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponse, BrewMethodsUpdateBrewMethodData, BrewMethodsUpdateBrewMethodError, BrewMethodsUpdateBrewMethodResponse, BrewsCreateBrewData, BrewsCreateBrewError, BrewsCreateBrewResponse, BrewsDeleteBrewData, BrewsDeleteBrewError, BrewsDeleteBrewResponse, BrewsGetBrewData, BrewsGetBrewError, BrewsGetBrewResponse, BrewsListBrewsData, BrewsListBrewsError, BrewsListBrewsResponse, BrewsUpdateBrewData, BrewsUpdateBrewError, BrewsUpdateBrewResponse, EquipmentCreateEquipmentData, EquipmentCreateEquipmentError, EquipmentCreateEquipmentResponse, EquipmentDeleteEquipmentData, EquipmentDeleteEquipmentError, EquipmentDeleteEquipmentResponse, EquipmentGetEquipmentData, EquipmentGetEquipmentError, EquipmentGetEquipmentResponse, EquipmentListEquipmentData, EquipmentListEquipmentResponse, EquipmentUpdateEquipmentData, EquipmentUpdateEquipmentError, EquipmentUpdateEquipmentResponse, LotsCreateLotData, LotsCreateLotError, LotsCreateLotResponse, LotsDeleteLotData, LotsDeleteLotError, LotsDeleteLotResponse, LotsGetLotData, LotsGetLotError, LotsGetLotResponse, LotsListLotsData, LotsListLotsError, LotsListLotsResponse, LotsUpdateLotData, LotsUpdateLotError, LotsUpdateLotResponse, RoastersCreateRoasterData, RoastersCreateRoasterError, RoastersCreateRoasterResponse, RoastersDeleteRoasterData, RoastersDeleteRoasterError, RoastersDeleteRoasterResponse, RoastersGetRoasterData, RoastersGetRoasterError, RoastersGetRoasterResponse, RoastersListRoastersData, RoastersListRoastersResponse, RoastersMergeRoasterData, RoastersMergeRoasterError, RoastersMergeRoasterResponse, RoastersUpdateRoasterData, RoastersUpdateRoasterError, RoastersUpdateRoasterResponse, SystemHealthData, SystemHealthResponse, TastingsCreateTastingData, TastingsCreateTastingError, TastingsCreateTastingResponse, TastingsDeleteTastingData, TastingsDeleteTastingError, TastingsDeleteTastingResponse, TastingsGetTastingData, TastingsGetTastingError, TastingsGetTastingResponse, TastingsListAllTastingsData, TastingsListAllTastingsError, TastingsListAllTastingsResponse, TastingsListTastingsData, TastingsListTastingsError, TastingsListTastingsResponse, TastingsUpdateTastingData, TastingsUpdateTastingError, TastingsUpdateTastingResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -551,6 +551,25 @@ export const brewMethodsCreateBrewMethodMutation = (options?: Partial<Options<Br
     return mutationOptions;
 };
 
+/**
+ * Delete Brew Method
+ *
+ * Delete a brew method. Admin only; 409 if a brew still uses it.
+ */
+export const brewMethodsDeleteBrewMethodMutation = (options?: Partial<Options<BrewMethodsDeleteBrewMethodData>>): UseMutationOptions<BrewMethodsDeleteBrewMethodResponse, BrewMethodsDeleteBrewMethodError, Options<BrewMethodsDeleteBrewMethodData>> => {
+    const mutationOptions: UseMutationOptions<BrewMethodsDeleteBrewMethodResponse, BrewMethodsDeleteBrewMethodError, Options<BrewMethodsDeleteBrewMethodData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await brewMethodsDeleteBrewMethod({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const brewMethodsGetBrewMethodQueryKey = (options: Options<BrewMethodsGetBrewMethodData>) => createQueryKey('brewMethodsGetBrewMethod', options);
 
 /**
@@ -570,6 +589,25 @@ export const brewMethodsGetBrewMethodOptions = (options: Options<BrewMethodsGetB
     },
     queryKey: brewMethodsGetBrewMethodQueryKey(options)
 });
+
+/**
+ * Update Brew Method
+ *
+ * Edit a brew method (shared lookup data). Admin only; 409 if the name is taken.
+ */
+export const brewMethodsUpdateBrewMethodMutation = (options?: Partial<Options<BrewMethodsUpdateBrewMethodData>>): UseMutationOptions<BrewMethodsUpdateBrewMethodResponse, BrewMethodsUpdateBrewMethodError, Options<BrewMethodsUpdateBrewMethodData>> => {
+    const mutationOptions: UseMutationOptions<BrewMethodsUpdateBrewMethodResponse, BrewMethodsUpdateBrewMethodError, Options<BrewMethodsUpdateBrewMethodData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await brewMethodsUpdateBrewMethod({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const equipmentListEquipmentQueryKey = (options?: Options<EquipmentListEquipmentData>) => createQueryKey('equipmentListEquipment', options);
 
@@ -610,6 +648,25 @@ export const equipmentCreateEquipmentMutation = (options?: Partial<Options<Equip
     return mutationOptions;
 };
 
+/**
+ * Delete Equipment
+ *
+ * Delete a piece of equipment. Admin only; any brew that used it keeps its data, unlinked.
+ */
+export const equipmentDeleteEquipmentMutation = (options?: Partial<Options<EquipmentDeleteEquipmentData>>): UseMutationOptions<EquipmentDeleteEquipmentResponse, EquipmentDeleteEquipmentError, Options<EquipmentDeleteEquipmentData>> => {
+    const mutationOptions: UseMutationOptions<EquipmentDeleteEquipmentResponse, EquipmentDeleteEquipmentError, Options<EquipmentDeleteEquipmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await equipmentDeleteEquipment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const equipmentGetEquipmentQueryKey = (options: Options<EquipmentGetEquipmentData>) => createQueryKey('equipmentGetEquipment', options);
 
 /**
@@ -629,6 +686,25 @@ export const equipmentGetEquipmentOptions = (options: Options<EquipmentGetEquipm
     },
     queryKey: equipmentGetEquipmentQueryKey(options)
 });
+
+/**
+ * Update Equipment
+ *
+ * Edit a piece of equipment (shared lookup data). Admin only.
+ */
+export const equipmentUpdateEquipmentMutation = (options?: Partial<Options<EquipmentUpdateEquipmentData>>): UseMutationOptions<EquipmentUpdateEquipmentResponse, EquipmentUpdateEquipmentError, Options<EquipmentUpdateEquipmentData>> => {
+    const mutationOptions: UseMutationOptions<EquipmentUpdateEquipmentResponse, EquipmentUpdateEquipmentError, Options<EquipmentUpdateEquipmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await equipmentUpdateEquipment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const brewsListBrewsQueryKey = (options?: Options<BrewsListBrewsData>) => createQueryKey('brewsListBrews', options);
 

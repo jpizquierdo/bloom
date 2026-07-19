@@ -1465,6 +1465,70 @@ export const BrewMethodReadSchema = {
     title: 'BrewMethodRead'
 } as const;
 
+export const BrewMethodUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name',
+            description: 'Unique method name.',
+            examples: [
+                'V60'
+            ]
+        },
+        category: {
+            anyOf: [
+                {
+                    type: 'string',
+                    enum: [
+                        'espresso',
+                        'filter',
+                        'immersion'
+                    ]
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Category',
+            description: 'Brewing family.',
+            examples: [
+                'filter'
+            ]
+        },
+        default_ratio: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Default Ratio',
+            description: 'Default brew ratio (grams of water per gram of coffee); null clears it.',
+            examples: [
+                '16.00'
+            ]
+        }
+    },
+    type: 'object',
+    title: 'BrewMethodUpdate',
+    description: 'Partial update; only provided fields are applied (PATCH semantics).'
+} as const;
+
 export const BrewReadSchema = {
     properties: {
         lot_id: {
@@ -2052,6 +2116,81 @@ export const EquipmentReadSchema = {
         'created_at'
     ],
     title: 'EquipmentRead'
+} as const;
+
+export const EquipmentUpdateSchema = {
+    properties: {
+        type: {
+            anyOf: [
+                {
+                    type: 'string',
+                    enum: [
+                        'grinder',
+                        'espresso_machine',
+                        'kettle',
+                        'other'
+                    ]
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Type',
+            description: 'Kind of equipment.',
+            examples: [
+                'grinder'
+            ]
+        },
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name',
+            description: 'Model name.',
+            examples: [
+                'Niche Zero'
+            ]
+        },
+        brand: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Brand',
+            description: 'Manufacturer; null clears it.',
+            examples: [
+                'Niche'
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes',
+            description: 'Free-form notes; null clears them.',
+            examples: [
+                'Single dosing'
+            ]
+        }
+    },
+    type: 'object',
+    title: 'EquipmentUpdate',
+    description: 'Partial update; only provided fields are applied (PATCH semantics).'
 } as const;
 
 export const ExtractionDiagnosticsReadSchema = {
