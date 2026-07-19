@@ -93,16 +93,18 @@ export function TastingDialog({ open, onOpenChange, brewId, tasting }: TastingDi
   })
 
   function onSubmit(values: FormValues) {
+    // 0 stars = unrated: send an explicit null (not omit), and keep the scores out of
+    // stripEmpty (which would drop null), so clearing a score on PATCH actually clears it.
     const scores = Object.fromEntries(
-      TASTING_SCORES.map((score) => [score, values[score] === 0 ? undefined : values[score]]),
+      TASTING_SCORES.map((score) => [score, values[score] === 0 ? null : values[score]]),
     )
     const body = {
       ...stripEmpty({
-        ...scores,
         notes: values.notes,
         tasted_at:
           values.tasted_at === "" ? undefined : new Date(values.tasted_at).toISOString(),
       }),
+      ...scores,
       descriptors: values.descriptors,
     }
 
