@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { stripEmpty, toDateInput } from "@/lib/format"
+import { patchBody, stripEmpty, toDateInput } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { useMutation } from "@tanstack/react-query"
 import { useEffect } from "react"
@@ -35,6 +35,9 @@ const EMPTY: FormValues = {
   price: "",
   is_finished: false,
 }
+
+// Nullable columns: on edit, clearing one sends an explicit null (see patchBody).
+const CLEARABLE = ["roast_date", "purchase_date", "weight_grams", "price"] as const
 
 interface LotDialogProps {
   open: boolean
@@ -74,18 +77,16 @@ export function LotDialog({ open, onOpenChange, beanId, lot }: LotDialogProps) {
   })
 
   function onSubmit(values: FormValues) {
-    const body = {
-      ...stripEmpty({
-        roast_date: values.roast_date === "" ? undefined : values.roast_date,
-        purchase_date: values.purchase_date === "" ? undefined : values.purchase_date,
-        weight_grams: values.weight_grams === "" ? undefined : Number(values.weight_grams),
-        price: values.price === "" ? undefined : Number(values.price),
-      }),
+    const normalized = {
+      roast_date: values.roast_date === "" ? undefined : values.roast_date,
+      purchase_date: values.purchase_date === "" ? undefined : values.purchase_date,
+      weight_grams: values.weight_grams === "" ? undefined : Number(values.weight_grams),
+      price: values.price === "" ? undefined : Number(values.price),
       is_finished: values.is_finished,
     }
     const request = lot
-      ? update.mutateAsync({ path: { lot_id: lot.id }, body })
-      : create.mutateAsync({ path: { bean_id: beanId }, body })
+      ? update.mutateAsync({ path: { lot_id: lot.id }, body: patchBody(normalized, CLEARABLE) })
+      : create.mutateAsync({ path: { bean_id: beanId }, body: stripEmpty(normalized) })
     return submitAndClose(request, () => onOpenChange(false))
   }
 

@@ -168,6 +168,45 @@ def test_null_dose_rejected(client, alice_headers, lookups, bean_id):
     assert resp.status_code == 422
 
 
+def test_null_brewed_at_rejected(client, alice_headers, lookups, bean_id):
+    brew = client.post(
+        "/brews",
+        headers=alice_headers,
+        json={"bean_id": bean_id, "method_id": lookups["filter"]["id"], "dose_grams": "15"},
+    ).json()
+    # brewed_at is NOT NULL (server default now()): an explicit null is a 422, not a DB error.
+    resp = client.patch(f"/brews/{brew['id']}", headers=alice_headers, json={"brewed_at": None})
+    assert resp.status_code == 422
+
+
+def test_nullable_brew_fields_cleared_with_null(client, alice_headers, lookups, bean_id):
+    # Optional measurements are set on create, then cleared back to null on PATCH.
+    brew = client.post(
+        "/brews",
+        headers=alice_headers,
+        json={
+            "bean_id": bean_id,
+            "method_id": lookups["filter"]["id"],
+            "dose_grams": "15",
+            "water_grams": "250",
+            "grind_setting": "2.5",
+            "notes": "bloomed 30s",
+        },
+    ).json()
+    assert brew["grind_setting"] == "2.5"
+
+    resp = client.patch(
+        f"/brews/{brew['id']}",
+        headers=alice_headers,
+        json={"water_grams": None, "grind_setting": None, "notes": None},
+    )
+    assert resp.status_code == 200
+    cleared = resp.json()
+    assert cleared["water_grams"] is None
+    assert cleared["grind_setting"] is None
+    assert cleared["notes"] is None
+
+
 def test_unknown_method_404(client, alice_headers, bean_id):
     resp = client.post(
         "/brews",

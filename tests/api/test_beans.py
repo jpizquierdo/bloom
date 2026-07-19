@@ -170,6 +170,28 @@ def test_explicit_null_on_a_required_field_422(client, alice_headers):
         assert resp.json()[field] is None
 
 
+def test_nullable_bean_fields_cleared_with_null(client, alice_headers):
+    # Optional descriptive fields are set on create, then cleared back to null on PATCH.
+    bean_id = _make_bean(
+        client,
+        alice_headers,
+        region="Guji",
+        website="https://nomadcoffee.es",
+        process="washed",
+    ).json()["id"]
+
+    resp = client.patch(
+        f"/beans/{bean_id}",
+        headers=alice_headers,
+        json={"region": None, "website": None, "process": None},
+    )
+    assert resp.status_code == 200
+    cleared = resp.json()
+    assert cleared["region"] is None
+    assert cleared["website"] is None
+    assert cleared["process"] is None
+
+
 def test_invalid_process_422(client, alice_headers):
     assert _make_bean(client, alice_headers, process="rocket-fuel").status_code == 422
 

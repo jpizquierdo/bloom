@@ -64,5 +64,25 @@ def test_null_descriptors_rejected_but_scores_are_nullable(client, alice_headers
     assert resp.json()["aroma"] is None
 
 
+def test_null_tasted_at_rejected(client, alice_headers, brew_id):
+    tasting = client.post(
+        f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 4}
+    ).json()
+    # tasted_at is NOT NULL (server default now()): an explicit null is a 422, not a DB error.
+    resp = client.patch(f"/tastings/{tasting['id']}", headers=alice_headers, json={"tasted_at": None})
+    assert resp.status_code == 422
+
+
+def test_tasting_notes_cleared_with_null(client, alice_headers, brew_id):
+    tasting = client.post(
+        f"/brews/{brew_id}/tastings",
+        headers=alice_headers,
+        json={"overall": 4, "notes": "juicy"},
+    ).json()
+    resp = client.patch(f"/tastings/{tasting['id']}", headers=alice_headers, json={"notes": None})
+    assert resp.status_code == 200
+    assert resp.json()["notes"] is None
+
+
 def test_tasting_on_unknown_brew_404(client, alice_headers):
     assert client.post("/brews/9999/tastings", headers=alice_headers, json={"overall": 4}).status_code == 404

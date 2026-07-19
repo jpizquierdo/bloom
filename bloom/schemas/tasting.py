@@ -42,8 +42,9 @@ class TastingUpdate(TastingBase):
 
     descriptors: list[str] | None = Field(default=None, description="Flavor descriptors.", examples=[["peach"]])
 
-    # Scores are nullable (an explicit null clears one); descriptors are not — send [] instead.
-    _no_null = reject_null("descriptors")
+    # Scores are nullable (an explicit null clears one). descriptors (send [] instead) and
+    # tasted_at (a NOT NULL column with a server default) reject an explicit null with a 422.
+    _no_null = reject_null("descriptors", "tasted_at")
 
 
 class TastingRead(TastingBase):

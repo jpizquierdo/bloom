@@ -41,7 +41,9 @@ class BrewUpdate(BrewBase):
 
     dose_grams: Decimal | None = Field(default=None, gt=0, description="Dry coffee dose (g).", examples=["15"])
 
-    _no_null = reject_null("dose_grams")
+    # dose_grams and brewed_at are NOT NULL columns (brewed_at has a server default): omit
+    # them to leave them unchanged; an explicit null is a 422, never a DB error.
+    _no_null = reject_null("dose_grams", "brewed_at")
 
 
 class ExtractionDiagnosticsRead(BaseModel):
