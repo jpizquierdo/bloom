@@ -9,6 +9,26 @@ export function stripEmpty<T extends Record<string, unknown>>(values: T): Partia
   ) as Partial<T>
 }
 
+/**
+ * Build a PATCH body. An empty value (undefined / null / "") for a `clearable` field — one
+ * backed by a *nullable* column — becomes an explicit `null` so the API clears it. Every
+ * other empty value is omitted (PATCH leaves it unchanged), which also avoids sending `null`
+ * to a NOT NULL-backed field, since the API rejects that (`reject_null` → 422).
+ */
+export function patchBody<T extends Record<string, unknown>>(
+  values: T,
+  clearable: readonly (keyof T)[],
+): Partial<{ [K in keyof T]: T[K] | null }> {
+  const clear = new Set<keyof T>(clearable)
+  const out: Record<string, unknown> = {}
+  for (const key of Object.keys(values) as (keyof T)[]) {
+    const value = values[key]
+    if (value !== undefined && value !== null && value !== "") out[key as string] = value
+    else if (clear.has(key)) out[key as string] = null
+  }
+  return out as Partial<{ [K in keyof T]: T[K] | null }>
+}
+
 /** Numeric columns arrive as strings ("18.50"); render them without trailing noise. */
 export function formatNumber(value: string | number | null | undefined, digits = 1): string {
   if (value === null || value === undefined || value === "") return "—"

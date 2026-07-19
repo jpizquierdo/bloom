@@ -16,8 +16,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { StarRating } from "@/components/ui/star-rating"
 import { Textarea } from "@/components/ui/textarea"
-import { TASTING_SCORES } from "@/lib/domain"
-import { humanize, stripEmpty, toDateTimeLocal } from "@/lib/format"
+import { TASTING_SCORES, type TastingScore } from "@/lib/domain"
+import { humanize, patchBody, stripEmpty, toDateTimeLocal } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { useMutation } from "@tanstack/react-query"
 import { useEffect } from "react"
@@ -93,24 +93,23 @@ export function TastingDialog({ open, onOpenChange, brewId, tasting }: TastingDi
   })
 
   function onSubmit(values: FormValues) {
-    // 0 stars = unrated: send an explicit null (not omit), and keep the scores out of
-    // stripEmpty (which would drop null), so clearing a score on PATCH actually clears it.
+    // 0 stars = unrated → undefined, so on edit patchBody sends null to clear it.
     const scores = Object.fromEntries(
-      TASTING_SCORES.map((score) => [score, values[score] === 0 ? null : values[score]]),
-    )
-    const body = {
-      ...stripEmpty({
-        notes: values.notes,
-        tasted_at:
-          values.tasted_at === "" ? undefined : new Date(values.tasted_at).toISOString(),
-      }),
+      TASTING_SCORES.map((score) => [score, values[score] === 0 ? undefined : values[score]]),
+    ) as Record<TastingScore, number | undefined>
+    const normalized = {
       ...scores,
-      descriptors: values.descriptors,
+      notes: values.notes,
+      tasted_at: values.tasted_at === "" ? undefined : new Date(values.tasted_at).toISOString(),
+      descriptors: values.descriptors, // NOT NULL: always sent ([] clears it)
     }
 
     const request = tasting
-      ? update.mutateAsync({ path: { tasting_id: tasting.id }, body })
-      : create.mutateAsync({ path: { brew_id: brewId }, body })
+      ? update.mutateAsync({
+          path: { tasting_id: tasting.id },
+          body: patchBody(normalized, [...TASTING_SCORES, "notes"]),
+        })
+      : create.mutateAsync({ path: { brew_id: brewId }, body: stripEmpty(normalized) })
     return submitAndClose(request, () => onOpenChange(false))
   }
 

@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { beanLabel } from "@/lib/domain"
-import { stripEmpty, toDateTimeLocal } from "@/lib/format"
+import { patchBody, stripEmpty, toDateTimeLocal } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -53,6 +53,20 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
+
+// Nullable columns: on edit, clearing one sends an explicit null (see patchBody). brewed_at is
+// NOT NULL (server default now()), so it is omitted when blank, never nulled.
+const CLEARABLE = [
+  "lot_id",
+  "grinder_id",
+  "yield_grams",
+  "water_grams",
+  "grind_setting",
+  "water_temp_celsius",
+  "brew_time_seconds",
+  "tds_percent",
+  "notes",
+] as const
 
 const EMPTY: FormValues = {
   bean_id: "",
@@ -151,7 +165,7 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
   })
 
   function onSubmit(values: FormValues) {
-    const measures = stripEmpty({
+    const measures = {
       lot_id: values.lot_id === "" ? undefined : Number(values.lot_id),
       grinder_id: values.grinder_id === "" ? undefined : Number(values.grinder_id),
       yield_grams: values.yield_grams === "" ? undefined : Number(values.yield_grams),
@@ -164,16 +178,16 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
       brewed_at: values.brewed_at === "" ? undefined : new Date(values.brewed_at).toISOString(),
       grind_setting: values.grind_setting,
       notes: values.notes,
-    })
+    }
 
     const request = brew
       ? update.mutateAsync({
           path: { brew_id: brew.id },
-          body: { ...measures, dose_grams: Number(values.dose_grams) },
+          body: { ...patchBody(measures, CLEARABLE), dose_grams: Number(values.dose_grams) },
         })
       : create.mutateAsync({
           body: {
-            ...measures,
+            ...stripEmpty(measures),
             bean_id: Number(values.bean_id),
             method_id: Number(values.method_id),
             dose_grams: Number(values.dose_grams),

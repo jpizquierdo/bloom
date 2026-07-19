@@ -25,7 +25,7 @@ import {
 import { StarRating } from "@/components/ui/star-rating"
 import { Textarea } from "@/components/ui/textarea"
 import { BLENDS, PROCESSES, ROAST_LEVELS, ROAST_TYPES } from "@/lib/domain"
-import { humanize, stripEmpty } from "@/lib/format"
+import { humanize, patchBody, stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -73,19 +73,39 @@ const EMPTY: FormValues = {
   notes: "",
 }
 
-/** Text inputs give strings; altitude wants a number, and empty means "absent". */
-function toPayload(values: FormValues) {
-  const { altitude_masl, process, roast_level, roast_type, blend, rating, ...rest } = values
+// Nullable columns: on edit, clearing one sends an explicit null (see patchBody).
+const CLEARABLE = [
+  "origin_country",
+  "region",
+  "producer",
+  "variety",
+  "process",
+  "roast_level",
+  "altitude_masl",
+  "tasting_notes_label",
+  "rating",
+  "website",
+  "notes",
+] as const
+
+/** Normalize form strings to API values; "unset" is `undefined` for typed fields, "" for text. */
+function normalize(values: FormValues) {
   return {
-    ...stripEmpty(rest),
-    ...stripEmpty({ altitude_masl: altitude_masl === "" ? undefined : Number(altitude_masl) }),
-    ...(process === "" ? {} : { process }),
-    ...(roast_level === "" ? {} : { roast_level }),
-    roast_type,
-    blend,
-    // 0 stars means unrated: send an explicit null (not omit), so clearing an existing
-    // rating on PATCH actually clears it. The API allows null on rating.
-    rating: rating === 0 ? null : rating,
+    name: values.name,
+    roaster: values.roaster,
+    origin_country: values.origin_country,
+    region: values.region,
+    producer: values.producer,
+    variety: values.variety,
+    process: values.process === "" ? undefined : values.process,
+    roast_level: values.roast_level === "" ? undefined : values.roast_level,
+    roast_type: values.roast_type,
+    blend: values.blend,
+    altitude_masl: values.altitude_masl === "" ? undefined : Number(values.altitude_masl),
+    tasting_notes_label: values.tasting_notes_label,
+    rating: values.rating === 0 ? undefined : values.rating, // 0 stars = unrated
+    website: values.website,
+    notes: values.notes,
   }
 }
 
@@ -137,10 +157,12 @@ export function BeanDialog({ open, onOpenChange, bean }: BeanDialogProps) {
   })
 
   function onSubmit(values: FormValues) {
-    const body = toPayload(values)
+    const normalized = normalize(values)
     const request = bean
-      ? update.mutateAsync({ path: { bean_id: bean.id }, body })
-      : create.mutateAsync({ body: { ...body, name: values.name, roaster: values.roaster } })
+      ? update.mutateAsync({ path: { bean_id: bean.id }, body: patchBody(normalized, CLEARABLE) })
+      : create.mutateAsync({
+          body: { ...stripEmpty(normalized), name: values.name, roaster: values.roaster },
+        })
     return submitAndClose(request, () => onOpenChange(false))
   }
 

@@ -26,7 +26,7 @@ services:
       - "1025:1025"
 
   bloom:
-    image: jpizquierdo/bloom:0.4.0
+    image: jpizquierdo/bloom:0.4.1
     container_name: bloom-core
     restart: unless-stopped
     depends_on:

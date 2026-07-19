@@ -28,6 +28,26 @@ def test_create_and_list_lot(client, alice_headers, users, bean_id):
     assert len(listing.json()) == 1
 
 
+def test_nullable_lot_fields_cleared_with_null(client, alice_headers, bean_id):
+    # All of a lot's fields except is_finished are nullable and can be cleared on PATCH.
+    lot = client.post(
+        f"/beans/{bean_id}/lots",
+        headers=alice_headers,
+        json={"roast_date": "2026-07-01", "weight_grams": 250, "price": "18.50"},
+    ).json()
+
+    resp = client.patch(
+        f"/lots/{lot['id']}",
+        headers=alice_headers,
+        json={"roast_date": None, "weight_grams": None, "price": None},
+    )
+    assert resp.status_code == 200
+    cleared = resp.json()
+    assert cleared["roast_date"] is None
+    assert cleared["weight_grams"] is None
+    assert cleared["price"] is None
+
+
 def test_multiple_lots_per_bean(client, alice_headers, bean_id):
     # The same coffee bought twice: two lots under one bean.
     client.post(f"/beans/{bean_id}/lots", headers=alice_headers, json={"purchase_date": "2026-06-01"})

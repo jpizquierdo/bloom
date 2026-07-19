@@ -367,8 +367,13 @@ silent:
 
 - **Ownership** — `canEdit(row, user)` (`src/lib/auth.ts`) mirrors `services/access.py`. The UI
   hides what it must, and the API enforces it regardless.
-- **PATCH omits, never nulls** — `stripEmpty()` (`src/lib/format.ts`), because `reject_null`
-  turns an explicit `null` on a NOT NULL-backed field into a 422.
+- **PATCH clears nullable fields with `null`, omits the rest** — `patchBody()`
+  (`src/lib/format.ts`) sends an explicit `null` for a cleared *nullable* field (so it is
+  actually blanked) and omits everything else, so it never nulls a NOT NULL-backed field —
+  which `reject_null` turns into a 422 (`brewed_at`/`tasted_at` are guarded this way too, as
+  they are NOT NULL with a server default). Create still uses `stripEmpty()` (omit empties,
+  let defaults apply). Each dialog declares its `CLEARABLE` set = nullable columns not in
+  `reject_null`.
 
 ### 18 — Bearer token in `localStorage`, no refresh flow
 
