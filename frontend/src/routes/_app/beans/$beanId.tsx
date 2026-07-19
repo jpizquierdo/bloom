@@ -6,6 +6,7 @@ import {
   lotsListLotsOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { BeanLotRead, BrewRead } from "@/client/types.gen"
+import { BeanDialog } from "@/components/beans/bean-dialog"
 import { LotDialog } from "@/components/beans/lot-dialog"
 import { BrewDialog } from "@/components/brews/brew-dialog"
 import { DataTable } from "@/components/data/data-table"
@@ -23,7 +24,7 @@ import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowLeft, Plus } from "lucide-react"
+import { ArrowLeft, Pencil, Plus } from "lucide-react"
 import type { ReactNode } from "react"
 import { useState } from "react"
 
@@ -42,6 +43,7 @@ function BeanDetailPage() {
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
 
   const [brewDialogOpen, setBrewDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [lotDialogOpen, setLotDialogOpen] = useState(false)
   const [editingLot, setEditingLot] = useState<BeanLotRead | null>(null)
   const [deletingLot, setDeletingLot] = useState<BeanLotRead | null>(null)
@@ -170,6 +172,14 @@ function BeanDetailPage() {
             {bean.owner.username}
           </>
         }
+        actions={
+          canEdit(bean, user) ? (
+            <Button variant="outline" onClick={() => setEditDialogOpen(true)}>
+              <Pencil className="size-4" />
+              Edit
+            </Button>
+          ) : undefined
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -270,6 +280,7 @@ function BeanDetailPage() {
         }
       />
 
+      <BeanDialog open={editDialogOpen} onOpenChange={setEditDialogOpen} bean={bean} />
       <LotDialog open={lotDialogOpen} onOpenChange={setLotDialogOpen} beanId={bean.id} lot={editingLot} />
       <BrewDialog
         open={brewDialogOpen}
