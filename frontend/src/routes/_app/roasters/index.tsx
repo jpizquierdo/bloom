@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { isAdmin, useCurrentUser } from "@/lib/auth"
-import { stripEmpty } from "@/lib/format"
+import { patchBody, stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -93,10 +93,13 @@ function RoastersPage() {
   }
 
   function onSubmit(values: FormValues) {
-    const body = stripEmpty(values)
     const request = editing
-      ? update.mutateAsync({ path: { roaster_id: editing.id }, body })
-      : create.mutateAsync({ body: { ...body, name: values.name } })
+      ? update.mutateAsync({
+          path: { roaster_id: editing.id },
+          // Clearing a metadata field sends null (blanks it); name stays required.
+          body: patchBody(values, ["country", "city", "website", "notes"]),
+        })
+      : create.mutateAsync({ body: { ...stripEmpty(values), name: values.name } })
     return submitAndClose(request, () => setDialogOpen(false))
   }
 

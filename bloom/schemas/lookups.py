@@ -6,6 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bloom.schemas.common import reject_null
+
 BrewCategory = Literal["espresso", "filter", "immersion"]
 EquipmentType = Literal["grinder", "espresso_machine", "kettle", "other"]
 
@@ -19,6 +21,22 @@ class BrewMethodCreate(BaseModel):
         description="Optional default brew ratio (grams of water per gram of coffee).",
         examples=["16.00"],
     )
+
+
+class BrewMethodUpdate(BaseModel):
+    """Partial update; only provided fields are applied (PATCH semantics)."""
+
+    name: str | None = Field(default=None, min_length=1, description="Unique method name.", examples=["V60"])
+    category: BrewCategory | None = Field(default=None, description="Brewing family.", examples=["filter"])
+    default_ratio: Decimal | None = Field(
+        default=None,
+        gt=0,
+        description="Default brew ratio (grams of water per gram of coffee); null clears it.",
+        examples=["16.00"],
+    )
+
+    # name/category are NOT NULL: omit to leave unchanged; default_ratio is nullable (null clears).
+    _no_null = reject_null("name", "category")
 
 
 class BrewMethodRead(BaseModel):
@@ -35,6 +53,18 @@ class EquipmentCreate(BaseModel):
     name: str = Field(min_length=1, description="Model name.", examples=["Niche Zero"])
     brand: str | None = Field(default=None, description="Manufacturer.", examples=["Niche"])
     notes: str | None = Field(default=None, description="Free-form notes.", examples=["Single dosing"])
+
+
+class EquipmentUpdate(BaseModel):
+    """Partial update; only provided fields are applied (PATCH semantics)."""
+
+    type: EquipmentType | None = Field(default=None, description="Kind of equipment.", examples=["grinder"])
+    name: str | None = Field(default=None, min_length=1, description="Model name.", examples=["Niche Zero"])
+    brand: str | None = Field(default=None, description="Manufacturer; null clears it.", examples=["Niche"])
+    notes: str | None = Field(default=None, description="Free-form notes; null clears them.", examples=["Single dosing"])
+
+    # type/name are NOT NULL: omit to leave unchanged; brand/notes are nullable (null clears).
+    _no_null = reject_null("type", "name")
 
 
 class EquipmentRead(BaseModel):

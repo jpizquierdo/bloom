@@ -51,6 +51,25 @@ def test_admin_can_rename_and_every_bean_follows(client, admin_headers, alice_he
     assert refreshed["roaster"]["name"] == "Nomad Coffee Roasters"
 
 
+def test_admin_can_clear_roaster_metadata_with_null(client, admin_headers, alice_headers):
+    roaster_id = client.post(
+        "/roasters",
+        headers=alice_headers,
+        json={"name": "Nomad", "country": "Spain", "notes": "great subs"},
+    ).json()["id"]
+
+    resp = client.patch(f"/roasters/{roaster_id}", headers=admin_headers, json={"country": None, "notes": None})
+    assert resp.status_code == 200
+    assert resp.json()["country"] is None
+    assert resp.json()["notes"] is None
+
+
+def test_null_roaster_name_rejected(client, admin_headers, alice_headers):
+    roaster_id = client.post("/roasters", headers=alice_headers, json={"name": "Nomad"}).json()["id"]
+    # name is NOT NULL: an explicit null is a 422, not a rename.
+    assert client.patch(f"/roasters/{roaster_id}", headers=admin_headers, json={"name": None}).status_code == 422
+
+
 def test_non_admin_cannot_rename_or_delete_a_roaster(client, alice_headers):
     roaster_id = client.post("/roasters", headers=alice_headers, json={"name": "Nomad"}).json()["id"]
 

@@ -1,11 +1,15 @@
 import {
   equipmentCreateEquipmentMutation,
+  equipmentDeleteEquipmentMutation,
   equipmentListEquipmentOptions,
+  equipmentUpdateEquipmentMutation,
 } from "@/client/@tanstack/react-query.gen"
 import type { EquipmentRead } from "@/client/types.gen"
 import { DataTable } from "@/components/data/data-table"
+import { DeleteAlert } from "@/components/data/delete-alert"
 import { PageHeader } from "@/components/data/page-header"
 import { ResourceDialog } from "@/components/data/resource-dialog"
+import { RowActions } from "@/components/data/row-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,7 +30,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { isAdmin, useCurrentUser } from "@/lib/auth"
 import { EQUIPMENT_TYPES } from "@/lib/domain"
-import { humanize, stripEmpty } from "@/lib/format"
+import { humanize, patchBody, stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -48,31 +52,62 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
+const EMPTY: FormValues = { type: "grinder", name: "", brand: "", notes: "" }
+
 function EquipmentPage() {
   const { user } = useCurrentUser()
   const feedback = useCrudFeedback()
   const { data, isLoading } = useQuery(equipmentListEquipmentOptions())
-  const [dialogOpen, setDialogOpen] = useState(false)
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { type: "grinder", name: "", brand: "", notes: "" },
-  })
+  const [editing, setEditing] = useState<EquipmentRead | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [deleting, setDeleting] = useState<EquipmentRead | null>(null)
+
+  const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY })
 
   const create = useMutation({
     ...equipmentCreateEquipmentMutation(),
     onSuccess: feedback.onSuccess("Equipment created"),
     onError: feedback.onError,
   })
+  const update = useMutation({
+    ...equipmentUpdateEquipmentMutation(),
+    onSuccess: feedback.onSuccess("Equipment updated"),
+    onError: feedback.onError,
+  })
+  const remove = useMutation({
+    ...equipmentDeleteEquipmentMutation(),
+    onSuccess: feedback.onSuccess("Equipment deleted"),
+    onError: feedback.onError,
+  })
+
+  function openCreate() {
+    setEditing(null)
+    form.reset(EMPTY)
+    setDialogOpen(true)
+  }
+
+  function openEdit(equipment: EquipmentRead) {
+    setEditing(equipment)
+    form.reset({
+      type: equipment.type as FormValues["type"],
+      name: equipment.name,
+      brand: equipment.brand ?? "",
+      notes: equipment.notes ?? "",
+    })
+    setDialogOpen(true)
+  }
 
   function onSubmit(values: FormValues) {
-    const request = create.mutateAsync({
-      body: {
-        type: values.type,
-        name: values.name,
-        ...stripEmpty({ brand: values.brand, notes: values.notes }),
-      },
-    })
+    const request = editing
+      ? update.mutateAsync({
+          path: { equipment_id: editing.id },
+          // Clearing brand/notes sends null (blanks it); type/name stay required.
+          body: patchBody(values, ["brand", "notes"]),
+        })
+      : create.mutateAsync({
+          body: { type: values.type, name: values.name, ...stripEmpty({ brand: values.brand, notes: values.notes }) },
+        })
     return submitAndClose(request, () => setDialogOpen(false))
   }
 
@@ -90,6 +125,20 @@ function EquipmentPage() {
       enableSorting: false,
       cell: ({ row }) => row.original.notes ?? "—",
     },
+    {
+      id: "actions",
+      header: "",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <div className="text-right">
+          <RowActions
+            canEdit={isAdmin(user)}
+            onEdit={() => openEdit(row.original)}
+            onDelete={() => setDeleting(row.original)}
+          />
+        </div>
+      ),
+    },
   ]
 
   return (
@@ -99,12 +148,7 @@ function EquipmentPage() {
         description="Grinders, machines and kettles. Brews reference a grinder."
         actions={
           isAdmin(user) ? (
-            <Button
-              onClick={() => {
-                form.reset({ type: "grinder", name: "", brand: "", notes: "" })
-                setDialogOpen(true)
-              }}
-            >
+            <Button onClick={openCreate}>
               <Plus className="size-4" />
               New equipment
             </Button>
@@ -123,10 +167,10 @@ function EquipmentPage() {
       <ResourceDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        title="New equipment"
+        title={editing ? "Edit equipment" : "New equipment"}
         form={form}
         onSubmit={onSubmit}
-        isPending={create.isPending}
+        isPending={create.isPending || update.isPending}
       >
         <FormField
           control={form.control}
@@ -192,6 +236,17 @@ function EquipmentPage() {
           )}
         />
       </ResourceDialog>
+
+      <DeleteAlert
+        open={deleting !== null}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        description={`Delete "${deleting?.name}"? Brews that used it keep their data, just unlinked from the grinder.`}
+        isPending={remove.isPending}
+        onConfirm={() => {
+          if (deleting) remove.mutate({ path: { equipment_id: deleting.id } })
+          setDeleting(null)
+        }}
+      />
     </>
   )
 }

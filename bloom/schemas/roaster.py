@@ -6,6 +6,7 @@ from typing import Annotated
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from bloom.domain.naming import normalize_name
+from bloom.schemas.common import reject_null
 
 
 def _clean_name(value: str) -> str:
@@ -37,6 +38,9 @@ class RoasterUpdate(RoasterBase):
         description="Rename the roaster — every bean referencing it follows.",
         examples=["Nomad Coffee Roasters"],
     )
+
+    # name is NOT NULL: omit to leave it unchanged; an explicit null is a 422, not a rename.
+    _no_null = reject_null("name")
 
 
 class RoasterRead(RoasterBase):

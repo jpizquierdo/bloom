@@ -617,6 +617,32 @@ export type BrewMethodRead = {
 };
 
 /**
+ * BrewMethodUpdate
+ *
+ * Partial update; only provided fields are applied (PATCH semantics).
+ */
+export type BrewMethodUpdate = {
+    /**
+     * Name
+     *
+     * Unique method name.
+     */
+    name?: string | null;
+    /**
+     * Category
+     *
+     * Brewing family.
+     */
+    category?: 'espresso' | 'filter' | 'immersion' | null;
+    /**
+     * Default Ratio
+     *
+     * Default brew ratio (grams of water per gram of coffee); null clears it.
+     */
+    default_ratio?: number | string | null;
+};
+
+/**
  * BrewRead
  */
 export type BrewRead = {
@@ -853,6 +879,38 @@ export type EquipmentRead = {
      * Created At
      */
     created_at: string;
+};
+
+/**
+ * EquipmentUpdate
+ *
+ * Partial update; only provided fields are applied (PATCH semantics).
+ */
+export type EquipmentUpdate = {
+    /**
+     * Type
+     *
+     * Kind of equipment.
+     */
+    type?: 'grinder' | 'espresso_machine' | 'kettle' | 'other' | null;
+    /**
+     * Name
+     *
+     * Model name.
+     */
+    name?: string | null;
+    /**
+     * Brand
+     *
+     * Manufacturer; null clears it.
+     */
+    brand?: string | null;
+    /**
+     * Notes
+     *
+     * Free-form notes; null clears them.
+     */
+    notes?: string | null;
 };
 
 /**
@@ -2096,6 +2154,36 @@ export type BrewMethodsCreateBrewMethodResponses = {
 
 export type BrewMethodsCreateBrewMethodResponse = BrewMethodsCreateBrewMethodResponses[keyof BrewMethodsCreateBrewMethodResponses];
 
+export type BrewMethodsDeleteBrewMethodData = {
+    body?: never;
+    path: {
+        /**
+         * Method Id
+         */
+        method_id: number;
+    };
+    query?: never;
+    url: '/api/v1/brew-methods/{method_id}';
+};
+
+export type BrewMethodsDeleteBrewMethodErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BrewMethodsDeleteBrewMethodError = BrewMethodsDeleteBrewMethodErrors[keyof BrewMethodsDeleteBrewMethodErrors];
+
+export type BrewMethodsDeleteBrewMethodResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type BrewMethodsDeleteBrewMethodResponse = BrewMethodsDeleteBrewMethodResponses[keyof BrewMethodsDeleteBrewMethodResponses];
+
 export type BrewMethodsGetBrewMethodData = {
     body?: never;
     path: {
@@ -2125,6 +2213,36 @@ export type BrewMethodsGetBrewMethodResponses = {
 };
 
 export type BrewMethodsGetBrewMethodResponse = BrewMethodsGetBrewMethodResponses[keyof BrewMethodsGetBrewMethodResponses];
+
+export type BrewMethodsUpdateBrewMethodData = {
+    body: BrewMethodUpdate;
+    path: {
+        /**
+         * Method Id
+         */
+        method_id: number;
+    };
+    query?: never;
+    url: '/api/v1/brew-methods/{method_id}';
+};
+
+export type BrewMethodsUpdateBrewMethodErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BrewMethodsUpdateBrewMethodError = BrewMethodsUpdateBrewMethodErrors[keyof BrewMethodsUpdateBrewMethodErrors];
+
+export type BrewMethodsUpdateBrewMethodResponses = {
+    /**
+     * Successful Response
+     */
+    200: BrewMethodRead;
+};
+
+export type BrewMethodsUpdateBrewMethodResponse = BrewMethodsUpdateBrewMethodResponses[keyof BrewMethodsUpdateBrewMethodResponses];
 
 export type EquipmentListEquipmentData = {
     body?: never;
@@ -2169,6 +2287,36 @@ export type EquipmentCreateEquipmentResponses = {
 
 export type EquipmentCreateEquipmentResponse = EquipmentCreateEquipmentResponses[keyof EquipmentCreateEquipmentResponses];
 
+export type EquipmentDeleteEquipmentData = {
+    body?: never;
+    path: {
+        /**
+         * Equipment Id
+         */
+        equipment_id: number;
+    };
+    query?: never;
+    url: '/api/v1/equipment/{equipment_id}';
+};
+
+export type EquipmentDeleteEquipmentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EquipmentDeleteEquipmentError = EquipmentDeleteEquipmentErrors[keyof EquipmentDeleteEquipmentErrors];
+
+export type EquipmentDeleteEquipmentResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type EquipmentDeleteEquipmentResponse = EquipmentDeleteEquipmentResponses[keyof EquipmentDeleteEquipmentResponses];
+
 export type EquipmentGetEquipmentData = {
     body?: never;
     path: {
@@ -2198,6 +2346,36 @@ export type EquipmentGetEquipmentResponses = {
 };
 
 export type EquipmentGetEquipmentResponse = EquipmentGetEquipmentResponses[keyof EquipmentGetEquipmentResponses];
+
+export type EquipmentUpdateEquipmentData = {
+    body: EquipmentUpdate;
+    path: {
+        /**
+         * Equipment Id
+         */
+        equipment_id: number;
+    };
+    query?: never;
+    url: '/api/v1/equipment/{equipment_id}';
+};
+
+export type EquipmentUpdateEquipmentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EquipmentUpdateEquipmentError = EquipmentUpdateEquipmentErrors[keyof EquipmentUpdateEquipmentErrors];
+
+export type EquipmentUpdateEquipmentResponses = {
+    /**
+     * Successful Response
+     */
+    200: EquipmentRead;
+};
+
+export type EquipmentUpdateEquipmentResponse = EquipmentUpdateEquipmentResponses[keyof EquipmentUpdateEquipmentResponses];
 
 export type BrewsListBrewsData = {
     body?: never;
