@@ -30,7 +30,9 @@ class BeanBase(BaseModel):
         description="Tasting notes printed on the bag.",
         examples=["Peach, jasmine, black tea"],
     )
-    rating: int | None = Field(default=None, ge=1, le=5, description="Overall rating of the coffee itself, 1–5 (null = unrated).", examples=[4])
+    rating: int | None = Field(
+        default=None, ge=1, le=5, description="Overall rating of the coffee itself, 1–5 (null = unrated).", examples=[4]
+    )
     website: str | None = Field(
         default=None,
         description="URL with more info about the coffee or roaster.",
