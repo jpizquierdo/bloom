@@ -91,19 +91,8 @@ everything on port 1025 and delivers nothing, so you can read the real rendered 
 ## API overview
 
 Everything is served under `/api/v1` (`/health` stays at the root, for container healthchecks).
-**Interactive Swagger docs live at [`/docs`](http://localhost:8000/docs)** — the fastest way to
-explore the API.
-
-| Area | Endpoints |
-|------|-----------|
-| Auth | `POST /auth/token`, `GET /auth/me`, `POST /auth/recover-password`, `POST /auth/reset-password` |
-| Users (admin) | `POST /users`, `GET /users`, `PATCH /users/{id}` |
-| Beans | `POST/GET /beans` (`?mine=true`), `GET/PATCH/DELETE /beans/{id}` |
-| Lots | `POST/GET /beans/{id}/lots`, `GET/PATCH/DELETE /lots/{id}` |
-| Roasters | `POST/GET /roasters`, `GET /roasters/{id}`; `PATCH/DELETE /roasters/{id}` and `POST /roasters/{id}/merge` are admin-only |
-| Brews | `POST/GET /brews` (`?mine=true`), `GET/PATCH/DELETE /brews/{id}` |
-| Tastings | `POST/GET /brews/{id}/tastings`, `GET /tastings` (`?mine=true`), `GET/PATCH/DELETE /tastings/{id}` |
-| Lookups | `GET /brew-methods`, `GET /equipment` (create is admin-only) |
+For the full list of endpoints and their schemas, use the **interactive Swagger docs at
+[`/docs`](http://localhost:8000/docs)** — the fastest way to explore the API.
 
 Bloom is a **shared log**: any authenticated user reads everything and can add beans, brew from
 any bean and taste any brew; only a row's creator (or an admin) may edit or delete it. A **bean
