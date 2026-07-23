@@ -50,7 +50,7 @@ Settings come from environment variables or a local `.env` (copy `.env.example`)
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` | Postgres credentials (default `bloom` / `bloom`). |
 | `POSTGRES_SERVER` / `POSTGRES_PORT` / `POSTGRES_DB` | Postgres host, port and database (default `localhost` / `5432` / `bloom`). |
 | `JWT_SECRET` | Access-token signing key — **set a strong value in production**. |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Access-token lifetime (default 60). |
+| `ACCESS_TOKEN_EXPIRE_HOURS` | Access-token lifetime in hours; generous by default for self-hosted use — set it lower for shorter sessions. |
 | `RESET_TOKEN_EXPIRE_MINUTES` | Lifetime of a password-reset link (default 30). |
 | `SMTP_HOST` / `SMTP_PORT` | Outgoing mail server (default port `587`). Leave the host blank to disable sending — links are written to the log instead. |
 | `SMTP_USER` / `SMTP_PASSWORD` | SMTP credentials, if the server needs them. |

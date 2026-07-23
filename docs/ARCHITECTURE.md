@@ -381,12 +381,20 @@ silent:
 
 ### 18 — Bearer token in `localStorage`, no refresh flow
 
-The API issues a 60-minute JWT and has no refresh endpoint, so the UI stores the token in
-`localStorage`, attaches it on every request, and on a `401` clears it and returns to `/login`.
-An expired session means logging in again.
+The API issues a single JWT access token (lifetime `ACCESS_TOKEN_EXPIRE_HOURS`, defaulting to a
+**generous 48h** for self-hosted convenience — lower it via env if you want shorter sessions) and
+has no refresh endpoint, so the UI stores the token in `localStorage`, attaches it on every
+request, and on a `401` clears it and returns to `/login`. An expired session means logging in
+again.
+
+A **password change invalidates every outstanding access token**: `get_current_user` refuses a
+token whose issue time predates `user.password_changed_at`, via the same millisecond `iat_ms`
+comparison used for reset links (decision 21). So changing a password logs out all active
+sessions on their next request.
 
 `localStorage` is readable by any script on the origin, so this leans on the app shipping no
 third-party JavaScript (the CSP-free, self-hosted, single-origin setup makes that tractable).
+A refresh flow is **deliberately deferred** — overkill for the current self-hosted threat model.
 If the threat model ever widens, the fix is a refresh flow with an httpOnly cookie — a backend
 change, not a UI one.
 
