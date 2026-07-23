@@ -59,6 +59,7 @@ function BrewsPage() {
   )
 
   const [editing, setEditing] = useState<BrewRead | null>(null)
+  const [duplicating, setDuplicating] = useState<BrewRead | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState<BrewRead | null>(null)
   const [roasterFilter, setRoasterFilter] = useState("all")
@@ -132,6 +133,7 @@ function BrewsPage() {
           <Button
             onClick={() => {
               setEditing(null)
+              setDuplicating(null)
               setDialogOpen(true)
             }}
           >
@@ -237,6 +239,12 @@ function BrewsPage() {
                       canEdit={canEdit(brew, user)}
                       onEdit={() => {
                         setEditing(brew)
+                        setDuplicating(null)
+                        setDialogOpen(true)
+                      }}
+                      onDuplicate={() => {
+                        setEditing(null)
+                        setDuplicating(brew)
                         setDialogOpen(true)
                       }}
                       onDelete={() => setDeleting(brew)}
@@ -282,7 +290,15 @@ function BrewsPage() {
         </div>
       )}
 
-      <BrewDialog open={dialogOpen} onOpenChange={setDialogOpen} brew={editing} />
+      <BrewDialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (!open) setDuplicating(null)
+        }}
+        brew={editing}
+        prefillFrom={duplicating ?? undefined}
+      />
 
       <DeleteAlert
         open={deleting !== null}

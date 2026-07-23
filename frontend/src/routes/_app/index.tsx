@@ -8,6 +8,7 @@ import { BrewDiagnostics } from "@/components/brews/diagnostics"
 import { PageHeader } from "@/components/data/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { StarRating } from "@/components/ui/star-rating"
 import { useCurrentUser } from "@/lib/auth"
 import { formatDateTime, formatNumber } from "@/lib/format"
 import { useQuery } from "@tanstack/react-query"
@@ -25,8 +26,16 @@ function DashboardPage() {
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
 
   const recentBrews = [...(brews ?? [])]
+    .filter((brew) => brew.user_id === user?.id)
     .sort((a, b) => (b.brewed_at ?? "").localeCompare(a.brewed_at ?? ""))
     .slice(0, 5)
+
+  // My tasting per brew (at most one, enforced by the API), for the star on each row.
+  const myTastingByBrew = new Map(
+    (tastings ?? [])
+      .filter((tasting) => tasting.user_id === user?.id)
+      .map((tasting) => [tasting.brew_id, tasting]),
+  )
 
   const beanName = (id: number) => beans?.find((bean) => bean.id === id)?.name ?? `#${id}`
   const methodName = (id: number) =>
@@ -36,7 +45,7 @@ function DashboardPage() {
     <>
       <PageHeader
         title={`Welcome back${user ? `, ${user.username}` : ""}`}
-        description="What the whole log has been drinking."
+        description="Here's what you've been brewing."
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -47,7 +56,7 @@ function DashboardPage() {
 
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Recent brews</CardTitle>
+          <CardTitle>Your recent brews</CardTitle>
           <CardAction>
             <Button asChild variant="ghost" size="sm">
               <Link to="/brews">View all</Link>
@@ -77,6 +86,13 @@ function DashboardPage() {
                   {formatNumber(brew.dose_grams)} g
                   {brew.ratio ? ` · 1:${formatNumber(brew.ratio, 2)}` : ""}
                 </span>
+                {myTastingByBrew.get(brew.id)?.overall ? (
+                  <StarRating
+                    value={myTastingByBrew.get(brew.id)?.overall ?? 0}
+                    readOnly
+                    size={16}
+                  />
+                ) : null}
                 <BrewDiagnostics brew={brew} />
               </Link>
             ))
