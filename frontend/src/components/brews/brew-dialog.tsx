@@ -91,9 +91,17 @@ interface BrewDialogProps {
   brew: BrewRead | null
   /** Preselect a bean when brewing straight from a bean row. */
   defaultBeanId?: number
+  /** Seed a create ("brew again") from an existing brew, minus brewed_at and TDS. */
+  prefillFrom?: BrewRead
 }
 
-export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDialogProps) {
+export function BrewDialog({
+  open,
+  onOpenChange,
+  brew,
+  defaultBeanId,
+  prefillFrom,
+}: BrewDialogProps) {
   const feedback = useCrudFeedback()
   const { data: beans } = useQuery(beansListBeansOptions())
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
@@ -114,34 +122,38 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
 
   useEffect(() => {
     if (!open) return
+    // "Brew again": reuse an existing brew's recipe, but brewed_at and TDS start blank
+    // (brewed_at defaults to now on create; TDS is always a fresh refractometer reading).
+    const source = brew ?? prefillFrom
     form.reset(
-      brew
+      source
         ? {
-            bean_id: String(brew.bean_id),
-            lot_id: brew.lot_id ? String(brew.lot_id) : "",
-            method_id: String(brew.method_id),
-            grinder_id: brew.grinder_id ? String(brew.grinder_id) : "",
-            dose_grams: brew.dose_grams,
-            yield_grams: brew.yield_grams ?? "",
-            water_grams: brew.water_grams ?? "",
-            grind_setting: brew.grind_setting ?? "",
-            water_temp_celsius: brew.water_temp_celsius ?? "",
-            brew_time_seconds: brew.brew_time_seconds?.toString() ?? "",
-            tds_percent: brew.tds_percent ?? "",
-            brewed_at: toDateTimeLocal(brew.brewed_at),
-            notes: brew.notes ?? "",
+            bean_id: String(source.bean_id),
+            lot_id: source.lot_id ? String(source.lot_id) : "",
+            method_id: String(source.method_id),
+            grinder_id: source.grinder_id ? String(source.grinder_id) : "",
+            dose_grams: source.dose_grams,
+            yield_grams: source.yield_grams ?? "",
+            water_grams: source.water_grams ?? "",
+            grind_setting: source.grind_setting ?? "",
+            water_temp_celsius: source.water_temp_celsius ?? "",
+            brew_time_seconds: source.brew_time_seconds?.toString() ?? "",
+            tds_percent: brew ? (source.tds_percent ?? "") : "",
+            brewed_at: brew ? toDateTimeLocal(source.brewed_at) : "",
+            notes: source.notes ?? "",
           }
         : { ...EMPTY, bean_id: defaultBeanId ? String(defaultBeanId) : "" },
     )
-  }, [open, brew, defaultBeanId, form])
+  }, [open, brew, prefillFrom, defaultBeanId, form])
 
-  // Fresh dialog: hide finished lots and allow the lot to be auto-selected again.
+  // Fresh dialog: hide finished lots. Allow auto-lot again on a blank create, but not when
+  // prefilling — keep the copied lot for the source's bean (re-enabled if the bean changes).
   useEffect(() => {
     if (open) {
       setShowFinished(false)
-      autoLotBeanRef.current = null
+      autoLotBeanRef.current = prefillFrom ? String(prefillFrom.bean_id) : null
     }
-  }, [open])
+  }, [open, prefillFrom])
 
   // On create, default the lot to the bean's most recent OPEN lot (once per bean). This also
   // clears a stale lot when the bean changes; editing keeps the brew's own lot untouched.
@@ -200,7 +212,7 @@ export function BrewDialog({ open, onOpenChange, brew, defaultBeanId }: BrewDial
     <ResourceDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={brew ? "Edit brew" : "Log a brew"}
+      title={brew ? "Edit brew" : prefillFrom ? "Brew again" : "Log a brew"}
       description="Dose is the only required measure; fill in what you actually recorded."
       form={form}
       onSubmit={onSubmit}

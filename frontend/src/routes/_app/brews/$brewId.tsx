@@ -32,7 +32,7 @@ import { formatDate, formatDateTime, formatNumber, formatSeconds, humanize } fro
 import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { ArrowLeft, Pencil, Plus } from "lucide-react"
+import { ArrowLeft, Copy, Pencil, Plus } from "lucide-react"
 import type { ReactNode } from "react"
 import { useState } from "react"
 
@@ -58,6 +58,7 @@ function BrewDetailPage() {
   })
 
   const [brewDialogOpen, setBrewDialogOpen] = useState(false)
+  const [duplicating, setDuplicating] = useState(false)
   const [tastingDialogOpen, setTastingDialogOpen] = useState(false)
   const [editingTasting, setEditingTasting] = useState<TastingRead | null>(null)
   const [deletingTasting, setDeletingTasting] = useState<TastingRead | null>(null)
@@ -105,12 +106,30 @@ function BrewDetailPage() {
           .filter(Boolean)
           .join(" · ")}
         actions={
-          canEdit(brew, user) ? (
-            <Button variant="outline" onClick={() => setBrewDialogOpen(true)}>
-              <Pencil className="size-4" />
-              Edit brew
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDuplicating(true)
+                setBrewDialogOpen(true)
+              }}
+            >
+              <Copy className="size-4" />
+              Brew again
             </Button>
-          ) : null
+            {canEdit(brew, user) ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDuplicating(false)
+                  setBrewDialogOpen(true)
+                }}
+              >
+                <Pencil className="size-4" />
+                Edit brew
+              </Button>
+            ) : null}
+          </div>
         }
       />
 
@@ -250,7 +269,15 @@ function BrewDetailPage() {
         </div>
       )}
 
-      <BrewDialog open={brewDialogOpen} onOpenChange={setBrewDialogOpen} brew={brew} />
+      <BrewDialog
+        open={brewDialogOpen}
+        onOpenChange={(open) => {
+          setBrewDialogOpen(open)
+          if (!open) setDuplicating(false)
+        }}
+        brew={duplicating ? null : brew}
+        prefillFrom={duplicating ? brew : undefined}
+      />
       <TastingDialog
         open={tastingDialogOpen}
         onOpenChange={setTastingDialogOpen}

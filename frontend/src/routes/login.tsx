@@ -77,15 +77,7 @@ function LoginPage() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <div className="flex items-center justify-between">
-                  <FormLabel>Password</FormLabel>
-                  <Link
-                    to="/recover-password"
-                    className="text-sm text-muted-foreground underline-offset-4 hover:underline"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <FormLabel>Password</FormLabel>
                 <FormControl>
                   <Input type="password" autoComplete="current-password" {...field} />
                 </FormControl>
@@ -93,6 +85,14 @@ function LoginPage() {
               </FormItem>
             )}
           />
+
+          {/* After the password field so Tab goes email → password → this → Log in. */}
+          <Link
+            to="/recover-password"
+            className="block text-right text-sm text-muted-foreground underline-offset-4 hover:underline"
+          >
+            Forgot password?
+          </Link>
 
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
 

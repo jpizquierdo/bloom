@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { Copy, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 
 interface RowActionsProps {
   onEdit: () => void
@@ -13,6 +13,9 @@ interface RowActionsProps {
   /** Rows you don't own are read-only (shared log): the menu is hidden entirely. */
   canEdit: boolean
   deleteLabel?: string
+  /** Optional duplicate action, rendered between Edit and Delete when provided. */
+  onDuplicate?: () => void
+  duplicateLabel?: string
 }
 
 export function RowActions({
@@ -20,6 +23,8 @@ export function RowActions({
   onDelete,
   canEdit,
   deleteLabel = "Delete",
+  onDuplicate,
+  duplicateLabel = "Duplicate",
 }: RowActionsProps) {
   if (!canEdit) return null
 
@@ -41,6 +46,12 @@ export function RowActions({
           <Pencil className="size-4" />
           Edit
         </DropdownMenuItem>
+        {onDuplicate ? (
+          <DropdownMenuItem onSelect={onDuplicate}>
+            <Copy className="size-4" />
+            {duplicateLabel}
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem variant="destructive" onSelect={onDelete}>
           <Trash2 className="size-4" />
           {deleteLabel}
