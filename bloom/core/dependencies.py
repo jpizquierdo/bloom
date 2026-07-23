@@ -52,6 +52,11 @@ def get_current_user(
     user = users_repo.get_by_id(db, user_id)
     if user is None or not user.is_active:
         raise credentials_exception
+    # A password change ends every session: reject tokens minted before it (same iat_ms
+    # mechanism as password-reset links, see decision 21).
+    issued_ms = payload.get("iat_ms")
+    if issued_ms is None or issued_ms < int(user.password_changed_at.timestamp() * 1000):
+        raise credentials_exception
     return user
 
 

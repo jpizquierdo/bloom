@@ -1,5 +1,7 @@
 """Auth flow: token issuance, current user, and rejection paths."""
 
+from bloom.services import users_service
+
 
 def test_login_and_me(client, users):
     resp = client.post(
@@ -47,3 +49,20 @@ def test_inactive_user_cannot_login(client, db, users):
         data={"username": "alice@example.com", "password": "alicepass1"},
     )
     assert resp.status_code == 401
+
+
+def test_password_change_invalidates_existing_access_tokens(client, db, users):
+    # An access token minted before the last password change must stop working, so
+    # changing a password logs out every active session.
+    token = client.post(
+        "/auth/token",
+        data={"username": "alice@example.com", "password": "alicepass1"},
+    ).json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    assert client.get("/auth/me", headers=headers).status_code == 200
+
+    # Changing the password bumps password_changed_at, which postdates the token.
+    users_service.set_password(db, users["alice"], "newpass123")
+    db.commit()
+
+    assert client.get("/auth/me", headers=headers).status_code == 401

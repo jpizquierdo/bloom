@@ -179,8 +179,8 @@ read `detail`.
 
 - **Siri phrase:** name the shortcut "Bloom" so "Hey Siri, Bloom" runs it. Add it to the
   Home Screen for one-tap access.
-- **Speed:** cache the token in a variable within a single run; tokens last
-  `ACCESS_TOKEN_EXPIRE_MINUTES` (default 60), so long sessions may need a re-login.
+- **Speed:** cache the token in a variable within a single run; a token lasts
+  `ACCESS_TOKEN_EXPIRE_HOURS` (generous by default), so a re-login is rarely needed.
 - **Explore the API first:** open `BASE_URL/docs` (Swagger) in Safari to see every endpoint,
   field, and example response before wiring the shortcut.
 

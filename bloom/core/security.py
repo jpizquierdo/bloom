@@ -46,7 +46,7 @@ def _create_token(subject: str, token_type: TokenType, minutes: int) -> str:
 def create_access_token(subject: str, expires_minutes: int | None = None) -> str:
     """Create a signed JWT access token whose ``sub`` claim is ``subject``."""
     settings = get_settings()
-    minutes = expires_minutes if expires_minutes is not None else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    minutes = expires_minutes if expires_minutes is not None else settings.ACCESS_TOKEN_EXPIRE_HOURS * 60
     return _create_token(subject, "access", minutes)
 
 
