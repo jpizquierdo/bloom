@@ -13,6 +13,7 @@ from sqlalchemy import (
     Integer,
     SmallInteger,
     Text,
+    UniqueConstraint,
     func,
     text,
 )
@@ -37,13 +38,14 @@ _SCORE_COLUMNS = (
 
 
 class Tasting(Base):
-    """A subjective evaluation of a brew; a brew may have several (1:N), and
-    different users may each score the same brew (6). ``user_id`` records who
-    tasted."""
+    """A subjective evaluation of a brew. A brew may have several tastings from
+    different users (6), but each user tastes a given brew at most once — see the
+    ``(brew_id, user_id)`` unique constraint. ``user_id`` records who tasted."""
 
     __tablename__ = "tasting"
     __table_args__ = (
         *(CheckConstraint(f"{column} BETWEEN 1 AND 5", name=f"ck_tasting_{column}_range") for column in _SCORE_COLUMNS),
+        UniqueConstraint("brew_id", "user_id", name="uq_tasting_brew_user"),
         Index("idx_tasting_brew_id", "brew_id"),
         Index("idx_tasting_user_id", "user_id"),
     )

@@ -12,6 +12,11 @@ Guidance for AI assistants working in this repository.
   - No `Co-Authored-By: Claude` or similar co-authorship / "in collaboration with
     Claude" lines.
   - Commits should read as authored solely by the repository owner.
+- **Run the linters before every commit / PR — without being asked.** CI runs
+  `uv run ruff format --check .` and `uv run ruff check .` and fails on any drift, so before
+  committing (and before opening a PR) run `uv run ruff format . && uv run ruff check .` and
+  fix what they report. For frontend changes also run the JS checks (`npm run lint`,
+  `npm run build`) as noted under *Web UI*.
 
 ## Code style
 
@@ -51,6 +56,12 @@ Guidance for AI assistants working in this repository.
   tests — but it breaks a real deploy, which runs `alembic upgrade head` on startup.
 - See `docs/ARCHITECTURE.md` for the architecture, data model, and design decisions
   (source of truth). `README.md` covers how to run and use the project.
+- **Keep `docs/ARCHITECTURE.md` in sync with the code — without being asked.** Whenever a change
+  touches something it documents — the data model (a new table, column, or constraint), the
+  layering rule, an ownership/access rule, an `ON DELETE` policy, or anything that contradicts an
+  existing numbered decision — update the relevant section (or add a new numbered decision) as part
+  of the same change. Pure UI or behaviour tweaks that don't alter a documented decision need no
+  update.
 
 ## Web UI (`frontend/`)
 

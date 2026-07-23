@@ -28,6 +28,12 @@ def list_for_user(db: Session, user_id: int) -> list[Tasting]:
     return list(db.execute(stmt).scalars().all())
 
 
+def get_for_brew_user(db: Session, brew_id: int, user_id: int) -> Tasting | None:
+    """Fetch ``user_id``'s tasting of ``brew_id``, if any (at most one exists)."""
+    stmt = select(Tasting).where(Tasting.brew_id == brew_id, Tasting.user_id == user_id)
+    return db.execute(stmt).scalars().first()
+
+
 def add(db: Session, *, brew_id: int, user_id: int, **fields: Any) -> Tasting:
     tasting = Tasting(brew_id=brew_id, user_id=user_id, **fields)
     db.add(tasting)

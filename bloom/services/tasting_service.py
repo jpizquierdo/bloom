@@ -14,7 +14,7 @@ from bloom.repositories import tastings as tastings_repo
 from bloom.schemas.tasting import TastingCreate, TastingUpdate
 from bloom.services import brew_service
 from bloom.services.access import owns_or_admin
-from bloom.services.errors import ForbiddenError, NotFoundError
+from bloom.services.errors import ConflictError, ForbiddenError, NotFoundError
 
 logger = get_logger(__name__)
 
@@ -50,8 +50,14 @@ def get_owned_tasting(db: Session, tasting_id: int, user: User) -> Tasting:
 
 
 def create_tasting(db: Session, brew_id: int, data: TastingCreate, user: User) -> Tasting:
-    """Add a tasting (authored by ``user``) to any existing brew."""
+    """Add a tasting (authored by ``user``) to any existing brew.
+
+    Each user tastes a given brew at most once; a second attempt raises a
+    ``ConflictError`` (409) — the existing tasting should be edited instead.
+    """
     brew_service.get_brew(db, brew_id)  # 404 if the brew does not exist
+    if tastings_repo.get_for_brew_user(db, brew_id, user.id) is not None:
+        raise ConflictError("You have already tasted this brew; edit your existing tasting")
     tasting = tastings_repo.add(db, brew_id=brew_id, user_id=user.id, **data.model_dump(exclude_none=True))
     db.commit()
     db.refresh(tasting)

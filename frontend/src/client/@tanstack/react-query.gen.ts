@@ -831,7 +831,8 @@ export const tastingsListTastingsOptions = (options: Options<TastingsListTasting
  *
  * Add a tasting to any brew; you are recorded as its taster.
  *
- * A brew can be scored by several users, so multiple tastings per brew are allowed.
+ * A brew can be scored by several users, but each user tastes a brew at most
+ * once — a second attempt returns 409; edit your existing tasting instead.
  */
 export const tastingsCreateTastingMutation = (options?: Partial<Options<TastingsCreateTastingData>>): UseMutationOptions<TastingsCreateTastingResponse, TastingsCreateTastingError, Options<TastingsCreateTastingData>> => {
     const mutationOptions: UseMutationOptions<TastingsCreateTastingResponse, TastingsCreateTastingError, Options<TastingsCreateTastingData>> = {

@@ -167,7 +167,7 @@ brew (tasters).
 | `brew_method` | Lookup: V60, Espresso, AeroPress… with a category.                  |
 | `equipment`   | Grinders, machines, kettles — one table, `type` discriminator.      |
 | `brew`        | A single extraction: the objective parameters. Central entity; `user_id` is the author, `lot_id` the optional lot brewed. |
-| `tasting`     | A subjective evaluation of a brew (1:N — several per brew, by different users); `user_id` is the taster. |
+| `tasting`     | A subjective evaluation of a brew (1:N — one per user, several per brew across different users); `user_id` is the taster. |
 
 The live schema is owned by **Alembic migrations** (`alembic/versions/`); the ORM models in
 `bloom/db/models/` are the source of truth for each table's shape. To eyeball the current
@@ -217,10 +217,14 @@ change to extend, avoiding the rigidity of Postgres enums.
 ### 5 — Single `equipment` table with a `type` discriminator
 Grinders, machines and kettles share enough shape. `brew` references it as `grinder_id`.
 
-### 6 — `tasting` is 1:N with `brew`
-Same extraction can be scored by more than one person, or re-tasted as it cools. Keeping
-tasting separate keeps objective parameters clean from subjective scores. Each tasting
-records its taster (`tasting.user_id`), so several users can score the same brew (see 11).
+### 6 — `tasting` is 1:N with `brew`, one per user
+The same extraction can be scored by more than one person, so keeping tasting separate keeps
+objective parameters clean from subjective scores. Each tasting records its taster
+(`tasting.user_id`), so several users can score the same brew (see 11). A **unique constraint
+on `(brew_id, user_id)`** caps it at one tasting per user per brew: a brew is a single
+extraction, so a user evaluates it once and **edits** that tasting to refine it — a second
+`POST /brews/{id}/tastings` returns `409` rather than stacking a duplicate. Different users
+still each get their own tasting.
 
 ### 7 — `grind_setting` as `TEXT`, not numeric
 Every grinder has its own scale; a number would lose meaning across grinders.
