@@ -17,7 +17,8 @@ router = APIRouter(tags=["tastings"])
 def create_tasting(brew_id: int, data: TastingCreate, db: DbSession, user: CurrentUser) -> TastingRead:
     """Add a tasting to any brew; you are recorded as its taster.
 
-    A brew can be scored by several users, so multiple tastings per brew are allowed.
+    A brew can be scored by several users, but each user tastes a brew at most
+    once — a second attempt returns 409; edit your existing tasting instead.
     """
     return tasting_service.create_tasting(db, brew_id, data, user)
 

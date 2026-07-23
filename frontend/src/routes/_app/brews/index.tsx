@@ -5,6 +5,7 @@ import {
   brewsListBrewsOptions,
   equipmentListEquipmentOptions,
   roastersListRoastersOptions,
+  tastingsListAllTastingsOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { BrewRead } from "@/client/types.gen"
 import { BrewDialog } from "@/components/brews/brew-dialog"
@@ -31,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { StarRating } from "@/components/ui/star-rating"
 import { canEdit, useCurrentUser } from "@/lib/auth"
 import { beanLabel } from "@/lib/domain"
 import { formatDateTime, formatNumber, formatSeconds } from "@/lib/format"
@@ -52,6 +54,9 @@ function BrewsPage() {
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
   const { data: equipment } = useQuery(equipmentListEquipmentOptions())
   const { data: roasters } = useQuery(roastersListRoastersOptions())
+  const { data: myTastings } = useQuery(
+    tastingsListAllTastingsOptions({ query: { mine: true } }),
+  )
 
   const [editing, setEditing] = useState<BrewRead | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -74,6 +79,9 @@ function BrewsPage() {
   const grinderName = (id: number | null | undefined) =>
     equipment?.find((item) => item.id === id)?.name ?? "—"
   const roasterIdForBean = (beanId: number) => beanOf(beanId)?.roaster.id
+
+  // At most one tasting per brew for the current user (enforced by the API).
+  const myTastingByBrew = new Map((myTastings ?? []).map((tasting) => [tasting.brew_id, tasting]))
 
   // When a roaster is picked, the bean dropdown only offers that roaster's beans.
   const beanOptions = (beans ?? []).filter(
@@ -189,6 +197,7 @@ function BrewsPage() {
           {filtered.map((brew) => {
             const method = methodOf(brew.method_id)
             const roaster = roasterName(brew.bean_id)
+            const myOverall = myTastingByBrew.get(brew.id)?.overall
             // Espresso's meaningful "out" is the beverage yield; for filter/immersion the
             // recipe is defined by the water you pour, so show that instead.
             const out =
@@ -218,6 +227,11 @@ function BrewsPage() {
                       <span className="ml-1 font-normal text-muted-foreground">({roaster})</span>
                     ) : null}
                   </CardTitle>
+                  {myOverall ? (
+                    <StarRating value={myOverall} readOnly size={16} />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Not tasted yet</span>
+                  )}
                   <CardAction>
                     <RowActions
                       canEdit={canEdit(brew, user)}

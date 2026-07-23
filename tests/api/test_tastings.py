@@ -36,10 +36,22 @@ def test_tasting_embeds_taster(client, bob_headers, brew_id):
     assert resp.json()["author"]["username"] == "bob"
 
 
-def test_multiple_tastings_per_brew(client, alice_headers, brew_id):
-    client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 4})
-    client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 5})
-    assert len(client.get(f"/brews/{brew_id}/tastings", headers=alice_headers).json()) == 2
+def test_second_tasting_by_same_user_conflicts(client, alice_headers, brew_id):
+    # Each user tastes a brew at most once: the first is created, the second is a
+    # 409, and the brew keeps exactly one tasting.
+    first = client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 4})
+    assert first.status_code == 201
+
+    second = client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 5})
+    assert second.status_code == 409
+
+    listing = client.get(f"/brews/{brew_id}/tastings", headers=alice_headers)
+    assert len(listing.json()) == 1
+
+    # The right way to change your score is to edit the existing tasting.
+    patched = client.patch(f"/tastings/{first.json()['id']}", headers=alice_headers, json={"overall": 5})
+    assert patched.status_code == 200
+    assert patched.json()["overall"] == 5
 
 
 def test_score_out_of_range_rejected(client, alice_headers, brew_id):

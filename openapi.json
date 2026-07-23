@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Bloom",
-    "version": "0.6.0"
+    "version": "0.7.0"
   },
   "paths": {
     "/health": {
@@ -1772,7 +1772,7 @@
           "tastings"
         ],
         "summary": "Create Tasting",
-        "description": "Add a tasting to any brew; you are recorded as its taster.\n\nA brew can be scored by several users, so multiple tastings per brew are allowed.",
+        "description": "Add a tasting to any brew; you are recorded as its taster.\n\nA brew can be scored by several users, but each user tastes a brew at most\nonce \u2014 a second attempt returns 409; edit your existing tasting instead.",
         "operationId": "tastings-create_tasting",
         "security": [
           {

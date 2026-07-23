@@ -74,6 +74,8 @@ function BrewDetailPage() {
 
   const method = methods?.find((item) => item.id === brew.method_id)
   const grinder = equipment?.find((item) => item.id === brew.grinder_id)
+  // You may taste a brew at most once, so route to editing your own tasting.
+  const myTasting = tastings?.find((tasting) => tasting.user_id === user?.id)
   const lotLabel = lot
     ? [
         lot.roast_date ? `roasted ${formatDate(lot.roast_date)}` : null,
@@ -175,12 +177,12 @@ function BrewDetailPage() {
         <Button
           variant="outline"
           onClick={() => {
-            setEditingTasting(null)
+            setEditingTasting(myTasting ?? null)
             setTastingDialogOpen(true)
           }}
         >
-          <Plus className="size-4" />
-          Add tasting
+          {myTasting ? <Pencil className="size-4" /> : <Plus className="size-4" />}
+          {myTasting ? "Edit your tasting" : "Add tasting"}
         </Button>
       </div>
 
