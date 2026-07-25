@@ -83,8 +83,8 @@ class TestStrengthRangeFor:
     def test_filter_range(self) -> None:
         assert strength_range_for(constants.CATEGORY_FILTER) == constants.STRENGTH_RANGE_FILTER
 
-    def test_immersion_uses_filter_range(self) -> None:
-        assert strength_range_for(constants.CATEGORY_IMMERSION) == constants.STRENGTH_RANGE_FILTER
+    def test_immersion_range(self) -> None:
+        assert strength_range_for(constants.CATEGORY_IMMERSION) == constants.STRENGTH_RANGE_IMMERSION
 
 
 class TestClassifyExtraction:
@@ -97,7 +97,8 @@ class TestClassifyExtraction:
         assert result == ExtractionDiagnostics(strength="below", extraction="below")
 
     def test_strong_and_over_extracted(self) -> None:
-        result = classify_extraction(D("1.5"), D("24"), constants.CATEGORY_FILTER)
+        # 1.8 % TDS is above the filter band's 1.70 % ceiling.
+        result = classify_extraction(D("1.8"), D("24"), constants.CATEGORY_FILTER)
         assert result == ExtractionDiagnostics(strength="above", extraction="above")
 
     def test_espresso_uses_espresso_strength_scale(self) -> None:
@@ -107,7 +108,7 @@ class TestClassifyExtraction:
 
     def test_band_boundaries_are_inclusive(self) -> None:
         low = classify_extraction(D("1.15"), D("18"), constants.CATEGORY_FILTER)
-        high = classify_extraction(D("1.35"), D("22"), constants.CATEGORY_FILTER)
+        high = classify_extraction(D("1.50"), D("22"), constants.CATEGORY_FILTER)
         assert low == ExtractionDiagnostics(strength="within", extraction="within")
         assert high == ExtractionDiagnostics(strength="within", extraction="within")
 

@@ -8,6 +8,7 @@ floats are intentionally not supported so no precision is silently lost.
 
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Final
 
 from bloom.domain import constants
 
@@ -25,6 +26,23 @@ class ExtractionDiagnostics:
 
     strength: str | None
     extraction: str | None
+
+
+@dataclass(frozen=True)
+class ControlChartRanges:
+    """Target ``(low, high)`` bands for the brewing control chart.
+
+    Defaults mirror ``domain/constants.py``; callers (the service layer) may pass
+    a customized instance assembled from settings so the bands are tunable.
+    """
+
+    strength_filter: tuple[Decimal, Decimal] = constants.STRENGTH_RANGE_FILTER
+    strength_immersion: tuple[Decimal, Decimal] = constants.STRENGTH_RANGE_IMMERSION
+    strength_espresso: tuple[Decimal, Decimal] = constants.STRENGTH_RANGE_ESPRESSO
+    extraction_yield: tuple[Decimal, Decimal] = constants.EY_RANGE
+
+
+DEFAULT_CHART_RANGES: Final = ControlChartRanges()
 
 
 def brew_ratio(
@@ -73,21 +91,27 @@ def extraction_yield(
     return (Decimal(tds_percent) * Decimal(yield_grams)) / Decimal(dose_grams)
 
 
-def strength_range_for(category: str) -> tuple[Decimal, Decimal]:
+def strength_range_for(
+    category: str,
+    ranges: ControlChartRanges = DEFAULT_CHART_RANGES,
+) -> tuple[Decimal, Decimal]:
     """Return the target TDS % band for a brew-method category."""
     if category == constants.CATEGORY_ESPRESSO:
-        return constants.STRENGTH_RANGE_ESPRESSO
-    return constants.STRENGTH_RANGE_FILTER
+        return ranges.strength_espresso
+    if category == constants.CATEGORY_IMMERSION:
+        return ranges.strength_immersion
+    return ranges.strength_filter
 
 
 def classify_extraction(
     tds_percent: Measure | None,
     extraction_yield_percent: Measure | None,
     category: str,
+    ranges: ControlChartRanges = DEFAULT_CHART_RANGES,
 ) -> ExtractionDiagnostics:
     """Classify a brew's strength and extraction against the control chart."""
-    strength_low, strength_high = strength_range_for(category)
-    ey_low, ey_high = constants.EY_RANGE
+    strength_low, strength_high = strength_range_for(category, ranges)
+    ey_low, ey_high = ranges.extraction_yield
     return ExtractionDiagnostics(
         strength=_band(tds_percent, strength_low, strength_high),
         extraction=_band(extraction_yield_percent, ey_low, ey_high),

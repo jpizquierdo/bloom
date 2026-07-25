@@ -15,6 +15,7 @@ def test_categories_match_schema_check() -> None:
 def test_ranges_are_decimal_low_below_high() -> None:
     for low, high in (
         constants.STRENGTH_RANGE_FILTER,
+        constants.STRENGTH_RANGE_IMMERSION,
         constants.STRENGTH_RANGE_ESPRESSO,
         constants.EY_RANGE,
     ):
@@ -24,6 +25,7 @@ def test_ranges_are_decimal_low_below_high() -> None:
 
 
 def test_range_values() -> None:
-    assert constants.STRENGTH_RANGE_FILTER == (Decimal("1.15"), Decimal("1.35"))
+    assert constants.STRENGTH_RANGE_FILTER == (Decimal("1.15"), Decimal("1.50"))
+    assert constants.STRENGTH_RANGE_IMMERSION == (Decimal("1.40"), Decimal("1.70"))
     assert constants.STRENGTH_RANGE_ESPRESSO == (Decimal("8.0"), Decimal("12.0"))
     assert constants.EY_RANGE == (Decimal("18.0"), Decimal("22.0"))

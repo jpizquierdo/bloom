@@ -1,11 +1,15 @@
 """Application settings, loaded from environment variables (and an optional .env)."""
 
+from decimal import Decimal
 from functools import lru_cache
 from typing import Annotated, Any
 
 from pydantic import AnyUrl, BeforeValidator, PostgresDsn, computed_field
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from bloom.domain import constants
+from bloom.domain.calculations import ControlChartRanges
 
 
 def parse_cors(value: Any) -> list[str] | str:
@@ -46,6 +50,18 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "INFO"
 
+    # Brewing-control-chart target bands (inclusive), tunable per taste. Strength is TDS % and
+    # each brew category has its own band (immersion brews stronger than filter, espresso far
+    # more than either). The extraction-yield band is shared across every category.
+    STRENGTH_RANGE_FILTER_LOW: Decimal = constants.STRENGTH_RANGE_FILTER[0]
+    STRENGTH_RANGE_FILTER_HIGH: Decimal = constants.STRENGTH_RANGE_FILTER[1]
+    STRENGTH_RANGE_IMMERSION_LOW: Decimal = constants.STRENGTH_RANGE_IMMERSION[0]
+    STRENGTH_RANGE_IMMERSION_HIGH: Decimal = constants.STRENGTH_RANGE_IMMERSION[1]
+    STRENGTH_RANGE_ESPRESSO_LOW: Decimal = constants.STRENGTH_RANGE_ESPRESSO[0]
+    STRENGTH_RANGE_ESPRESSO_HIGH: Decimal = constants.STRENGTH_RANGE_ESPRESSO[1]
+    EY_RANGE_LOW: Decimal = constants.EY_RANGE[0]
+    EY_RANGE_HIGH: Decimal = constants.EY_RANGE[1]
+
     # Outgoing mail. With SMTP_HOST unset the app still boots and password-reset links are
     # written to the log instead of being sent.
     SMTP_HOST: str | None = None
@@ -63,6 +79,16 @@ class Settings(BaseSettings):
     # Leave empty to skip the first-admin bootstrap.
     BLOOM_ADMIN_EMAIL: str | None = None
     BLOOM_ADMIN_PASSWORD: str | None = None
+
+    @property
+    def control_chart_ranges(self) -> ControlChartRanges:
+        """Assemble the tunable control-chart bands for the domain calculations."""
+        return ControlChartRanges(
+            strength_filter=(self.STRENGTH_RANGE_FILTER_LOW, self.STRENGTH_RANGE_FILTER_HIGH),
+            strength_immersion=(self.STRENGTH_RANGE_IMMERSION_LOW, self.STRENGTH_RANGE_IMMERSION_HIGH),
+            strength_espresso=(self.STRENGTH_RANGE_ESPRESSO_LOW, self.STRENGTH_RANGE_ESPRESSO_HIGH),
+            extraction_yield=(self.EY_RANGE_LOW, self.EY_RANGE_HIGH),
+        )
 
     @computed_field  # type: ignore[prop-decorator]
     @property
