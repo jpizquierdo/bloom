@@ -14,8 +14,10 @@ CATEGORY_IMMERSION: Final = "immersion"
 
 CATEGORIES: Final = (CATEGORY_ESPRESSO, CATEGORY_FILTER, CATEGORY_IMMERSION)
 
-# Control-chart target ranges as (low, high) inclusive bounds. Espresso is far more
-# concentrated, so its strength (TDS %) band differs; the yield band is shared.
-STRENGTH_RANGE_FILTER: Final[tuple[Decimal, Decimal]] = (Decimal("1.15"), Decimal("1.35"))
+# Control-chart target ranges as (low, high) inclusive bounds. Each brew category has its own
+# strength (TDS %) band — immersion (French press / AeroPress) brews stronger than a pour-over
+# filter, and espresso is far more concentrated than either; the yield band is shared.
+STRENGTH_RANGE_FILTER: Final[tuple[Decimal, Decimal]] = (Decimal("1.15"), Decimal("1.50"))
+STRENGTH_RANGE_IMMERSION: Final[tuple[Decimal, Decimal]] = (Decimal("1.40"), Decimal("1.70"))
 STRENGTH_RANGE_ESPRESSO: Final[tuple[Decimal, Decimal]] = (Decimal("8.0"), Decimal("12.0"))
 EY_RANGE: Final[tuple[Decimal, Decimal]] = (Decimal("18.0"), Decimal("22.0"))

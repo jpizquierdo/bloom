@@ -495,11 +495,18 @@ extraction_yield = (tds_percent * yield_grams) / dose_grams
 
 ### Extraction diagnostics
 Classify a brew against the brewing control chart. The strength (TDS %) band depends on the
-category — espresso is far more concentrated than filter — while the extraction-yield band
-is shared. Each axis is reported as `below` / `within` / `above` (or `None` when the
-measurement is missing). Ranges live in `domain/constants.py`:
+category — immersion brews stronger than a pour-over filter, and espresso far more than
+either — while the extraction-yield band is shared. Each axis is reported as `below` /
+`within` / `above` (or `None` when the measurement is missing). The defaults live in
+`domain/constants.py`:
 ```
-STRENGTH_RANGE_FILTER   = (1.15, 1.35)   # TDS %, filter / immersion
-STRENGTH_RANGE_ESPRESSO = (8.0, 12.0)    # TDS %, espresso
-EY_RANGE                = (18.0, 22.0)   # extraction yield %, all categories
+STRENGTH_RANGE_FILTER    = (1.15, 1.50)   # TDS %, filter (pour-over)
+STRENGTH_RANGE_IMMERSION = (1.40, 1.70)   # TDS %, immersion (French press / AeroPress)
+STRENGTH_RANGE_ESPRESSO  = (8.0, 12.0)    # TDS %, espresso
+EY_RANGE                 = (18.0, 22.0)   # extraction yield %, all categories
 ```
+Each bound is overridable from the environment (`STRENGTH_RANGE_FILTER_LOW/HIGH`,
+`STRENGTH_RANGE_IMMERSION_LOW/HIGH`, `STRENGTH_RANGE_ESPRESSO_LOW/HIGH`, `EY_RANGE_LOW/HIGH`).
+`domain/` stays pure: the settings are read in the service layer, which passes a
+`ControlChartRanges` into `classify_extraction` — the domain functions default to the
+constants above.

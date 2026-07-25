@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
+from bloom.core.config import get_settings
 from bloom.core.logger import get_logger
 from bloom.db.models.bean_lot import BeanLot
 from bloom.db.models.brew import Brew
@@ -27,7 +28,7 @@ def serialize(brew: Brew) -> BrewRead:
     ey = extraction_yield(brew.tds_percent, brew.yield_grams, brew.dose_grams)
     if ey is not None:
         ey = ey.quantize(Decimal("0.01"))
-    diagnostics = classify_extraction(brew.tds_percent, ey, category)
+    diagnostics = classify_extraction(brew.tds_percent, ey, category, get_settings().control_chart_ranges)
     read = BrewRead.model_validate(brew)
     read.ratio = ratio
     read.extraction_yield_percent = ey
