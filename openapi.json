@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Bloom",
-    "version": "0.9.0"
+    "version": "0.10.0"
   },
   "paths": {
     "/health": {
@@ -601,11 +601,25 @@
           "beans"
         ],
         "summary": "Create Bean",
-        "description": "Create a bean. It is shared with everyone; you are recorded as its owner.",
+        "description": "Create a bean. It is shared with everyone; you are recorded as its owner.\n\n409 if this roaster already has a bean with that name (matched case-insensitively) \u2014\nopen that one, or resend with `?allow_duplicate=true` if it really is another coffee.",
         "operationId": "beans-create_bean",
         "security": [
           {
             "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "allow_duplicate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Accept a name that already exists under this roaster instead of failing with 409.",
+              "default": false,
+              "title": "Allow Duplicate"
+            },
+            "description": "Accept a name that already exists under this roaster instead of failing with 409."
           }
         ],
         "requestBody": {
@@ -745,7 +759,7 @@
           "beans"
         ],
         "summary": "Update Bean",
-        "description": "Update a bean. Only its owner (or an admin) may edit it.",
+        "description": "Update a bean. Only its owner (or an admin) may edit it.\n\n409 if the new name and roaster are already taken by another bean; merge into it\ninstead, or resend with `?allow_duplicate=true`.",
         "operationId": "beans-update_bean",
         "security": [
           {
@@ -761,6 +775,18 @@
               "type": "integer",
               "title": "Bean Id"
             }
+          },
+          {
+            "name": "allow_duplicate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Accept a name that already exists under this roaster instead of failing with 409.",
+              "default": false,
+              "title": "Allow Duplicate"
+            },
+            "description": "Accept a name that already exists under this roaster instead of failing with 409."
           }
         ],
         "requestBody": {
@@ -822,6 +848,64 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/beans/{bean_id}/merge": {
+      "post": {
+        "tags": [
+          "beans"
+        ],
+        "summary": "Merge Bean",
+        "description": "Fold a duplicate into this bean: its brews and lots move here and it is deleted.\n\nYou must own both beans (or be an admin). This bean keeps its own values and adopts\nthe duplicate's for anything it left empty.",
+        "operationId": "beans-merge_bean",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bean_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Bean Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BeanMerge"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeanRead"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -2314,7 +2398,6 @@
           },
           "name": {
             "type": "string",
-            "minLength": 1,
             "title": "Name",
             "description": "Coffee name.",
             "examples": [
@@ -2628,6 +2711,23 @@
         "type": "object",
         "title": "BeanLotUpdate",
         "description": "All fields optional; only provided fields are applied (PATCH semantics)."
+      },
+      "BeanMerge": {
+        "properties": {
+          "source_id": {
+            "type": "integer",
+            "title": "Source Id",
+            "description": "Bean to merge away: its brews and lots move to the target and it is deleted.",
+            "examples": [
+              7
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_id"
+        ],
+        "title": "BeanMerge"
       },
       "BeanRead": {
         "properties": {
@@ -3120,8 +3220,7 @@
           "name": {
             "anyOf": [
               {
-                "type": "string",
-                "minLength": 1
+                "type": "string"
               },
               {
                 "type": "null"

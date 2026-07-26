@@ -5,8 +5,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from bloom.schemas.common import reject_null
-from bloom.schemas.roaster import RoasterName, RoasterRead
+from bloom.schemas.common import CleanName, reject_null
+from bloom.schemas.roaster import RoasterRead
 from bloom.schemas.user import AuthorRead
 
 Process = Literal["washed", "natural", "honey", "anaerobic", "carbonic_maceration", "other"]
@@ -42,8 +42,8 @@ class BeanBase(BaseModel):
 
 
 class BeanCreate(BeanBase):
-    name: str = Field(min_length=1, description="Coffee name.", examples=["Guji Natural"])
-    roaster: RoasterName = Field(
+    name: CleanName = Field(description="Coffee name.", examples=["Guji Natural"])
+    roaster: CleanName = Field(
         description="Roaster name. Matched case-insensitively; created if it does not exist yet.",
         examples=["Nomad Coffee"],
     )
@@ -52,8 +52,8 @@ class BeanCreate(BeanBase):
 class BeanUpdate(BeanBase):
     """All fields optional; only provided fields are applied (PATCH semantics)."""
 
-    name: str | None = Field(default=None, min_length=1, description="Coffee name.", examples=["Guji Natural"])
-    roaster: RoasterName | None = Field(
+    name: CleanName | None = Field(default=None, description="Coffee name.", examples=["Guji Natural"])
+    roaster: CleanName | None = Field(
         default=None,
         description="Move the bean to this roaster. Matched case-insensitively; created if it does not exist yet.",
         examples=["Nomad Coffee"],
@@ -76,3 +76,10 @@ class BeanRead(BeanBase):
     name: str = Field(examples=["Guji Natural"])
     roaster: RoasterRead = Field(description="The roaster this bean came from.")
     created_at: datetime = Field(examples=["2026-07-05T09:30:00Z"])
+
+
+class BeanMerge(BaseModel):
+    source_id: int = Field(
+        description="Bean to merge away: its brews and lots move to the target and it is deleted.",
+        examples=[7],
+    )

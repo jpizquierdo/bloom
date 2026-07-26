@@ -249,6 +249,18 @@ export type BeanLotUpdate = {
 };
 
 /**
+ * BeanMerge
+ */
+export type BeanMerge = {
+    /**
+     * Source Id
+     *
+     * Bean to merge away: its brews and lots move to the target and it is deleted.
+     */
+    source_id: number;
+};
+
+/**
  * BeanRead
  */
 export type BeanRead = {
@@ -1847,7 +1859,14 @@ export type BeansListBeansResponse = BeansListBeansResponses[keyof BeansListBean
 export type BeansCreateBeanData = {
     body: BeanCreate;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Allow Duplicate
+         *
+         * Accept a name that already exists under this roaster instead of failing with 409.
+         */
+        allow_duplicate?: boolean;
+    };
     url: '/api/v1/beans';
 };
 
@@ -1937,7 +1956,14 @@ export type BeansUpdateBeanData = {
          */
         bean_id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * Allow Duplicate
+         *
+         * Accept a name that already exists under this roaster instead of failing with 409.
+         */
+        allow_duplicate?: boolean;
+    };
     url: '/api/v1/beans/{bean_id}';
 };
 
@@ -1958,6 +1984,36 @@ export type BeansUpdateBeanResponses = {
 };
 
 export type BeansUpdateBeanResponse = BeansUpdateBeanResponses[keyof BeansUpdateBeanResponses];
+
+export type BeansMergeBeanData = {
+    body: BeanMerge;
+    path: {
+        /**
+         * Bean Id
+         */
+        bean_id: number;
+    };
+    query?: never;
+    url: '/api/v1/beans/{bean_id}/merge';
+};
+
+export type BeansMergeBeanErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type BeansMergeBeanError = BeansMergeBeanErrors[keyof BeansMergeBeanErrors];
+
+export type BeansMergeBeanResponses = {
+    /**
+     * Successful Response
+     */
+    200: BeanRead;
+};
+
+export type BeansMergeBeanResponse = BeansMergeBeanResponses[keyof BeansMergeBeanResponses];
 
 export type LotsListLotsData = {
     body?: never;

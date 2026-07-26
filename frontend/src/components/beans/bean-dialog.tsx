@@ -1,11 +1,23 @@
 import {
   beansCreateBeanMutation,
+  beansListBeansOptions,
   beansUpdateBeanMutation,
   roastersListRoastersOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { BeanRead } from "@/client/types.gen"
 import { CreatableCombobox } from "@/components/data/creatable-combobox"
 import { ResourceDialog } from "@/components/data/resource-dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
 import {
   FormControl,
   FormDescription,
@@ -24,12 +36,20 @@ import {
 } from "@/components/ui/select"
 import { StarRating } from "@/components/ui/star-rating"
 import { Textarea } from "@/components/ui/textarea"
-import { BLENDS, PROCESSES, ROAST_LEVELS, ROAST_TYPES } from "@/lib/domain"
+import {
+  BLENDS,
+  PROCESSES,
+  ROAST_LEVELS,
+  ROAST_TYPES,
+  beanLabel,
+  findDuplicateBean,
+} from "@/lib/domain"
 import { humanize, patchBody, stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { useEffect } from "react"
+import { useNavigate } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -117,8 +137,19 @@ interface BeanDialogProps {
 
 export function BeanDialog({ open, onOpenChange, bean }: BeanDialogProps) {
   const feedback = useCrudFeedback()
+  const navigate = useNavigate()
   const { data: roasters } = useQuery(roastersListRoastersOptions())
+  const { data: beans } = useQuery(beansListBeansOptions())
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY })
+  // Values held back while the duplicate warning is up, so confirming re-submits them.
+  const [pending, setPending] = useState<FormValues | null>(null)
+
+  const [watchedName, watchedRoaster] = form.watch(["name", "roaster"])
+  const duplicate = findDuplicateBean(beans ?? [], {
+    name: watchedName,
+    roaster: watchedRoaster,
+    excludeId: bean?.id,
+  })
 
   useEffect(() => {
     if (!open) return
@@ -156,273 +187,334 @@ export function BeanDialog({ open, onOpenChange, bean }: BeanDialogProps) {
     onError: feedback.onError,
   })
 
-  function onSubmit(values: FormValues) {
+  function save(values: FormValues, allowDuplicate: boolean) {
     const normalized = normalize(values)
+    const query = allowDuplicate ? { allow_duplicate: true } : undefined
     const request = bean
-      ? update.mutateAsync({ path: { bean_id: bean.id }, body: patchBody(normalized, CLEARABLE) })
+      ? update.mutateAsync({
+          path: { bean_id: bean.id },
+          query,
+          body: patchBody(normalized, CLEARABLE),
+        })
       : create.mutateAsync({
+          query,
           body: { ...stripEmpty(normalized), name: values.name, roaster: values.roaster },
         })
     return submitAndClose(request, () => onOpenChange(false))
   }
 
+  function onSubmit(values: FormValues) {
+    // The API would refuse this with a 409 anyway; asking first turns that into a choice.
+    if (duplicate) {
+      setPending(values)
+      return
+    }
+    return save(values, false)
+  }
+
+  function openDuplicate() {
+    if (!duplicate) return
+    setPending(null)
+    onOpenChange(false)
+    navigate({ to: "/beans/$beanId", params: { beanId: String(duplicate.id) } })
+  }
+
   return (
-    <ResourceDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={bean ? "Edit bean" : "New bean"}
-      description="Only the name and the roaster are required. Add lots (bags) from the bean's page."
-      form={form}
-      onSubmit={onSubmit}
-      isPending={create.isPending || update.isPending}
-      wide
-    >
-      <FormField
-        control={form.control}
-        name="name"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Name</FormLabel>
-            <FormControl>
-              <Input placeholder="Kirinyaga AA" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="roaster"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Roaster</FormLabel>
-            <FormControl>
-              <CreatableCombobox
-                value={field.value}
-                onChange={field.onChange}
-                options={(roasters ?? []).map((roaster) => roaster.name)}
-                placeholder="Select or type a roaster"
-              />
-            </FormControl>
-            <FormDescription>A roaster you type is created automatically.</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="origin_country"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Origin country</FormLabel>
-            <FormControl>
-              <Input placeholder="Kenya" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="region"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Region</FormLabel>
-            <FormControl>
-              <Input placeholder="Kirinyaga" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="producer"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Producer</FormLabel>
-            <FormControl>
-              <Input placeholder="Kiangoi Factory" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="variety"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Variety</FormLabel>
-            <FormControl>
-              <Input placeholder="SL28, SL34" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="process"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Process</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
+    <>
+      <ResourceDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        title={bean ? "Edit bean" : "New bean"}
+        description="Only the name and the roaster are required. Add lots (bags) from the bean's page."
+        form={form}
+        onSubmit={onSubmit}
+        isPending={create.isPending || update.isPending}
+        wide
+      >
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
               <FormControl>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a process" />
-                </SelectTrigger>
+                <Input placeholder="Kirinyaga AA" {...field} />
               </FormControl>
-              <SelectContent>
-                {PROCESSES.map((process) => (
-                  <SelectItem key={process} value={process}>
-                    {humanize(process)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="roast_level"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Roast level</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
+              {duplicate ? (
+                <FormDescription className="text-amber-600 dark:text-amber-500">
+                  {beanLabel(duplicate)} is already logged.{" "}
+                  <button type="button" onClick={openDuplicate} className="underline">
+                    Open it
+                  </button>{" "}
+                  instead of adding it twice.
+                </FormDescription>
+              ) : null}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="roaster"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Roaster</FormLabel>
               <FormControl>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a roast level" />
-                </SelectTrigger>
+                <CreatableCombobox
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={(roasters ?? []).map((roaster) => roaster.name)}
+                  placeholder="Select or type a roaster"
+                />
               </FormControl>
-              <SelectContent>
-                {ROAST_LEVELS.map((level) => (
-                  <SelectItem key={level} value={level}>
-                    {humanize(level)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="roast_type"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Roast type</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
+              <FormDescription>A roaster you type is created automatically.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="origin_country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Origin country</FormLabel>
               <FormControl>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a roast type" />
-                </SelectTrigger>
+                <Input placeholder="Kenya" {...field} />
               </FormControl>
-              <SelectContent>
-                {ROAST_TYPES.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {humanize(type)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="blend"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Blend</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="region"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Region</FormLabel>
               <FormControl>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Single origin or blend" />
-                </SelectTrigger>
+                <Input placeholder="Kirinyaga" {...field} />
               </FormControl>
-              <SelectContent>
-                {BLENDS.map((blend) => (
-                  <SelectItem key={blend} value={blend}>
-                    {humanize(blend)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="altitude_masl"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Altitude (masl)</FormLabel>
-            <FormControl>
-              <Input type="number" min={0} placeholder="1750" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="tasting_notes_label"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Notes on the label</FormLabel>
-            <FormControl>
-              <Input placeholder="Blackcurrant, grapefruit" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="website"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Website</FormLabel>
-            <FormControl>
-              <Input type="url" placeholder="https://roaster.example/coffee" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="rating"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Rating</FormLabel>
-            <FormControl>
-              <StarRating value={field.value} onChange={field.onChange} aria-label="Bean rating" />
-            </FormControl>
-            <FormDescription>Leave empty if unrated.</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="notes"
-        render={({ field }) => (
-          <FormItem className="sm:col-span-2">
-            <FormLabel>Your notes</FormLabel>
-            <FormControl>
-              <Textarea rows={3} {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </ResourceDialog>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="producer"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Producer</FormLabel>
+              <FormControl>
+                <Input placeholder="Kiangoi Factory" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="variety"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Variety</FormLabel>
+              <FormControl>
+                <Input placeholder="SL28, SL34" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="process"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Process</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a process" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {PROCESSES.map((process) => (
+                    <SelectItem key={process} value={process}>
+                      {humanize(process)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="roast_level"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Roast level</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a roast level" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {ROAST_LEVELS.map((level) => (
+                    <SelectItem key={level} value={level}>
+                      {humanize(level)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="roast_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Roast type</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a roast type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {ROAST_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {humanize(type)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="blend"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Blend</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Single origin or blend" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {BLENDS.map((blend) => (
+                    <SelectItem key={blend} value={blend}>
+                      {humanize(blend)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="altitude_masl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Altitude (masl)</FormLabel>
+              <FormControl>
+                <Input type="number" min={0} placeholder="1750" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="tasting_notes_label"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes on the label</FormLabel>
+              <FormControl>
+                <Input placeholder="Blackcurrant, grapefruit" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Website</FormLabel>
+              <FormControl>
+                <Input type="url" placeholder="https://roaster.example/coffee" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="rating"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Rating</FormLabel>
+              <FormControl>
+                <StarRating value={field.value} onChange={field.onChange} aria-label="Bean rating" />
+              </FormControl>
+              <FormDescription>Leave empty if unrated.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem className="sm:col-span-2">
+              <FormLabel>Your notes</FormLabel>
+              <FormControl>
+                <Textarea rows={3} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </ResourceDialog>
+
+      <AlertDialog open={pending !== null} onOpenChange={(next) => !next && setPending(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>This coffee is already logged</AlertDialogTitle>
+            <AlertDialogDescription>
+              {duplicate ? beanLabel(duplicate) : ""} already exists. Keeping one entry per
+              coffee keeps its brews and lots together — add a second one only if it really is
+              a different coffee.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Back</AlertDialogCancel>
+            <Button type="button" variant="outline" onClick={openDuplicate}>
+              Open the existing one
+            </Button>
+            <AlertDialogAction
+              onClick={() => {
+                const values = pending
+                setPending(null)
+                if (values) save(values, true)
+              }}
+            >
+              {bean ? "Save anyway" : "Create anyway"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

@@ -199,6 +199,10 @@ the `bean`** (`brew.bean_id`, required); they may additionally name the specific
 now fires when a brew names a finished lot. A lot is a shared, creator-owned row like a bean:
 anyone reads it, only its buyer (or an admin) edits it.
 
+Two rows for one coffee defeat this aggregation just as one row per bag did, so a repeated
+name under the same roaster is flagged on write and can be folded back with a merge — see
+decision 22.
+
 ### 2 — Derived vs. measured fields: a hybrid rule
 - **`ratio` is computed in the domain layer, never stored.**
 - **`tds_percent` and `extraction_yield_percent` are stored** — real refractometer
@@ -248,7 +252,8 @@ The instance is a single shared log — a household, or a café bar with several
 Every authenticated user can **read** all beans, brews and tastings; can **add** beans,
 brew from any bean, and taste any brew; and may **edit/delete only what they created**
 (a non-creator write returns `403`). Each row records its creator: `bean.user_id` (owner),
-`bean_lot.user_id` (buyer), `brew.user_id` (author), `tasting.user_id` (taster).
+`bean_lot.user_id` (buyer), `brew.user_id` (author), `tasting.user_id` (taster). Merging one
+bean into another is a write to both, so it needs edit rights on both (decision 22).
 
 This evolved in two steps:
 - Originally `user_id` lived only on `bean` and a brew's owner was derived through it — which
@@ -442,6 +447,41 @@ and the tests run with no mail config at all.
 address is registered, so it cannot be used to enumerate accounts. It is not rate-limited:
 real limiting needs shared state across workers, which is infrastructure this project does not
 otherwise have.
+
+### 22 — Duplicate beans are flagged, not forbidden
+
+Logging the same coffee twice used to be silent: both `POST /beans` returned `201`, and the
+only defence was the user remembering to check the list first. Splitting one coffee's history
+across two rows is exactly what decision 1 exists to prevent, so a bean whose **name already
+exists under the same roaster** (case-folded and whitespace-normalised, like a roaster name)
+is now a `409` naming the existing bean.
+
+**It is a warning, not a constraint.** There is deliberately no unique index on
+`(roaster_id, lower(name))`:
+
+- Instances already hold duplicates, and adding the index would mean a migration that deletes
+  or renames real rows.
+- A roaster can genuinely re-release a coffee under the same name, and the pair is a heuristic
+  for identity, not the identity itself.
+
+So both `POST /beans` and `PATCH /beans/{id}` (a rename, or a move to another roaster, can
+collide just as a creation can) take `?allow_duplicate=true` to insist. The UI warns inline
+while the name is being typed and asks for confirmation on submit, which is where the reported
+problem is actually solved — the `409` is the backstop for every other client. Because there is
+no index to race against, the check is a plain `SELECT`; a concurrent duplicate loses nothing
+but the warning.
+
+**Merge is the cleanup path** (`POST /beans/{id}/merge`), for the duplicates that got through
+before anyone noticed: the source's brews and lots are reassigned to the target, the target
+adopts the source's values for every descriptive field it left empty (`NULL`, or `unknown` for
+the two NOT NULL ones), and the source is deleted. Tastings need no handling — they hang off
+their brew. If the source's roaster is left with no beans and no metadata, it is reaped like
+after a typo fix (decision 13).
+
+Unlike roaster merge, which is admin-only because a roaster is global, **bean merge is allowed
+to whoever may edit both beans** (owner or admin, decision 11): duplicates are usually one
+person's own, and needing an admin to fix them would leave them unfixed. It does move other
+users' brews onto the target — which is the point, since the two rows are the same coffee.
 
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.

@@ -1,22 +1,10 @@
 """Pydantic DTOs for roasters."""
 
 from datetime import datetime
-from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field
 
-from bloom.domain.naming import normalize_name
-from bloom.schemas.common import reject_null
-
-
-def _clean_name(value: str) -> str:
-    name = normalize_name(value)
-    if not name:
-        raise ValueError("must not be blank")
-    return name
-
-
-RoasterName = Annotated[str, AfterValidator(_clean_name)]
+from bloom.schemas.common import CleanName, reject_null
 
 
 class RoasterBase(BaseModel):
@@ -27,13 +15,13 @@ class RoasterBase(BaseModel):
 
 
 class RoasterCreate(RoasterBase):
-    name: RoasterName = Field(description="Roaster name (unique, case-insensitive).", examples=["Nomad Coffee"])
+    name: CleanName = Field(description="Roaster name (unique, case-insensitive).", examples=["Nomad Coffee"])
 
 
 class RoasterUpdate(RoasterBase):
     """All fields optional; only provided fields are applied (PATCH semantics)."""
 
-    name: RoasterName | None = Field(
+    name: CleanName | None = Field(
         default=None,
         description="Rename the roaster — every bean referencing it follows.",
         examples=["Nomad Coffee Roasters"],
