@@ -35,6 +35,30 @@ export function beanLabel(bean: BeanRead): string {
   return `${bean.name} — ${bean.roaster.name}`
 }
 
+function foldName(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLowerCase()
+}
+
+/**
+ * A bean is a duplicate of another when the same roaster already has that name. This only
+ * warns before submitting: the API runs the same check (case-folded in the database) and
+ * is what actually refuses, with 409.
+ */
+export function findDuplicateBean(
+  beans: BeanRead[],
+  { name, roaster, excludeId }: { name: string; roaster: string; excludeId?: number },
+): BeanRead | undefined {
+  const wantedName = foldName(name)
+  const wantedRoaster = foldName(roaster)
+  if (!wantedName || !wantedRoaster) return undefined
+  return beans.find(
+    (bean) =>
+      bean.id !== excludeId &&
+      foldName(bean.name) === wantedName &&
+      foldName(bean.roaster.name) === wantedRoaster,
+  )
+}
+
 /**
  * The API returns a band per metric ("below" / "within" / "above") against the control-chart
  * targets in docs/ARCHITECTURE.md; we only choose how to paint it.

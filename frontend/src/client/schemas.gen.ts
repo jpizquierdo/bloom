@@ -242,7 +242,6 @@ export const BeanCreateSchema = {
         },
         name: {
             type: 'string',
-            minLength: 1,
             title: 'Name',
             description: 'Coffee name.',
             examples: [
@@ -559,6 +558,24 @@ export const BeanLotUpdateSchema = {
     type: 'object',
     title: 'BeanLotUpdate',
     description: 'All fields optional; only provided fields are applied (PATCH semantics).'
+} as const;
+
+export const BeanMergeSchema = {
+    properties: {
+        source_id: {
+            type: 'integer',
+            title: 'Source Id',
+            description: 'Bean to merge away: its brews and lots move to the target and it is deleted.',
+            examples: [
+                7
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'source_id'
+    ],
+    title: 'BeanMerge'
 } as const;
 
 export const BeanReadSchema = {
@@ -1053,8 +1070,7 @@ export const BeanUpdateSchema = {
         name: {
             anyOf: [
                 {
-                    type: 'string',
-                    minLength: 1
+                    type: 'string'
                 },
                 {
                     type: 'null'
