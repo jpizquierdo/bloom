@@ -1,4 +1,7 @@
 # Bloom ☕
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/jpizquierdo?label=Sponsor&logo=github&style=for-the-badge&color=EA4AAA)](https://github.com/sponsors/jpizquierdo)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-FF5E5B?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/jpizquierdo)
+
 
 Self-hosted tracking for the specialty coffee you brew — at home or behind the bar.
 Bloom records the beans you buy, every brew you pull or pour, and how each one tasted,
