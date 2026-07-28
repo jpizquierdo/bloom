@@ -90,7 +90,7 @@ function BeansPage() {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="mb-6 flex flex-wrap items-center gap-2">
         <Input
           placeholder="Search beans…"
           value={search}
