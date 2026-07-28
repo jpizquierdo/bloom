@@ -1,4 +1,5 @@
 # Bloom ☕
+[![Live demo](https://img.shields.io/badge/Live%20demo-bloom.fastapicloud.dev-6F4E37?logo=fastapi&logoColor=white&style=for-the-badge)](https://bloom.fastapicloud.dev/)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/jpizquierdo?label=Sponsor&logo=github&style=for-the-badge&color=EA4AAA)](https://github.com/sponsors/jpizquierdo)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-FF5E5B?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/jpizquierdo)
 
@@ -6,6 +7,19 @@
 Self-hosted tracking for the specialty coffee you brew — at home or behind the bar.
 Bloom records the beans you buy, every brew you pull or pour, and how each one tasted,
 so you can find what actually makes a good cup repeatable.
+
+## Try it
+
+A live demo runs at **<https://bloom.fastapicloud.dev/>** — log in with:
+
+| User | Password |
+|------|----------|
+| `barista` | `baristademo` |
+
+It is a real instance with everything enabled, so add beans, log a brew and taste it.
+Two things to expect: it is a **shared log**, so whatever you add is visible to everyone
+else poking around, and the demo account is a regular user — you can edit and delete your
+own rows, but not other people's. Treat it as a playground, not as storage.
 
 ## Screenshots
 
