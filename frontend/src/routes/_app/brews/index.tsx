@@ -39,7 +39,7 @@ import { formatDateTime, formatNumber, formatSeconds } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { Plus, X } from "lucide-react"
+import { Plus, StarOff, User, X } from "lucide-react"
 import type { ReactNode } from "react"
 import { useState } from "react"
 
@@ -65,6 +65,8 @@ function BrewsPage() {
   const [roasterFilter, setRoasterFilter] = useState("all")
   const [beanFilter, setBeanFilter] = useState("all")
   const [methodFilter, setMethodFilter] = useState("all")
+  const [mineOnly, setMineOnly] = useState(false)
+  const [untastedOnly, setUntastedOnly] = useState(false)
   const [search, setSearch] = useState("")
 
   const remove = useMutation({
@@ -98,6 +100,8 @@ function BrewsPage() {
       }
       if (beanFilter !== "all" && String(brew.bean_id) !== beanFilter) return false
       if (methodFilter !== "all" && String(brew.method_id) !== methodFilter) return false
+      if (mineOnly && brew.user_id !== user?.id) return false
+      if (untastedOnly && myTastingByBrew.has(brew.id)) return false
       if (query !== "") {
         const haystack = [
           beanName(brew.bean_id),
@@ -114,7 +118,12 @@ function BrewsPage() {
     })
     .sort((a, b) => (b.brewed_at ?? "").localeCompare(a.brewed_at ?? ""))
 
-  const hasFilters = roasterFilter !== "all" || beanFilter !== "all" || methodFilter !== "all"
+  const hasFilters =
+    roasterFilter !== "all" ||
+    beanFilter !== "all" ||
+    methodFilter !== "all" ||
+    mineOnly ||
+    untastedOnly
 
   function pickRoaster(value: string) {
     setRoasterFilter(value)
@@ -125,6 +134,8 @@ function BrewsPage() {
     setRoasterFilter("all")
     setBeanFilter("all")
     setMethodFilter("all")
+    setMineOnly(false)
+    setUntastedOnly(false)
   }
 
   return (
@@ -192,6 +203,26 @@ function BrewsPage() {
             ))}
           </SelectContent>
         </Select>
+
+        <Button
+          variant={mineOnly ? "secondary" : "outline"}
+          size="sm"
+          aria-pressed={mineOnly}
+          onClick={() => setMineOnly((on) => !on)}
+        >
+          <User className="size-4" />
+          Mine
+        </Button>
+
+        <Button
+          variant={untastedOnly ? "secondary" : "outline"}
+          size="sm"
+          aria-pressed={untastedOnly}
+          onClick={() => setUntastedOnly((on) => !on)}
+        >
+          <StarOff className="size-4" />
+          Not tasted
+        </Button>
 
         {hasFilters ? (
           <Button variant="ghost" size="sm" onClick={clearFilters}>
