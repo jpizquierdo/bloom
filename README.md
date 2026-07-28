@@ -19,7 +19,8 @@ A live demo runs at **<https://bloom.fastapicloud.dev/>** — log in with:
 It is a real instance with everything enabled, so add beans, log a brew and taste it.
 Two things to expect: it is a **shared log**, so whatever you add is visible to everyone
 else poking around, and the demo account is a regular user — you can edit and delete your
-own rows, but not other people's. Treat it as a playground, not as storage.
+own rows, but not other people's. **Everything is wiped and reseeded every night**, so
+treat it as a playground, not as storage.
 
 ## Screenshots
 

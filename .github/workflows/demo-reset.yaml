@@ -1,0 +1,36 @@
+name: Reset demo
+
+on:
+  # Nightly. GitHub delays scheduled runs when it is busy, so treat the time as approximate.
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: demo-reset
+  cancel-in-progress: false
+
+jobs:
+  reset:
+    name: Wipe and reseed the demo database
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Reset the demo data
+        run: uv run --frozen python scripts/reset_demo.py
+        env:
+          BLOOM_DEMO_RESET: "yes"
+          POSTGRES_SERVER: ${{ secrets.DEMO_POSTGRES_SERVER }}
+          POSTGRES_PORT: ${{ secrets.DEMO_POSTGRES_PORT }}
+          POSTGRES_USER: ${{ secrets.DEMO_POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DEMO_POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DEMO_POSTGRES_DB }}
+          BLOOM_ADMIN_EMAIL: ${{ secrets.DEMO_ADMIN_EMAIL }}
+          BLOOM_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
