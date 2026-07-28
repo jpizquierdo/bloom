@@ -114,7 +114,7 @@ docker compose -f docker/docker-compose.yml up -d db
 
 # API — http://localhost:8000, docs at /docs
 uv sync
-uv run fastapi dev bloom/main.py
+uv run fastapi dev
 
 # Web UI — http://localhost:5173, proxies /api to the API
 cd frontend && npm install && npm run dev
@@ -122,7 +122,8 @@ cd frontend && npm install && npm run dev
 
 The dev server runs on its own origin, so the API allows it through CORS via `FRONTEND_HOST`;
 point the proxy at another API with `BLOOM_API_URL`. `fastapi dev` auto-reloads;
-`fastapi run` is the production entrypoint.
+`fastapi run` is the production entrypoint. Neither needs a path — `entrypoint` in
+`pyproject.toml` points them at `bloom.main:app`.
 
 - **Tests**: `uv run pytest`. Domain unit tests run without a database; API tests build a
   disposable `bloom_test` database on the running Postgres.

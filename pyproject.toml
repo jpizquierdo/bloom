@@ -33,6 +33,10 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["bloom"]
 
+# The app lives in a package, so `fastapi run`/`deploy` cannot auto-discover it.
+[tool.fastapi]
+entrypoint = "bloom.main:app"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
