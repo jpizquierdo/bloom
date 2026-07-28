@@ -29,6 +29,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { StarRating } from "@/components/ui/star-rating"
 import { canEdit, useCurrentUser } from "@/lib/auth"
+import { ROAST_TYPES } from "@/lib/domain"
 import { humanize } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -48,11 +49,13 @@ function BeansPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState<BeanRead | null>(null)
   const [roasterFilter, setRoasterFilter] = useState("all")
+  const [roastTypeFilter, setRoastTypeFilter] = useState("all")
   const [search, setSearch] = useState("")
 
   const query = search.trim().toLowerCase()
   const filtered = (data ?? [])
     .filter((bean) => roasterFilter === "all" || String(bean.roaster.id) === roasterFilter)
+    .filter((bean) => roastTypeFilter === "all" || bean.roast_type === roastTypeFilter)
     .filter(
       (bean) =>
         query === "" ||
@@ -66,6 +69,13 @@ function BeansPage() {
     onSuccess: feedback.onSuccess("Bean deleted"),
     onError: feedback.onError,
   })
+
+  const hasFilters = roasterFilter !== "all" || roastTypeFilter !== "all"
+
+  function clearFilters() {
+    setRoasterFilter("all")
+    setRoastTypeFilter("all")
+  }
 
   function openCreate() {
     setEditing(null)
@@ -111,8 +121,22 @@ function BeansPage() {
           </SelectContent>
         </Select>
 
-        {roasterFilter !== "all" ? (
-          <Button variant="ghost" size="sm" onClick={() => setRoasterFilter("all")}>
+        <Select value={roastTypeFilter} onValueChange={setRoastTypeFilter}>
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder="All roast types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All roast types</SelectItem>
+            {ROAST_TYPES.map((roastType) => (
+              <SelectItem key={roastType} value={roastType}>
+                {humanize(roastType)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {hasFilters ? (
+          <Button variant="ghost" size="sm" onClick={clearFilters}>
             <X className="size-4" />
             Clear
           </Button>

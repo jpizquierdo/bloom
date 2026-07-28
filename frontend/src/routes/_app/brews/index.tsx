@@ -64,6 +64,7 @@ function BrewsPage() {
   const [deleting, setDeleting] = useState<BrewRead | null>(null)
   const [roasterFilter, setRoasterFilter] = useState("all")
   const [beanFilter, setBeanFilter] = useState("all")
+  const [methodFilter, setMethodFilter] = useState("all")
   const [search, setSearch] = useState("")
 
   const remove = useMutation({
@@ -96,6 +97,7 @@ function BrewsPage() {
         return false
       }
       if (beanFilter !== "all" && String(brew.bean_id) !== beanFilter) return false
+      if (methodFilter !== "all" && String(brew.method_id) !== methodFilter) return false
       if (query !== "") {
         const haystack = [
           beanName(brew.bean_id),
@@ -112,7 +114,7 @@ function BrewsPage() {
     })
     .sort((a, b) => (b.brewed_at ?? "").localeCompare(a.brewed_at ?? ""))
 
-  const hasFilters = roasterFilter !== "all" || beanFilter !== "all"
+  const hasFilters = roasterFilter !== "all" || beanFilter !== "all" || methodFilter !== "all"
 
   function pickRoaster(value: string) {
     setRoasterFilter(value)
@@ -122,6 +124,7 @@ function BrewsPage() {
   function clearFilters() {
     setRoasterFilter("all")
     setBeanFilter("all")
+    setMethodFilter("all")
   }
 
   return (
@@ -175,6 +178,20 @@ function BrewsPage() {
           searchPlaceholder="Search beans…"
           className="w-56"
         />
+
+        <Select value={methodFilter} onValueChange={setMethodFilter}>
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder="All methods" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All methods</SelectItem>
+            {(methods ?? []).map((method) => (
+              <SelectItem key={method.id} value={String(method.id)}>
+                {method.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         {hasFilters ? (
           <Button variant="ghost" size="sm" onClick={clearFilters}>
