@@ -1,0 +1,12 @@
+# Complements .gitignore for `fastapi deploy` (it takes precedence over it).
+
+# The compiled web UI is gitignored, but the deployed app must serve it.
+!bloom/static/
+
+# Not needed at runtime.
+frontend/
+tests/
+docs/
+docker/
+Dockerfile
+.github/
