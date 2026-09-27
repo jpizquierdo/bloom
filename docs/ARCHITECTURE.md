@@ -49,22 +49,22 @@ bloom/
 │   │   ├── base.py            # SQLAlchemy DeclarativeBase
 │   │   ├── session.py         # engine + session factory
 │   │   └── models/            # ORM models (one concern per file)
-│   │       ├── user.py  bean.py  bean_lot.py  brew.py  brew_method.py  equipment.py  tasting.py
+│   │       ├── user.py  bean.py  bean_lot.py  recipe.py  brew.py  brew_method.py  equipment.py  tasting.py
 │   ├── schemas/               # Pydantic v2 DTOs (request/response)
-│   │   ├── user.py  bean.py  brew.py  tasting.py  lookups.py
+│   │   ├── user.py  bean.py  recipe.py  brew.py  tasting.py  lookups.py
 │   ├── domain/                # PURE functions — no ORM, no FastAPI imports
 │   │   ├── calculations.py    # brew ratio, extraction yield, diagnostics
 │   │   └── constants.py       # brew categories + control-chart target ranges
 │   ├── repositories/          # DB access layer (queries live here, not in routes)
-│   │   ├── users.py  beans.py  brews.py  tastings.py  lookups.py
+│   │   ├── users.py  beans.py  recipes.py  brews.py  tastings.py  lookups.py
 │   ├── services/              # business logic orchestrating repos + domain
 │   │   ├── auth_service.py    users_service.py  bean_service.py
 │   │   ├── email_service.py   # composes the emails; delivery lives in core/email.py
-│   │   ├── brew_service.py    tasting_service.py  lookups_service.py
+│   │   ├── recipe_service.py  brew_service.py  tasting_service.py  lookups_service.py
 │   │   ├── access.py          # ownership helper (owns_or_admin)
 │   │   └── errors.py          # NotFoundError (framework-agnostic)
 │   └── routes/                # FastAPI routers (thin — validate, delegate, return)
-│       ├── auth.py  users.py  beans.py  brews.py
+│       ├── auth.py  users.py  beans.py  recipes.py  brews.py
 │       ├── tastings.py  brew_methods.py  equipment.py
 ├── frontend/                  # React SPA; its API client is generated from openapi.json
 ├── scripts/                   # dump_openapi.py (schema for the frontend's codegen)
@@ -99,7 +99,7 @@ Bloom is multi-user with two roles:
 | Role       | Capabilities                                                                 |
 |------------|------------------------------------------------------------------------------|
 | **admin**  | Everything a standard user can do, plus manage users (create, promote/demote, deactivate) and manage shared lookup data (`brew_method`, `equipment`). May edit/delete anyone's data. |
-| **user**   | Add beans, brew from any bean, and taste any brew — all shared and readable by everyone. May edit/delete only their own beans, brews and tastings. Read shared lookup data. |
+| **user**   | Add beans, create/use recipes for any bean, brew from any bean, and taste any brew — all shared and readable by everyone. May edit/delete only their own beans, recipes, brews and tastings. Read shared lookup data. |
 
 Design points:
 
@@ -115,12 +115,13 @@ Design points:
 - Each account has a unique **`username`** handle (unique on `lower(username)`) alongside its
   email; the login form's single field accepts **either** an email or a handle. Handles are
   set by an admin today and will be supplied by the IdP (Keycloak/Authentik) once automated
-  provisioning lands. Beans, brews and tastings embed their creator as a nested
+  provisioning lands. Beans, recipes, brews and tastings embed their creator as a nested
   `{ id, username }` object (`owner`/`author`) so the UI can name who added, pulled or scored
   a cup without reading the admin-only user list.
 - **Everything is a shared log** (household/café model, 11). Any authenticated user can
-  read all beans, brews and tastings, and can add beans, brew from any bean, and taste any
-  brew. Each row records who created it — `bean.user_id` (owner), `brew.user_id` (author),
+  read all beans, recipes, brews and tastings, and can add beans, create or use a recipe for
+  any bean, brew from any bean, and taste any brew. Each row records who created it —
+  `bean.user_id` (owner), `recipe.user_id` (creator), `brew.user_id` (author), and
   `tasting.user_id` (taster) — and **only that creator (or an admin) may edit or delete it**
   (a non-creator write returns `403`). Because tastings carry their taster, several people
   can each score the same brew (realizing 6).
@@ -134,29 +135,31 @@ Design points:
 
 ## Data model
 
-Eight tables. `brew` is the central, highest-volume entity.
+Nine tables. `brew` is the central, highest-volume entity.
 
 ```
 Entities:
-    roaster 1 ──< bean 1 ──< bean_lot        (1:N — one bag bought each)
-                     │  1
-                     │  └──< brew >── 1 brew_method
-                     │          │ └─ 1 equipment   (grinder, nullable)
-                     │          └─── 1 bean_lot    (lot brewed, nullable)
-                     │
-                     └ (brew) ──< tasting          (1:N)
+    roaster 1 ──< bean 1 ──< bean_lot             (1:N — one bag bought each)
+                     ├─────< recipe >── 1 brew_method
+                     │          └────── 1 equipment (grinder, nullable)
+                     └─────< brew >──── 1 brew_method
+                                ├────── 1 equipment (grinder, nullable)
+                                ├────── 1 bean_lot  (lot brewed, nullable)
+                                ├────── 1 recipe    (provenance, nullable)
+                                └─────< tasting    (1:N)
 
 Ownership (who created each row):
     user 1 ──< bean       (owner)
     user 1 ──< bean_lot   (buyer)
+    user 1 ──< recipe     (creator)
     user 1 ──< brew       (author)
     user 1 ──< tasting    (taster)
 ```
 
-Every row carries who created it: `bean.user_id` (owner), `bean_lot.user_id` (buyer),
-`brew.user_id` (author) and `tasting.user_id` (taster). These are often different people — one
-member buys a bag (lot buyer), another brews from it (brew author), and several may score that
-brew (tasters).
+Every user-created row carries who created it: `bean.user_id` (owner), `bean_lot.user_id`
+(buyer), `recipe.user_id` (creator), `brew.user_id` (author), and `tasting.user_id` (taster).
+These are often different people — one member buys a bag, another writes the recipe or brews
+from it, and several may score that brew.
 
 | Table         | Purpose                                                             |
 |---------------|---------------------------------------------------------------------|
@@ -166,7 +169,8 @@ brew (tasters).
 | `roaster`     | Who roasted the bean. User-creatable, unique on `lower(name)` (see 13). |
 | `brew_method` | Lookup: V60, Espresso, AeroPress… with a category.                  |
 | `equipment`   | Grinders, machines, kettles — one table, `type` discriminator.      |
-| `brew`        | A single extraction: the objective parameters. Central entity; `user_id` is the author, `lot_id` the optional lot brewed. |
+| `recipe`      | Optional reusable preparation parameters for one bean. Shared; `user_id` is the creator. |
+| `brew`        | A single extraction: the objective parameters. Central entity; `user_id` is the author, `lot_id` the optional lot brewed, and `recipe_id` optional provenance. |
 | `tasting`     | A subjective evaluation of a brew (1:N — one per user, several per brew across different users); `user_id` is the taster. |
 
 The live schema is owned by **Alembic migrations** (`alembic/versions/`); the ORM models in
@@ -245,15 +249,16 @@ possible future upgrade.
 
 ### 10 — Full entity set from day one
 `user`, `bean`, `brew`, `tasting`, `brew_method`, `equipment` all present from the start
-(`bean_lot` came later, when `bean` split into coffee + lot — see 1).
+(`bean_lot` and `recipe` came later as their separate concepts became useful).
 
 ### 11 — Shared log, creator-owned rows (household / café model)
 The instance is a single shared log — a household, or a café bar with several baristas.
-Every authenticated user can **read** all beans, brews and tastings; can **add** beans,
-brew from any bean, and taste any brew; and may **edit/delete only what they created**
-(a non-creator write returns `403`). Each row records its creator: `bean.user_id` (owner),
-`bean_lot.user_id` (buyer), `brew.user_id` (author), `tasting.user_id` (taster). Merging one
-bean into another is a write to both, so it needs edit rights on both (decision 22).
+Every authenticated user can **read** all beans, recipes, brews and tastings; can **add** beans,
+create/use recipes for any bean, brew from any bean, and taste any brew; and may **edit/delete
+only what they created** (a non-creator write returns `403`). Each row records its creator:
+`bean.user_id` (owner), `bean_lot.user_id` (buyer), `recipe.user_id` (creator), `brew.user_id`
+(author), `tasting.user_id` (taster). Merging one bean into another is a write to both, so it
+needs edit rights on both (decision 22).
 
 This evolved in two steps:
 - Originally `user_id` lived only on `bean` and a brew's owner was derived through it — which
@@ -472,7 +477,7 @@ no index to race against, the check is a plain `SELECT`; a concurrent duplicate 
 but the warning.
 
 **Merge is the cleanup path** (`POST /beans/{id}/merge`), for the duplicates that got through
-before anyone noticed: the source's brews and lots are reassigned to the target, the target
+before anyone noticed: the source's brews, lots and recipes are reassigned to the target, the target
 adopts the source's values for every descriptive field it left empty (`NULL`, or `unknown` for
 the two NOT NULL ones), and the source is deleted. Tastings need no handling — they hang off
 their brew. If the source's roaster is left with no beans and no metadata, it is reaped like
@@ -483,6 +488,25 @@ to whoever may edit both beans** (owner or admin, decision 11): duplicates are u
 person's own, and needing an admin to fix them would leave them unfixed. It does move other
 users' brews onto the target — which is the point, since the two rows are the same coffee.
 
+### 23 — A recipe is optional intent; a brew is an independent result
+
+A `recipe` is a named, reusable set of preparation parameters for one bean: method, grinder,
+dose, target yield/water, grind, temperature and target time. It is **optional** — adding the
+table does not create recipes for existing beans, and a brew still works without one. Recipes
+are shared like the rest of the log: anyone may create, read or use one, while only its creator
+or an admin may edit/delete it.
+
+Brewing from a recipe copies those preparation parameters into a new `brew` once. Callers may
+override the copy while logging what actually happened. `brew.recipe_id` is nullable provenance,
+not live inheritance: later recipe edits never alter the brew, and deleting the recipe sets the
+reference to NULL while keeping all copied measurements. Recipe notes describe future intent;
+brew notes describe one extraction, so notes never copy in either direction. Extraction-only
+values (`lot_id`, `brewed_at`, TDS, diagnostics and tastings) do not belong to a recipe.
+
+There is deliberately no default recipe. That avoids inventing state during migration and lets
+each bean have zero, one or many explicitly chosen recipes. Names are required for people but
+not unique; the row id remains the unambiguous identity.
+
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
 - **First admin via env vars on startup**; further accounts are admin-created and default
@@ -490,7 +514,8 @@ users' brews onto the target — which is the point, since the two rows are the 
 - **JWT / OAuth2 password flow**, access token only; passwords hashed with argon2id.
 - **Password reset by emailed link**, stateless and single-use (decision 21).
 - **Shared read across the instance**; **each row edited/deleted only by its creator** (or an
-  admin), tracked by `bean.user_id` / `bean_lot.user_id` / `brew.user_id` / `tasting.user_id`.
+  admin), tracked by `bean.user_id` / `bean_lot.user_id` / `recipe.user_id` / `brew.user_id` /
+  `tasting.user_id`.
 - **Soft-delete** of users (`is_active`) instead of hard deletion.
 
 ### Cross-cutting choices
@@ -498,15 +523,15 @@ users' brews onto the target — which is the point, since the two rows are the 
 - **`NUMERIC` for all weights and measures**, never floating point (the domain layer uses
   `Decimal` end to end for the same reason).
 - **`ON DELETE` policies**:
-  - `bean` → `brew` → `tasting` and `bean` → `bean_lot`: **CASCADE**. Note: because beans are
-    shared, deleting a bean removes *every* user's brews and lots on it (only the owner can
-    trigger this).
-  - `brew.method_id`: **RESTRICT** (a method in use cannot be deleted).
+  - `bean` → `brew` → `tasting`, `bean` → `bean_lot`, and `bean` → `recipe`: **CASCADE**. Note:
+    because beans are shared, deleting a bean removes *every* user's brews, lots and recipes on
+    it (only the owner can trigger this).
+  - `brew.method_id` and `recipe.method_id`: **RESTRICT** (a method in use cannot be deleted).
   - `bean.roaster_id`: **RESTRICT** (a roaster with beans is merged away, never deleted — see 13).
-  - `brew.grinder_id` and `brew.lot_id`: **SET NULL** (deleting a grinder, or a lot, preserves
-    brew history — the brew keeps its measurements, just loses the reference).
-  - `user` → `bean` (owner), `user` → `bean_lot` (buyer), `user` → `brew` (author),
-    `user` → `tasting` (taster): all
+  - `brew.grinder_id`, `recipe.grinder_id`, `brew.lot_id`, and `brew.recipe_id`: **SET NULL**
+    (deleting a referenced row preserves the independent brew/recipe data).
+  - `user` → `bean` (owner), `user` → `bean_lot` (buyer), `user` → `recipe` (creator),
+    `user` → `brew` (author), `user` → `tasting` (taster): all
     **RESTRICT**, paired with **soft-delete** of users (an `is_active` flag). Accounts are
     never hard-deleted, so history is never silently destroyed.
 

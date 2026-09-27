@@ -61,6 +61,7 @@ class BrewRead(BrewBase):
     author: AuthorRead = Field(description="Author (who prepared the brew).")
     bean_id: int = Field(examples=[1])
     method_id: int = Field(examples=[1])
+    recipe_id: int | None = Field(default=None, description="Recipe used as this brew's starting point, if any.", examples=[1])
     dose_grams: Decimal = Field(examples=["15"])
 
     ratio: Decimal | None = Field(default=None, description="Computed brew ratio (never stored).", examples=["16.67"])

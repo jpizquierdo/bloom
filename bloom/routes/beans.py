@@ -51,7 +51,7 @@ def update_bean(bean_id: int, data: BeanUpdate, db: DbSession, user: CurrentUser
 
 @router.post("/{bean_id}/merge", response_model=BeanRead)
 def merge_bean(bean_id: int, data: BeanMerge, db: DbSession, user: CurrentUser) -> BeanRead:
-    """Fold a duplicate into this bean: its brews and lots move here and it is deleted.
+    """Fold a duplicate into this bean: its brews, lots and recipes move here.
 
     You must own both beans (or be an admin). This bean keeps its own values and adopts
     the duplicate's for anything it left empty.

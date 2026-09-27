@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, type Options as Options2, type RequestResult, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthReadCurrentUserData, AuthReadCurrentUserResponses, AuthRecoverPasswordData, AuthRecoverPasswordErrors, AuthRecoverPasswordResponses, AuthResetPasswordData, AuthResetPasswordErrors, AuthResetPasswordResponses, BeansCreateBeanData, BeansCreateBeanErrors, BeansCreateBeanResponses, BeansDeleteBeanData, BeansDeleteBeanErrors, BeansDeleteBeanResponses, BeansGetBeanData, BeansGetBeanErrors, BeansGetBeanResponses, BeansListBeansData, BeansListBeansErrors, BeansListBeansResponses, BeansMergeBeanData, BeansMergeBeanErrors, BeansMergeBeanResponses, BeansUpdateBeanData, BeansUpdateBeanErrors, BeansUpdateBeanResponses, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodErrors, BrewMethodsCreateBrewMethodResponses, BrewMethodsDeleteBrewMethodData, BrewMethodsDeleteBrewMethodErrors, BrewMethodsDeleteBrewMethodResponses, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodErrors, BrewMethodsGetBrewMethodResponses, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponses, BrewMethodsUpdateBrewMethodData, BrewMethodsUpdateBrewMethodErrors, BrewMethodsUpdateBrewMethodResponses, BrewsCreateBrewData, BrewsCreateBrewErrors, BrewsCreateBrewResponses, BrewsDeleteBrewData, BrewsDeleteBrewErrors, BrewsDeleteBrewResponses, BrewsGetBrewData, BrewsGetBrewErrors, BrewsGetBrewResponses, BrewsListBrewsData, BrewsListBrewsErrors, BrewsListBrewsResponses, BrewsUpdateBrewData, BrewsUpdateBrewErrors, BrewsUpdateBrewResponses, EquipmentCreateEquipmentData, EquipmentCreateEquipmentErrors, EquipmentCreateEquipmentResponses, EquipmentDeleteEquipmentData, EquipmentDeleteEquipmentErrors, EquipmentDeleteEquipmentResponses, EquipmentGetEquipmentData, EquipmentGetEquipmentErrors, EquipmentGetEquipmentResponses, EquipmentListEquipmentData, EquipmentListEquipmentResponses, EquipmentUpdateEquipmentData, EquipmentUpdateEquipmentErrors, EquipmentUpdateEquipmentResponses, LotsCreateLotData, LotsCreateLotErrors, LotsCreateLotResponses, LotsDeleteLotData, LotsDeleteLotErrors, LotsDeleteLotResponses, LotsGetLotData, LotsGetLotErrors, LotsGetLotResponses, LotsListLotsData, LotsListLotsErrors, LotsListLotsResponses, LotsUpdateLotData, LotsUpdateLotErrors, LotsUpdateLotResponses, RoastersCreateRoasterData, RoastersCreateRoasterErrors, RoastersCreateRoasterResponses, RoastersDeleteRoasterData, RoastersDeleteRoasterErrors, RoastersDeleteRoasterResponses, RoastersGetRoasterData, RoastersGetRoasterErrors, RoastersGetRoasterResponses, RoastersListRoastersData, RoastersListRoastersResponses, RoastersMergeRoasterData, RoastersMergeRoasterErrors, RoastersMergeRoasterResponses, RoastersUpdateRoasterData, RoastersUpdateRoasterErrors, RoastersUpdateRoasterResponses, SystemHealthData, SystemHealthResponses, TastingsCreateTastingData, TastingsCreateTastingErrors, TastingsCreateTastingResponses, TastingsDeleteTastingData, TastingsDeleteTastingErrors, TastingsDeleteTastingResponses, TastingsGetTastingData, TastingsGetTastingErrors, TastingsGetTastingResponses, TastingsListAllTastingsData, TastingsListAllTastingsErrors, TastingsListAllTastingsResponses, TastingsListTastingsData, TastingsListTastingsErrors, TastingsListTastingsResponses, TastingsUpdateTastingData, TastingsUpdateTastingErrors, TastingsUpdateTastingResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen';
+import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthReadCurrentUserData, AuthReadCurrentUserResponses, AuthRecoverPasswordData, AuthRecoverPasswordErrors, AuthRecoverPasswordResponses, AuthResetPasswordData, AuthResetPasswordErrors, AuthResetPasswordResponses, BeansCreateBeanData, BeansCreateBeanErrors, BeansCreateBeanResponses, BeansDeleteBeanData, BeansDeleteBeanErrors, BeansDeleteBeanResponses, BeansGetBeanData, BeansGetBeanErrors, BeansGetBeanResponses, BeansListBeansData, BeansListBeansErrors, BeansListBeansResponses, BeansMergeBeanData, BeansMergeBeanErrors, BeansMergeBeanResponses, BeansUpdateBeanData, BeansUpdateBeanErrors, BeansUpdateBeanResponses, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodErrors, BrewMethodsCreateBrewMethodResponses, BrewMethodsDeleteBrewMethodData, BrewMethodsDeleteBrewMethodErrors, BrewMethodsDeleteBrewMethodResponses, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodErrors, BrewMethodsGetBrewMethodResponses, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponses, BrewMethodsUpdateBrewMethodData, BrewMethodsUpdateBrewMethodErrors, BrewMethodsUpdateBrewMethodResponses, BrewsCreateBrewData, BrewsCreateBrewErrors, BrewsCreateBrewResponses, BrewsDeleteBrewData, BrewsDeleteBrewErrors, BrewsDeleteBrewResponses, BrewsGetBrewData, BrewsGetBrewErrors, BrewsGetBrewResponses, BrewsListBrewsData, BrewsListBrewsErrors, BrewsListBrewsResponses, BrewsUpdateBrewData, BrewsUpdateBrewErrors, BrewsUpdateBrewResponses, EquipmentCreateEquipmentData, EquipmentCreateEquipmentErrors, EquipmentCreateEquipmentResponses, EquipmentDeleteEquipmentData, EquipmentDeleteEquipmentErrors, EquipmentDeleteEquipmentResponses, EquipmentGetEquipmentData, EquipmentGetEquipmentErrors, EquipmentGetEquipmentResponses, EquipmentListEquipmentData, EquipmentListEquipmentResponses, EquipmentUpdateEquipmentData, EquipmentUpdateEquipmentErrors, EquipmentUpdateEquipmentResponses, LotsCreateLotData, LotsCreateLotErrors, LotsCreateLotResponses, LotsDeleteLotData, LotsDeleteLotErrors, LotsDeleteLotResponses, LotsGetLotData, LotsGetLotErrors, LotsGetLotResponses, LotsListLotsData, LotsListLotsErrors, LotsListLotsResponses, LotsUpdateLotData, LotsUpdateLotErrors, LotsUpdateLotResponses, RecipesCreateBrewFromRecipeData, RecipesCreateBrewFromRecipeErrors, RecipesCreateBrewFromRecipeResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesErrors, RecipesListRecipesResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, RoastersCreateRoasterData, RoastersCreateRoasterErrors, RoastersCreateRoasterResponses, RoastersDeleteRoasterData, RoastersDeleteRoasterErrors, RoastersDeleteRoasterResponses, RoastersGetRoasterData, RoastersGetRoasterErrors, RoastersGetRoasterResponses, RoastersListRoastersData, RoastersListRoastersResponses, RoastersMergeRoasterData, RoastersMergeRoasterErrors, RoastersMergeRoasterResponses, RoastersUpdateRoasterData, RoastersUpdateRoasterErrors, RoastersUpdateRoasterResponses, SystemHealthData, SystemHealthResponses, TastingsCreateTastingData, TastingsCreateTastingErrors, TastingsCreateTastingResponses, TastingsDeleteTastingData, TastingsDeleteTastingErrors, TastingsDeleteTastingResponses, TastingsGetTastingData, TastingsGetTastingErrors, TastingsGetTastingResponses, TastingsListAllTastingsData, TastingsListAllTastingsErrors, TastingsListAllTastingsResponses, TastingsListTastingsData, TastingsListTastingsErrors, TastingsListTastingsResponses, TastingsUpdateTastingData, TastingsUpdateTastingErrors, TastingsUpdateTastingResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -278,7 +278,7 @@ export const beansUpdateBean = <ThrowOnError extends boolean = false>(options: O
 /**
  * Merge Bean
  *
- * Fold a duplicate into this bean: its brews and lots move here and it is deleted.
+ * Fold a duplicate into this bean: its brews, lots and recipes move here.
  *
  * You must own both beans (or be an admin). This bean keeps its own values and adopts
  * the duplicate's for anything it left empty.
@@ -475,6 +475,84 @@ export const equipmentGetEquipment = <ThrowOnError extends boolean = false>(opti
 export const equipmentUpdateEquipment = <ThrowOnError extends boolean = false>(options: Options<EquipmentUpdateEquipmentData, ThrowOnError>): RequestResult<EquipmentUpdateEquipmentResponses, EquipmentUpdateEquipmentErrors, ThrowOnError> => (options.client ?? client).patch<EquipmentUpdateEquipmentResponses, EquipmentUpdateEquipmentErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/equipment/{equipment_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List Recipes
+ *
+ * List a bean's recipes. Any authenticated user may read them.
+ */
+export const recipesListRecipes = <ThrowOnError extends boolean = false>(options: Options<RecipesListRecipesData, ThrowOnError>): RequestResult<RecipesListRecipesResponses, RecipesListRecipesErrors, ThrowOnError> => (options.client ?? client).get<RecipesListRecipesResponses, RecipesListRecipesErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/beans/{bean_id}/recipes',
+    ...options
+});
+
+/**
+ * Create Recipe
+ *
+ * Create a recipe for any shared bean; you are recorded as its creator.
+ */
+export const recipesCreateRecipe = <ThrowOnError extends boolean = false>(options: Options<RecipesCreateRecipeData, ThrowOnError>): RequestResult<RecipesCreateRecipeResponses, RecipesCreateRecipeErrors, ThrowOnError> => (options.client ?? client).post<RecipesCreateRecipeResponses, RecipesCreateRecipeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/beans/{bean_id}/recipes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Recipe
+ *
+ * Delete a recipe. Creator or admin only; existing brews remain unchanged.
+ */
+export const recipesDeleteRecipe = <ThrowOnError extends boolean = false>(options: Options<RecipesDeleteRecipeData, ThrowOnError>): RequestResult<RecipesDeleteRecipeResponses, RecipesDeleteRecipeErrors, ThrowOnError> => (options.client ?? client).delete<RecipesDeleteRecipeResponses, RecipesDeleteRecipeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/recipes/{recipe_id}',
+    ...options
+});
+
+/**
+ * Get Recipe
+ *
+ * Get a recipe by id. Any authenticated user may read it.
+ */
+export const recipesGetRecipe = <ThrowOnError extends boolean = false>(options: Options<RecipesGetRecipeData, ThrowOnError>): RequestResult<RecipesGetRecipeResponses, RecipesGetRecipeErrors, ThrowOnError> => (options.client ?? client).get<RecipesGetRecipeResponses, RecipesGetRecipeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/recipes/{recipe_id}',
+    ...options
+});
+
+/**
+ * Update Recipe
+ *
+ * Update a recipe. Only its creator (or an admin) may edit it.
+ */
+export const recipesUpdateRecipe = <ThrowOnError extends boolean = false>(options: Options<RecipesUpdateRecipeData, ThrowOnError>): RequestResult<RecipesUpdateRecipeResponses, RecipesUpdateRecipeErrors, ThrowOnError> => (options.client ?? client).patch<RecipesUpdateRecipeResponses, RecipesUpdateRecipeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/recipes/{recipe_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Create Brew From Recipe
+ *
+ * Create a brew from a recipe snapshot; any authenticated user may use it.
+ */
+export const recipesCreateBrewFromRecipe = <ThrowOnError extends boolean = false>(options: Options<RecipesCreateBrewFromRecipeData, ThrowOnError>): RequestResult<RecipesCreateBrewFromRecipeResponses, RecipesCreateBrewFromRecipeErrors, ThrowOnError> => (options.client ?? client).post<RecipesCreateBrewFromRecipeResponses, RecipesCreateBrewFromRecipeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/recipes/{recipe_id}/brews',
     ...options,
     headers: {
         'Content-Type': 'application/json',

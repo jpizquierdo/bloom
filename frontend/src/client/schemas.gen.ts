@@ -565,7 +565,7 @@ export const BeanMergeSchema = {
         source_id: {
             type: 'integer',
             title: 'Source Id',
-            description: 'Bean to merge away: its brews and lots move to the target and it is deleted.',
+            description: 'Bean to merge away: its brews, lots and recipes move to the target and it is deleted.',
             examples: [
                 7
             ]
@@ -1379,6 +1379,199 @@ export const BrewCreateSchema = {
     title: 'BrewCreate'
 } as const;
 
+export const BrewFromRecipeCreateSchema = {
+    properties: {
+        grinder_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grinder Id',
+            description: 'Grinder to use (equipment id).',
+            examples: [
+                1
+            ]
+        },
+        yield_grams: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Yield Grams',
+            description: 'Target beverage mass in the cup (g).',
+            examples: [
+                '42'
+            ]
+        },
+        water_grams: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Water Grams',
+            description: 'Target water amount (g).',
+            examples: [
+                '250'
+            ]
+        },
+        grind_setting: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grind Setting',
+            description: 'Target grinder setting.',
+            examples: [
+                '14'
+            ]
+        },
+        water_temp_celsius: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Water Temp Celsius',
+            description: 'Target water temperature (°C).',
+            examples: [
+                '94.0'
+            ]
+        },
+        brew_time_seconds: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Brew Time Seconds',
+            description: 'Target total brew time (s).',
+            examples: [
+                30
+            ]
+        },
+        lot_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Lot Id',
+            description: 'Optional physical lot used for this brew.',
+            examples: [
+                1
+            ]
+        },
+        dose_grams: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Dose Grams',
+            description: 'Override the recipe\'s dose (g).',
+            examples: [
+                '18'
+            ]
+        },
+        brewed_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Brewed At',
+            description: 'When it was brewed (defaults to now).'
+        },
+        tds_percent: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Tds Percent',
+            description: 'Measured TDS % for this extraction.',
+            examples: [
+                '1.35'
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes',
+            description: 'Notes about this brew; recipe notes are never copied.'
+        }
+    },
+    type: 'object',
+    title: 'BrewFromRecipeCreate',
+    description: 'Overrides and extraction-only values for a brew created from a recipe.'
+} as const;
+
 export const BrewMethodCreateSchema = {
     properties: {
         name: {
@@ -1732,6 +1925,21 @@ export const BrewReadSchema = {
         method_id: {
             type: 'integer',
             title: 'Method Id',
+            examples: [
+                1
+            ]
+        },
+        recipe_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Recipe Id',
+            description: 'Recipe used as this brew\'s starting point, if any.',
             examples: [
                 1
             ]
@@ -2281,6 +2489,532 @@ export const MessageSchema = {
     ],
     title: 'Message',
     description: 'A human-readable outcome, for endpoints with nothing else to return.'
+} as const;
+
+export const RecipeCreateSchema = {
+    properties: {
+        grinder_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grinder Id',
+            description: 'Grinder to use (equipment id).',
+            examples: [
+                1
+            ]
+        },
+        yield_grams: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Yield Grams',
+            description: 'Target beverage mass in the cup (g).',
+            examples: [
+                '42'
+            ]
+        },
+        water_grams: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Water Grams',
+            description: 'Target water amount (g).',
+            examples: [
+                '250'
+            ]
+        },
+        grind_setting: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grind Setting',
+            description: 'Target grinder setting.',
+            examples: [
+                '14'
+            ]
+        },
+        water_temp_celsius: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Water Temp Celsius',
+            description: 'Target water temperature (°C).',
+            examples: [
+                '94.0'
+            ]
+        },
+        brew_time_seconds: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Brew Time Seconds',
+            description: 'Target total brew time (s).',
+            examples: [
+                30
+            ]
+        },
+        name: {
+            type: 'string',
+            title: 'Name',
+            description: 'Human-readable recipe name.',
+            examples: [
+                'Brazil: recipe #1'
+            ]
+        },
+        method_id: {
+            type: 'integer',
+            title: 'Method Id',
+            description: 'Brew method id.',
+            examples: [
+                1
+            ]
+        },
+        dose_grams: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                }
+            ],
+            title: 'Dose Grams',
+            description: 'Target dry coffee dose (g).',
+            examples: [
+                '18'
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes',
+            description: 'Notes about the recipe itself.',
+            examples: [
+                'Start slightly coarser as it ages'
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'name',
+        'method_id',
+        'dose_grams'
+    ],
+    title: 'RecipeCreate'
+} as const;
+
+export const RecipeReadSchema = {
+    properties: {
+        grinder_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grinder Id',
+            description: 'Grinder to use (equipment id).',
+            examples: [
+                1
+            ]
+        },
+        yield_grams: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Yield Grams',
+            description: 'Target beverage mass in the cup (g).',
+            examples: [
+                '42'
+            ]
+        },
+        water_grams: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Water Grams',
+            description: 'Target water amount (g).',
+            examples: [
+                '250'
+            ]
+        },
+        grind_setting: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grind Setting',
+            description: 'Target grinder setting.',
+            examples: [
+                '14'
+            ]
+        },
+        water_temp_celsius: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Water Temp Celsius',
+            description: 'Target water temperature (°C).',
+            examples: [
+                '94.0'
+            ]
+        },
+        brew_time_seconds: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Brew Time Seconds',
+            description: 'Target total brew time (s).',
+            examples: [
+                30
+            ]
+        },
+        name: {
+            type: 'string',
+            title: 'Name',
+            description: 'Human-readable recipe name.',
+            examples: [
+                'Brazil: recipe #1'
+            ]
+        },
+        method_id: {
+            type: 'integer',
+            title: 'Method Id',
+            description: 'Brew method id.',
+            examples: [
+                1
+            ]
+        },
+        dose_grams: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$',
+            title: 'Dose Grams',
+            description: 'Target dry coffee dose (g).',
+            examples: [
+                '18'
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes',
+            description: 'Notes about the recipe itself.',
+            examples: [
+                'Start slightly coarser as it ages'
+            ]
+        },
+        id: {
+            type: 'integer',
+            title: 'Id',
+            examples: [
+                1
+            ]
+        },
+        bean_id: {
+            type: 'integer',
+            title: 'Bean Id',
+            description: 'Bean this recipe belongs to.',
+            examples: [
+                1
+            ]
+        },
+        user_id: {
+            type: 'integer',
+            title: 'User Id',
+            description: 'Creator id.',
+            examples: [
+                1
+            ]
+        },
+        owner: {
+            $ref: '#/components/schemas/AuthorRead',
+            description: 'Creator of the recipe.'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At',
+            examples: [
+                '2026-09-27T09:30:00Z'
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'name',
+        'method_id',
+        'dose_grams',
+        'id',
+        'bean_id',
+        'user_id',
+        'owner',
+        'created_at'
+    ],
+    title: 'RecipeRead'
+} as const;
+
+export const RecipeUpdateSchema = {
+    properties: {
+        grinder_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grinder Id',
+            description: 'Grinder to use (equipment id).',
+            examples: [
+                1
+            ]
+        },
+        yield_grams: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Yield Grams',
+            description: 'Target beverage mass in the cup (g).',
+            examples: [
+                '42'
+            ]
+        },
+        water_grams: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Water Grams',
+            description: 'Target water amount (g).',
+            examples: [
+                '250'
+            ]
+        },
+        grind_setting: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grind Setting',
+            description: 'Target grinder setting.',
+            examples: [
+                '14'
+            ]
+        },
+        water_temp_celsius: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Water Temp Celsius',
+            description: 'Target water temperature (°C).',
+            examples: [
+                '94.0'
+            ]
+        },
+        brew_time_seconds: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Brew Time Seconds',
+            description: 'Target total brew time (s).',
+            examples: [
+                30
+            ]
+        },
+        name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name',
+            description: 'Human-readable recipe name.',
+            examples: [
+                'Brazil espresso'
+            ]
+        },
+        method_id: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Method Id',
+            description: 'Brew method id.',
+            examples: [
+                1
+            ]
+        },
+        dose_grams: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Dose Grams',
+            description: 'Target dry coffee dose (g).',
+            examples: [
+                '18'
+            ]
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes',
+            description: 'Notes about the recipe itself.'
+        }
+    },
+    type: 'object',
+    title: 'RecipeUpdate',
+    description: 'Partial update; bean and creator are immutable.'
 } as const;
 
 export const RecoverPasswordSchema = {

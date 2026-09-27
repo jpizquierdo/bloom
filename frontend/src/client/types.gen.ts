@@ -255,7 +255,7 @@ export type BeanMerge = {
     /**
      * Source Id
      *
-     * Bean to merge away: its brews and lots move to the target and it is deleted.
+     * Bean to merge away: its brews, lots and recipes move to the target and it is deleted.
      */
     source_id: number;
 };
@@ -583,6 +583,80 @@ export type BrewCreate = {
 };
 
 /**
+ * BrewFromRecipeCreate
+ *
+ * Overrides and extraction-only values for a brew created from a recipe.
+ */
+export type BrewFromRecipeCreate = {
+    /**
+     * Grinder Id
+     *
+     * Grinder to use (equipment id).
+     */
+    grinder_id?: number | null;
+    /**
+     * Yield Grams
+     *
+     * Target beverage mass in the cup (g).
+     */
+    yield_grams?: number | string | null;
+    /**
+     * Water Grams
+     *
+     * Target water amount (g).
+     */
+    water_grams?: number | string | null;
+    /**
+     * Grind Setting
+     *
+     * Target grinder setting.
+     */
+    grind_setting?: string | null;
+    /**
+     * Water Temp Celsius
+     *
+     * Target water temperature (°C).
+     */
+    water_temp_celsius?: number | string | null;
+    /**
+     * Brew Time Seconds
+     *
+     * Target total brew time (s).
+     */
+    brew_time_seconds?: number | null;
+    /**
+     * Lot Id
+     *
+     * Optional physical lot used for this brew.
+     */
+    lot_id?: number | null;
+    /**
+     * Dose Grams
+     *
+     * Override the recipe's dose (g).
+     */
+    dose_grams?: number | string | null;
+    /**
+     * Brewed At
+     *
+     * When it was brewed (defaults to now).
+     */
+    brewed_at?: string | null;
+    /**
+     * Tds Percent
+     *
+     * Measured TDS % for this extraction.
+     */
+    tds_percent?: number | string | null;
+    /**
+     * Notes
+     *
+     * Notes about this brew; recipe notes are never copied.
+     */
+    notes?: string | null;
+};
+
+/**
  * BrewMethodCreate
  */
 export type BrewMethodCreate = {
@@ -740,6 +814,12 @@ export type BrewRead = {
      * Method Id
      */
     method_id: number;
+    /**
+     * Recipe Id
+     *
+     * Recipe used as this brew's starting point, if any.
+     */
+    recipe_id?: number | null;
     /**
      * Dose Grams
      */
@@ -965,6 +1045,230 @@ export type Message = {
      * Message
      */
     message: string;
+};
+
+/**
+ * RecipeCreate
+ */
+export type RecipeCreate = {
+    /**
+     * Grinder Id
+     *
+     * Grinder to use (equipment id).
+     */
+    grinder_id?: number | null;
+    /**
+     * Yield Grams
+     *
+     * Target beverage mass in the cup (g).
+     */
+    yield_grams?: number | string | null;
+    /**
+     * Water Grams
+     *
+     * Target water amount (g).
+     */
+    water_grams?: number | string | null;
+    /**
+     * Grind Setting
+     *
+     * Target grinder setting.
+     */
+    grind_setting?: string | null;
+    /**
+     * Water Temp Celsius
+     *
+     * Target water temperature (°C).
+     */
+    water_temp_celsius?: number | string | null;
+    /**
+     * Brew Time Seconds
+     *
+     * Target total brew time (s).
+     */
+    brew_time_seconds?: number | null;
+    /**
+     * Name
+     *
+     * Human-readable recipe name.
+     */
+    name: string;
+    /**
+     * Method Id
+     *
+     * Brew method id.
+     */
+    method_id: number;
+    /**
+     * Dose Grams
+     *
+     * Target dry coffee dose (g).
+     */
+    dose_grams: number | string;
+    /**
+     * Notes
+     *
+     * Notes about the recipe itself.
+     */
+    notes?: string | null;
+};
+
+/**
+ * RecipeRead
+ */
+export type RecipeRead = {
+    /**
+     * Grinder Id
+     *
+     * Grinder to use (equipment id).
+     */
+    grinder_id?: number | null;
+    /**
+     * Yield Grams
+     *
+     * Target beverage mass in the cup (g).
+     */
+    yield_grams?: string | null;
+    /**
+     * Water Grams
+     *
+     * Target water amount (g).
+     */
+    water_grams?: string | null;
+    /**
+     * Grind Setting
+     *
+     * Target grinder setting.
+     */
+    grind_setting?: string | null;
+    /**
+     * Water Temp Celsius
+     *
+     * Target water temperature (°C).
+     */
+    water_temp_celsius?: string | null;
+    /**
+     * Brew Time Seconds
+     *
+     * Target total brew time (s).
+     */
+    brew_time_seconds?: number | null;
+    /**
+     * Name
+     *
+     * Human-readable recipe name.
+     */
+    name: string;
+    /**
+     * Method Id
+     *
+     * Brew method id.
+     */
+    method_id: number;
+    /**
+     * Dose Grams
+     *
+     * Target dry coffee dose (g).
+     */
+    dose_grams: string;
+    /**
+     * Notes
+     *
+     * Notes about the recipe itself.
+     */
+    notes?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Bean Id
+     *
+     * Bean this recipe belongs to.
+     */
+    bean_id: number;
+    /**
+     * User Id
+     *
+     * Creator id.
+     */
+    user_id: number;
+    /**
+     * Creator of the recipe.
+     */
+    owner: AuthorRead;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * RecipeUpdate
+ *
+ * Partial update; bean and creator are immutable.
+ */
+export type RecipeUpdate = {
+    /**
+     * Grinder Id
+     *
+     * Grinder to use (equipment id).
+     */
+    grinder_id?: number | null;
+    /**
+     * Yield Grams
+     *
+     * Target beverage mass in the cup (g).
+     */
+    yield_grams?: number | string | null;
+    /**
+     * Water Grams
+     *
+     * Target water amount (g).
+     */
+    water_grams?: number | string | null;
+    /**
+     * Grind Setting
+     *
+     * Target grinder setting.
+     */
+    grind_setting?: string | null;
+    /**
+     * Water Temp Celsius
+     *
+     * Target water temperature (°C).
+     */
+    water_temp_celsius?: number | string | null;
+    /**
+     * Brew Time Seconds
+     *
+     * Target total brew time (s).
+     */
+    brew_time_seconds?: number | null;
+    /**
+     * Name
+     *
+     * Human-readable recipe name.
+     */
+    name?: string | null;
+    /**
+     * Method Id
+     *
+     * Brew method id.
+     */
+    method_id?: number | null;
+    /**
+     * Dose Grams
+     *
+     * Target dry coffee dose (g).
+     */
+    dose_grams?: number | string | null;
+    /**
+     * Notes
+     *
+     * Notes about the recipe itself.
+     */
+    notes?: string | null;
 };
 
 /**
@@ -2432,6 +2736,188 @@ export type EquipmentUpdateEquipmentResponses = {
 };
 
 export type EquipmentUpdateEquipmentResponse = EquipmentUpdateEquipmentResponses[keyof EquipmentUpdateEquipmentResponses];
+
+export type RecipesListRecipesData = {
+    body?: never;
+    path: {
+        /**
+         * Bean Id
+         */
+        bean_id: number;
+    };
+    query?: never;
+    url: '/api/v1/beans/{bean_id}/recipes';
+};
+
+export type RecipesListRecipesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesListRecipesError = RecipesListRecipesErrors[keyof RecipesListRecipesErrors];
+
+export type RecipesListRecipesResponses = {
+    /**
+     * Response Recipes-List Recipes
+     *
+     * Successful Response
+     */
+    200: Array<RecipeRead>;
+};
+
+export type RecipesListRecipesResponse = RecipesListRecipesResponses[keyof RecipesListRecipesResponses];
+
+export type RecipesCreateRecipeData = {
+    body: RecipeCreate;
+    path: {
+        /**
+         * Bean Id
+         */
+        bean_id: number;
+    };
+    query?: never;
+    url: '/api/v1/beans/{bean_id}/recipes';
+};
+
+export type RecipesCreateRecipeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesCreateRecipeError = RecipesCreateRecipeErrors[keyof RecipesCreateRecipeErrors];
+
+export type RecipesCreateRecipeResponses = {
+    /**
+     * Successful Response
+     */
+    201: RecipeRead;
+};
+
+export type RecipesCreateRecipeResponse = RecipesCreateRecipeResponses[keyof RecipesCreateRecipeResponses];
+
+export type RecipesDeleteRecipeData = {
+    body?: never;
+    path: {
+        /**
+         * Recipe Id
+         */
+        recipe_id: number;
+    };
+    query?: never;
+    url: '/api/v1/recipes/{recipe_id}';
+};
+
+export type RecipesDeleteRecipeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesDeleteRecipeError = RecipesDeleteRecipeErrors[keyof RecipesDeleteRecipeErrors];
+
+export type RecipesDeleteRecipeResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RecipesDeleteRecipeResponse = RecipesDeleteRecipeResponses[keyof RecipesDeleteRecipeResponses];
+
+export type RecipesGetRecipeData = {
+    body?: never;
+    path: {
+        /**
+         * Recipe Id
+         */
+        recipe_id: number;
+    };
+    query?: never;
+    url: '/api/v1/recipes/{recipe_id}';
+};
+
+export type RecipesGetRecipeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesGetRecipeError = RecipesGetRecipeErrors[keyof RecipesGetRecipeErrors];
+
+export type RecipesGetRecipeResponses = {
+    /**
+     * Successful Response
+     */
+    200: RecipeRead;
+};
+
+export type RecipesGetRecipeResponse = RecipesGetRecipeResponses[keyof RecipesGetRecipeResponses];
+
+export type RecipesUpdateRecipeData = {
+    body: RecipeUpdate;
+    path: {
+        /**
+         * Recipe Id
+         */
+        recipe_id: number;
+    };
+    query?: never;
+    url: '/api/v1/recipes/{recipe_id}';
+};
+
+export type RecipesUpdateRecipeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesUpdateRecipeError = RecipesUpdateRecipeErrors[keyof RecipesUpdateRecipeErrors];
+
+export type RecipesUpdateRecipeResponses = {
+    /**
+     * Successful Response
+     */
+    200: RecipeRead;
+};
+
+export type RecipesUpdateRecipeResponse = RecipesUpdateRecipeResponses[keyof RecipesUpdateRecipeResponses];
+
+export type RecipesCreateBrewFromRecipeData = {
+    body: BrewFromRecipeCreate;
+    path: {
+        /**
+         * Recipe Id
+         */
+        recipe_id: number;
+    };
+    query?: never;
+    url: '/api/v1/recipes/{recipe_id}/brews';
+};
+
+export type RecipesCreateBrewFromRecipeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesCreateBrewFromRecipeError = RecipesCreateBrewFromRecipeErrors[keyof RecipesCreateBrewFromRecipeErrors];
+
+export type RecipesCreateBrewFromRecipeResponses = {
+    /**
+     * Successful Response
+     */
+    201: BrewRead;
+};
+
+export type RecipesCreateBrewFromRecipeResponse = RecipesCreateBrewFromRecipeResponses[keyof RecipesCreateBrewFromRecipeResponses];
 
 export type BrewsListBrewsData = {
     body?: never;

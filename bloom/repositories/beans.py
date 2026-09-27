@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 from bloom.db.models.bean import Bean
 from bloom.db.models.bean_lot import BeanLot
 from bloom.db.models.brew import Brew
+from bloom.db.models.recipe import Recipe
 
 
 def get(db: Session, bean_id: int) -> Bean | None:
@@ -46,15 +47,18 @@ def add(db: Session, *, user_id: int, **fields: Any) -> Bean:
     return bean
 
 
-def reassign_children(db: Session, *, source_id: int, target_id: int) -> tuple[int, int]:
-    """Move every brew and lot of ``source_id`` onto ``target_id``; return the two counts."""
+def reassign_children(db: Session, *, source_id: int, target_id: int) -> tuple[int, int, int]:
+    """Move every brew, lot and recipe of ``source_id`` onto ``target_id``."""
     brews = db.execute(
         update(Brew).where(Brew.bean_id == source_id).values(bean_id=target_id).execution_options(synchronize_session=False)
     ).rowcount
     lots = db.execute(
         update(BeanLot).where(BeanLot.bean_id == source_id).values(bean_id=target_id).execution_options(synchronize_session=False)
     ).rowcount
-    return brews, lots
+    recipes = db.execute(
+        update(Recipe).where(Recipe.bean_id == source_id).values(bean_id=target_id).execution_options(synchronize_session=False)
+    ).rowcount
+    return brews, lots, recipes
 
 
 def delete(db: Session, bean: Bean) -> None:

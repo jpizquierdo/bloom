@@ -12,11 +12,22 @@ from bloom.db.models.user import User
 from bloom.domain.calculations import brew_ratio, classify_extraction, extraction_yield
 from bloom.repositories import brews as brews_repo
 from bloom.schemas.brew import BrewCreate, BrewRead, BrewUpdate, ExtractionDiagnosticsRead
-from bloom.services import bean_lot_service, bean_service, lookups_service
+from bloom.schemas.recipe import BrewFromRecipeCreate
+from bloom.services import bean_lot_service, bean_service, lookups_service, recipe_service
 from bloom.services.access import owns_or_admin
 from bloom.services.errors import ForbiddenError, NotFoundError, UnprocessableError
 
 logger = get_logger(__name__)
+
+_RECIPE_PARAMETER_FIELDS = (
+    "grinder_id",
+    "dose_grams",
+    "yield_grams",
+    "water_grams",
+    "grind_setting",
+    "water_temp_celsius",
+    "brew_time_seconds",
+)
 
 
 def serialize(brew: Brew) -> BrewRead:
@@ -79,6 +90,34 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
     db.commit()
     db.refresh(brew)
     logger.info("Brew %s created by user %s (bean %s)", brew.id, user.id, brew.bean_id)
+    if lot is not None and lot.is_finished:
+        logger.warning("Brew %s created on a finished lot (%s)", brew.id, lot.id)
+    return brew
+
+
+def create_brew_from_recipe(db: Session, recipe_id: int, data: BrewFromRecipeCreate, user: User) -> Brew:
+    """Create an independent brew snapshot from a shared recipe plus overrides."""
+    recipe = recipe_service.get_recipe(db, recipe_id)
+    payload = {field: getattr(recipe, field) for field in _RECIPE_PARAMETER_FIELDS}
+    payload.update(data.model_dump(exclude_unset=True))
+
+    grinder_id = payload.get("grinder_id")
+    if grinder_id is not None:
+        lookups_service.get_equipment(db, grinder_id)
+    lot_id = payload.get("lot_id")
+    lot = _resolve_lot(db, lot_id, recipe.bean_id) if lot_id is not None else None
+
+    brew = brews_repo.add(
+        db,
+        user_id=user.id,
+        bean_id=recipe.bean_id,
+        method_id=recipe.method_id,
+        recipe_id=recipe.id,
+        **payload,
+    )
+    db.commit()
+    db.refresh(brew)
+    logger.info("Brew %s created by user %s from recipe %s", brew.id, user.id, recipe.id)
     if lot is not None and lot.is_finished:
         logger.warning("Brew %s created on a finished lot (%s)", brew.id, lot.id)
     return brew

@@ -120,7 +120,7 @@ def update_bean(db: Session, bean: Bean, data: BeanUpdate, allow_duplicate: bool
 
 
 def merge_beans(db: Session, *, target_id: int, source_id: int, user: User) -> Bean:
-    """Move every brew and lot of ``source_id`` onto ``target_id``, then delete the source."""
+    """Move every brew, lot and recipe onto ``target_id``, then delete the source."""
     if target_id == source_id:
         raise ConflictError("Cannot merge a bean into itself")
     target = get_owned_bean(db, target_id, user)
@@ -136,10 +136,10 @@ def merge_beans(db: Session, *, target_id: int, source_id: int, user: User) -> B
     for field, value in adopted.items():
         setattr(target, field, value)
 
-    moved_brews, moved_lots = beans_repo.reassign_children(db, source_id=source.id, target_id=target.id)
+    moved_brews, moved_lots, moved_recipes = beans_repo.reassign_children(db, source_id=source.id, target_id=target.id)
     # The reassignment is a bulk UPDATE the session knows nothing about, so the source's
     # loaded collections are stale — deleting it now would cascade them (delete-orphan)
-    # and take the brews and lots that just moved with it.
+    # and take the brews, lots and recipes that just moved with it.
     db.expire(source)
     beans_repo.delete(db, source)
     db.flush()
@@ -148,11 +148,12 @@ def merge_beans(db: Session, *, target_id: int, source_id: int, user: User) -> B
     db.commit()
     db.refresh(target)
     logger.info(
-        "Bean %s merged into %s (%s brews, %s lots moved, adopted: %s)",
+        "Bean %s merged into %s (%s brews, %s lots, %s recipes moved, adopted: %s)",
         source_id,
         target_id,
         moved_brews,
         moved_lots,
+        moved_recipes,
         ", ".join(adopted) or "nothing",
     )
     return target

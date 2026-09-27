@@ -47,9 +47,9 @@ def update_brew_method(db: Session, method_id: int, data: BrewMethodUpdate) -> B
 
 def delete_brew_method(db: Session, method_id: int) -> None:
     method = get_brew_method(db, method_id)
-    # brew.method_id is RESTRICT: a method still used by a brew cannot be deleted.
+    # Brew and recipe method references are RESTRICT.
     if not lookups_repo.try_delete_brew_method(db, method):
-        raise ConflictError("Brew method is used by a brew and cannot be deleted")
+        raise ConflictError("Brew method is in use and cannot be deleted")
     db.commit()
     logger.info("Brew method %s deleted", method_id)
 
@@ -85,7 +85,7 @@ def update_equipment(db: Session, equipment_id: int, data: EquipmentUpdate) -> E
 
 def delete_equipment(db: Session, equipment_id: int) -> None:
     equipment = get_equipment(db, equipment_id)
-    # brew.grinder_id is SET NULL: deleting a grinder leaves past brews, just unlinked.
+    # Brew and recipe grinder references are SET NULL.
     lookups_repo.delete_equipment(db, equipment)
     db.commit()
     logger.info("Equipment %s deleted", equipment_id)

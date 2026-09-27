@@ -16,7 +16,7 @@ from bloom.core.config import get_settings
 from bloom.core.dependencies import get_db
 from bloom.core.logger import configure_logging
 from bloom.db import init_db
-from bloom.routes import auth, bean_lots, beans, brew_methods, brews, equipment, roasters, tastings, users
+from bloom.routes import auth, bean_lots, beans, brew_methods, brews, equipment, recipes, roasters, tastings, users
 from bloom.services.errors import ConflictError, ForbiddenError, NotFoundError, UnprocessableError
 
 
@@ -105,6 +105,7 @@ def create_app() -> FastAPI:
         bean_lots.router,
         brew_methods.router,
         equipment.router,
+        recipes.router,
         brews.router,
         tastings.router,
     ):

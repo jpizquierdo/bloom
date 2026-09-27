@@ -3,8 +3,8 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { authLogin, authReadCurrentUser, authRecoverPassword, authResetPassword, beansCreateBean, beansDeleteBean, beansGetBean, beansListBeans, beansMergeBean, beansUpdateBean, brewMethodsCreateBrewMethod, brewMethodsDeleteBrewMethod, brewMethodsGetBrewMethod, brewMethodsListBrewMethods, brewMethodsUpdateBrewMethod, brewsCreateBrew, brewsDeleteBrew, brewsGetBrew, brewsListBrews, brewsUpdateBrew, equipmentCreateEquipment, equipmentDeleteEquipment, equipmentGetEquipment, equipmentListEquipment, equipmentUpdateEquipment, lotsCreateLot, lotsDeleteLot, lotsGetLot, lotsListLots, lotsUpdateLot, type Options, roastersCreateRoaster, roastersDeleteRoaster, roastersGetRoaster, roastersListRoasters, roastersMergeRoaster, roastersUpdateRoaster, systemHealth, tastingsCreateTasting, tastingsDeleteTasting, tastingsGetTasting, tastingsListAllTastings, tastingsListTastings, tastingsUpdateTasting, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen';
-import type { AuthLoginData, AuthLoginError, AuthLoginResponse, AuthReadCurrentUserData, AuthReadCurrentUserResponse, AuthRecoverPasswordData, AuthRecoverPasswordError, AuthRecoverPasswordResponse, AuthResetPasswordData, AuthResetPasswordError, AuthResetPasswordResponse, BeansCreateBeanData, BeansCreateBeanError, BeansCreateBeanResponse, BeansDeleteBeanData, BeansDeleteBeanError, BeansDeleteBeanResponse, BeansGetBeanData, BeansGetBeanError, BeansGetBeanResponse, BeansListBeansData, BeansListBeansError, BeansListBeansResponse, BeansMergeBeanData, BeansMergeBeanError, BeansMergeBeanResponse, BeansUpdateBeanData, BeansUpdateBeanError, BeansUpdateBeanResponse, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodError, BrewMethodsCreateBrewMethodResponse, BrewMethodsDeleteBrewMethodData, BrewMethodsDeleteBrewMethodError, BrewMethodsDeleteBrewMethodResponse, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodError, BrewMethodsGetBrewMethodResponse, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponse, BrewMethodsUpdateBrewMethodData, BrewMethodsUpdateBrewMethodError, BrewMethodsUpdateBrewMethodResponse, BrewsCreateBrewData, BrewsCreateBrewError, BrewsCreateBrewResponse, BrewsDeleteBrewData, BrewsDeleteBrewError, BrewsDeleteBrewResponse, BrewsGetBrewData, BrewsGetBrewError, BrewsGetBrewResponse, BrewsListBrewsData, BrewsListBrewsError, BrewsListBrewsResponse, BrewsUpdateBrewData, BrewsUpdateBrewError, BrewsUpdateBrewResponse, EquipmentCreateEquipmentData, EquipmentCreateEquipmentError, EquipmentCreateEquipmentResponse, EquipmentDeleteEquipmentData, EquipmentDeleteEquipmentError, EquipmentDeleteEquipmentResponse, EquipmentGetEquipmentData, EquipmentGetEquipmentError, EquipmentGetEquipmentResponse, EquipmentListEquipmentData, EquipmentListEquipmentResponse, EquipmentUpdateEquipmentData, EquipmentUpdateEquipmentError, EquipmentUpdateEquipmentResponse, LotsCreateLotData, LotsCreateLotError, LotsCreateLotResponse, LotsDeleteLotData, LotsDeleteLotError, LotsDeleteLotResponse, LotsGetLotData, LotsGetLotError, LotsGetLotResponse, LotsListLotsData, LotsListLotsError, LotsListLotsResponse, LotsUpdateLotData, LotsUpdateLotError, LotsUpdateLotResponse, RoastersCreateRoasterData, RoastersCreateRoasterError, RoastersCreateRoasterResponse, RoastersDeleteRoasterData, RoastersDeleteRoasterError, RoastersDeleteRoasterResponse, RoastersGetRoasterData, RoastersGetRoasterError, RoastersGetRoasterResponse, RoastersListRoastersData, RoastersListRoastersResponse, RoastersMergeRoasterData, RoastersMergeRoasterError, RoastersMergeRoasterResponse, RoastersUpdateRoasterData, RoastersUpdateRoasterError, RoastersUpdateRoasterResponse, SystemHealthData, SystemHealthResponse, TastingsCreateTastingData, TastingsCreateTastingError, TastingsCreateTastingResponse, TastingsDeleteTastingData, TastingsDeleteTastingError, TastingsDeleteTastingResponse, TastingsGetTastingData, TastingsGetTastingError, TastingsGetTastingResponse, TastingsListAllTastingsData, TastingsListAllTastingsError, TastingsListAllTastingsResponse, TastingsListTastingsData, TastingsListTastingsError, TastingsListTastingsResponse, TastingsUpdateTastingData, TastingsUpdateTastingError, TastingsUpdateTastingResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen';
+import { authLogin, authReadCurrentUser, authRecoverPassword, authResetPassword, beansCreateBean, beansDeleteBean, beansGetBean, beansListBeans, beansMergeBean, beansUpdateBean, brewMethodsCreateBrewMethod, brewMethodsDeleteBrewMethod, brewMethodsGetBrewMethod, brewMethodsListBrewMethods, brewMethodsUpdateBrewMethod, brewsCreateBrew, brewsDeleteBrew, brewsGetBrew, brewsListBrews, brewsUpdateBrew, equipmentCreateEquipment, equipmentDeleteEquipment, equipmentGetEquipment, equipmentListEquipment, equipmentUpdateEquipment, lotsCreateLot, lotsDeleteLot, lotsGetLot, lotsListLots, lotsUpdateLot, type Options, recipesCreateBrewFromRecipe, recipesCreateRecipe, recipesDeleteRecipe, recipesGetRecipe, recipesListRecipes, recipesUpdateRecipe, roastersCreateRoaster, roastersDeleteRoaster, roastersGetRoaster, roastersListRoasters, roastersMergeRoaster, roastersUpdateRoaster, systemHealth, tastingsCreateTasting, tastingsDeleteTasting, tastingsGetTasting, tastingsListAllTastings, tastingsListTastings, tastingsUpdateTasting, usersCreateUser, usersListUsers, usersUpdateUser } from '../sdk.gen';
+import type { AuthLoginData, AuthLoginError, AuthLoginResponse, AuthReadCurrentUserData, AuthReadCurrentUserResponse, AuthRecoverPasswordData, AuthRecoverPasswordError, AuthRecoverPasswordResponse, AuthResetPasswordData, AuthResetPasswordError, AuthResetPasswordResponse, BeansCreateBeanData, BeansCreateBeanError, BeansCreateBeanResponse, BeansDeleteBeanData, BeansDeleteBeanError, BeansDeleteBeanResponse, BeansGetBeanData, BeansGetBeanError, BeansGetBeanResponse, BeansListBeansData, BeansListBeansError, BeansListBeansResponse, BeansMergeBeanData, BeansMergeBeanError, BeansMergeBeanResponse, BeansUpdateBeanData, BeansUpdateBeanError, BeansUpdateBeanResponse, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodError, BrewMethodsCreateBrewMethodResponse, BrewMethodsDeleteBrewMethodData, BrewMethodsDeleteBrewMethodError, BrewMethodsDeleteBrewMethodResponse, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodError, BrewMethodsGetBrewMethodResponse, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponse, BrewMethodsUpdateBrewMethodData, BrewMethodsUpdateBrewMethodError, BrewMethodsUpdateBrewMethodResponse, BrewsCreateBrewData, BrewsCreateBrewError, BrewsCreateBrewResponse, BrewsDeleteBrewData, BrewsDeleteBrewError, BrewsDeleteBrewResponse, BrewsGetBrewData, BrewsGetBrewError, BrewsGetBrewResponse, BrewsListBrewsData, BrewsListBrewsError, BrewsListBrewsResponse, BrewsUpdateBrewData, BrewsUpdateBrewError, BrewsUpdateBrewResponse, EquipmentCreateEquipmentData, EquipmentCreateEquipmentError, EquipmentCreateEquipmentResponse, EquipmentDeleteEquipmentData, EquipmentDeleteEquipmentError, EquipmentDeleteEquipmentResponse, EquipmentGetEquipmentData, EquipmentGetEquipmentError, EquipmentGetEquipmentResponse, EquipmentListEquipmentData, EquipmentListEquipmentResponse, EquipmentUpdateEquipmentData, EquipmentUpdateEquipmentError, EquipmentUpdateEquipmentResponse, LotsCreateLotData, LotsCreateLotError, LotsCreateLotResponse, LotsDeleteLotData, LotsDeleteLotError, LotsDeleteLotResponse, LotsGetLotData, LotsGetLotError, LotsGetLotResponse, LotsListLotsData, LotsListLotsError, LotsListLotsResponse, LotsUpdateLotData, LotsUpdateLotError, LotsUpdateLotResponse, RecipesCreateBrewFromRecipeData, RecipesCreateBrewFromRecipeError, RecipesCreateBrewFromRecipeResponse, RecipesCreateRecipeData, RecipesCreateRecipeError, RecipesCreateRecipeResponse, RecipesDeleteRecipeData, RecipesDeleteRecipeError, RecipesDeleteRecipeResponse, RecipesGetRecipeData, RecipesGetRecipeError, RecipesGetRecipeResponse, RecipesListRecipesData, RecipesListRecipesError, RecipesListRecipesResponse, RecipesUpdateRecipeData, RecipesUpdateRecipeError, RecipesUpdateRecipeResponse, RoastersCreateRoasterData, RoastersCreateRoasterError, RoastersCreateRoasterResponse, RoastersDeleteRoasterData, RoastersDeleteRoasterError, RoastersDeleteRoasterResponse, RoastersGetRoasterData, RoastersGetRoasterError, RoastersGetRoasterResponse, RoastersListRoastersData, RoastersListRoastersResponse, RoastersMergeRoasterData, RoastersMergeRoasterError, RoastersMergeRoasterResponse, RoastersUpdateRoasterData, RoastersUpdateRoasterError, RoastersUpdateRoasterResponse, SystemHealthData, SystemHealthResponse, TastingsCreateTastingData, TastingsCreateTastingError, TastingsCreateTastingResponse, TastingsDeleteTastingData, TastingsDeleteTastingError, TastingsDeleteTastingResponse, TastingsGetTastingData, TastingsGetTastingError, TastingsGetTastingResponse, TastingsListAllTastingsData, TastingsListAllTastingsError, TastingsListAllTastingsResponse, TastingsListTastingsData, TastingsListTastingsError, TastingsListTastingsResponse, TastingsUpdateTastingData, TastingsUpdateTastingError, TastingsUpdateTastingResponse, UsersCreateUserData, UsersCreateUserError, UsersCreateUserResponse, UsersListUsersData, UsersListUsersResponse, UsersUpdateUserData, UsersUpdateUserError, UsersUpdateUserResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -424,7 +424,7 @@ export const beansUpdateBeanMutation = (options?: Partial<Options<BeansUpdateBea
 /**
  * Merge Bean
  *
- * Fold a duplicate into this bean: its brews and lots move here and it is deleted.
+ * Fold a duplicate into this bean: its brews, lots and recipes move here.
  *
  * You must own both beans (or be an admin). This bean keeps its own values and adopts
  * the duplicate's for anything it left empty.
@@ -724,6 +724,122 @@ export const equipmentUpdateEquipmentMutation = (options?: Partial<Options<Equip
     const mutationOptions: UseMutationOptions<EquipmentUpdateEquipmentResponse, EquipmentUpdateEquipmentError, Options<EquipmentUpdateEquipmentData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await equipmentUpdateEquipment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const recipesListRecipesQueryKey = (options: Options<RecipesListRecipesData>) => createQueryKey('recipesListRecipes', options);
+
+/**
+ * List Recipes
+ *
+ * List a bean's recipes. Any authenticated user may read them.
+ */
+export const recipesListRecipesOptions = (options: Options<RecipesListRecipesData>) => queryOptions<RecipesListRecipesResponse, RecipesListRecipesError, RecipesListRecipesResponse, ReturnType<typeof recipesListRecipesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await recipesListRecipes({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: recipesListRecipesQueryKey(options)
+});
+
+/**
+ * Create Recipe
+ *
+ * Create a recipe for any shared bean; you are recorded as its creator.
+ */
+export const recipesCreateRecipeMutation = (options?: Partial<Options<RecipesCreateRecipeData>>): UseMutationOptions<RecipesCreateRecipeResponse, RecipesCreateRecipeError, Options<RecipesCreateRecipeData>> => {
+    const mutationOptions: UseMutationOptions<RecipesCreateRecipeResponse, RecipesCreateRecipeError, Options<RecipesCreateRecipeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await recipesCreateRecipe({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete Recipe
+ *
+ * Delete a recipe. Creator or admin only; existing brews remain unchanged.
+ */
+export const recipesDeleteRecipeMutation = (options?: Partial<Options<RecipesDeleteRecipeData>>): UseMutationOptions<RecipesDeleteRecipeResponse, RecipesDeleteRecipeError, Options<RecipesDeleteRecipeData>> => {
+    const mutationOptions: UseMutationOptions<RecipesDeleteRecipeResponse, RecipesDeleteRecipeError, Options<RecipesDeleteRecipeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await recipesDeleteRecipe({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const recipesGetRecipeQueryKey = (options: Options<RecipesGetRecipeData>) => createQueryKey('recipesGetRecipe', options);
+
+/**
+ * Get Recipe
+ *
+ * Get a recipe by id. Any authenticated user may read it.
+ */
+export const recipesGetRecipeOptions = (options: Options<RecipesGetRecipeData>) => queryOptions<RecipesGetRecipeResponse, RecipesGetRecipeError, RecipesGetRecipeResponse, ReturnType<typeof recipesGetRecipeQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await recipesGetRecipe({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: recipesGetRecipeQueryKey(options)
+});
+
+/**
+ * Update Recipe
+ *
+ * Update a recipe. Only its creator (or an admin) may edit it.
+ */
+export const recipesUpdateRecipeMutation = (options?: Partial<Options<RecipesUpdateRecipeData>>): UseMutationOptions<RecipesUpdateRecipeResponse, RecipesUpdateRecipeError, Options<RecipesUpdateRecipeData>> => {
+    const mutationOptions: UseMutationOptions<RecipesUpdateRecipeResponse, RecipesUpdateRecipeError, Options<RecipesUpdateRecipeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await recipesUpdateRecipe({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Create Brew From Recipe
+ *
+ * Create a brew from a recipe snapshot; any authenticated user may use it.
+ */
+export const recipesCreateBrewFromRecipeMutation = (options?: Partial<Options<RecipesCreateBrewFromRecipeData>>): UseMutationOptions<RecipesCreateBrewFromRecipeResponse, RecipesCreateBrewFromRecipeError, Options<RecipesCreateBrewFromRecipeData>> => {
+    const mutationOptions: UseMutationOptions<RecipesCreateBrewFromRecipeResponse, RecipesCreateBrewFromRecipeError, Options<RecipesCreateBrewFromRecipeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await recipesCreateBrewFromRecipe({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

@@ -868,7 +868,7 @@
           "beans"
         ],
         "summary": "Merge Bean",
-        "description": "Fold a duplicate into this bean: its brews and lots move here and it is deleted.\n\nYou must own both beans (or be an admin). This bean keeps its own values and adopts\nthe duplicate's for anything it left empty.",
+        "description": "Fold a duplicate into this bean: its brews, lots and recipes move here.\n\nYou must own both beans (or be an admin). This bean keeps its own values and adopts\nthe duplicate's for anything it left empty.",
         "operationId": "beans-merge_bean",
         "security": [
           {
@@ -1595,6 +1595,315 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/beans/{bean_id}/recipes": {
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Create Recipe",
+        "description": "Create a recipe for any shared bean; you are recorded as its creator.",
+        "operationId": "recipes-create_recipe",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bean_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Bean Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "List Recipes",
+        "description": "List a bean's recipes. Any authenticated user may read them.",
+        "operationId": "recipes-list_recipes",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bean_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Bean Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecipeRead"
+                  },
+                  "title": "Response Recipes-List Recipes"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes/{recipe_id}": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Get Recipe",
+        "description": "Get a recipe by id. Any authenticated user may read it.",
+        "operationId": "recipes-get_recipe",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Update Recipe",
+        "description": "Update a recipe. Only its creator (or an admin) may edit it.",
+        "operationId": "recipes-update_recipe",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Delete Recipe",
+        "description": "Delete a recipe. Creator or admin only; existing brews remain unchanged.",
+        "operationId": "recipes-delete_recipe",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes/{recipe_id}/brews": {
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Create Brew From Recipe",
+        "description": "Create a brew from a recipe snapshot; any authenticated user may use it.",
+        "operationId": "recipes-create_brew_from_recipe",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrewFromRecipeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrewRead"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -2717,7 +3026,7 @@
           "source_id": {
             "type": "integer",
             "title": "Source Id",
-            "description": "Bean to merge away: its brews and lots move to the target and it is deleted.",
+            "description": "Bean to merge away: its brews, lots and recipes move to the target and it is deleted.",
             "examples": [
               7
             ]
@@ -3526,6 +3835,198 @@
         ],
         "title": "BrewCreate"
       },
+      "BrewFromRecipeCreate": {
+        "properties": {
+          "grinder_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grinder Id",
+            "description": "Grinder to use (equipment id).",
+            "examples": [
+              1
+            ]
+          },
+          "yield_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yield Grams",
+            "description": "Target beverage mass in the cup (g).",
+            "examples": [
+              "42"
+            ]
+          },
+          "water_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Grams",
+            "description": "Target water amount (g).",
+            "examples": [
+              "250"
+            ]
+          },
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Target grinder setting.",
+            "examples": [
+              "14"
+            ]
+          },
+          "water_temp_celsius": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp Celsius",
+            "description": "Target water temperature (\u00b0C).",
+            "examples": [
+              "94.0"
+            ]
+          },
+          "brew_time_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brew Time Seconds",
+            "description": "Target total brew time (s).",
+            "examples": [
+              30
+            ]
+          },
+          "lot_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lot Id",
+            "description": "Optional physical lot used for this brew.",
+            "examples": [
+              1
+            ]
+          },
+          "dose_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dose Grams",
+            "description": "Override the recipe's dose (g).",
+            "examples": [
+              "18"
+            ]
+          },
+          "brewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brewed At",
+            "description": "When it was brewed (defaults to now)."
+          },
+          "tds_percent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tds Percent",
+            "description": "Measured TDS % for this extraction.",
+            "examples": [
+              "1.35"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Notes about this brew; recipe notes are never copied."
+          }
+        },
+        "type": "object",
+        "title": "BrewFromRecipeCreate",
+        "description": "Overrides and extraction-only values for a brew created from a recipe."
+      },
       "BrewMethodCreate": {
         "properties": {
           "name": {
@@ -3876,6 +4377,21 @@
           "method_id": {
             "type": "integer",
             "title": "Method Id",
+            "examples": [
+              1
+            ]
+          },
+          "recipe_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipe Id",
+            "description": "Recipe used as this brew's starting point, if any.",
             "examples": [
               1
             ]
@@ -4418,6 +4934,529 @@
         ],
         "title": "Message",
         "description": "A human-readable outcome, for endpoints with nothing else to return."
+      },
+      "RecipeCreate": {
+        "properties": {
+          "grinder_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grinder Id",
+            "description": "Grinder to use (equipment id).",
+            "examples": [
+              1
+            ]
+          },
+          "yield_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yield Grams",
+            "description": "Target beverage mass in the cup (g).",
+            "examples": [
+              "42"
+            ]
+          },
+          "water_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Grams",
+            "description": "Target water amount (g).",
+            "examples": [
+              "250"
+            ]
+          },
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Target grinder setting.",
+            "examples": [
+              "14"
+            ]
+          },
+          "water_temp_celsius": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp Celsius",
+            "description": "Target water temperature (\u00b0C).",
+            "examples": [
+              "94.0"
+            ]
+          },
+          "brew_time_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brew Time Seconds",
+            "description": "Target total brew time (s).",
+            "examples": [
+              30
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable recipe name.",
+            "examples": [
+              "Brazil: recipe #1"
+            ]
+          },
+          "method_id": {
+            "type": "integer",
+            "title": "Method Id",
+            "description": "Brew method id.",
+            "examples": [
+              1
+            ]
+          },
+          "dose_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Dose Grams",
+            "description": "Target dry coffee dose (g).",
+            "examples": [
+              "18"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Notes about the recipe itself.",
+            "examples": [
+              "Start slightly coarser as it ages"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "method_id",
+          "dose_grams"
+        ],
+        "title": "RecipeCreate"
+      },
+      "RecipeRead": {
+        "properties": {
+          "grinder_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grinder Id",
+            "description": "Grinder to use (equipment id).",
+            "examples": [
+              1
+            ]
+          },
+          "yield_grams": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yield Grams",
+            "description": "Target beverage mass in the cup (g).",
+            "examples": [
+              "42"
+            ]
+          },
+          "water_grams": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Grams",
+            "description": "Target water amount (g).",
+            "examples": [
+              "250"
+            ]
+          },
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Target grinder setting.",
+            "examples": [
+              "14"
+            ]
+          },
+          "water_temp_celsius": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp Celsius",
+            "description": "Target water temperature (\u00b0C).",
+            "examples": [
+              "94.0"
+            ]
+          },
+          "brew_time_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brew Time Seconds",
+            "description": "Target total brew time (s).",
+            "examples": [
+              30
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable recipe name.",
+            "examples": [
+              "Brazil: recipe #1"
+            ]
+          },
+          "method_id": {
+            "type": "integer",
+            "title": "Method Id",
+            "description": "Brew method id.",
+            "examples": [
+              1
+            ]
+          },
+          "dose_grams": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Dose Grams",
+            "description": "Target dry coffee dose (g).",
+            "examples": [
+              "18"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Notes about the recipe itself.",
+            "examples": [
+              "Start slightly coarser as it ages"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "bean_id": {
+            "type": "integer",
+            "title": "Bean Id",
+            "description": "Bean this recipe belongs to.",
+            "examples": [
+              1
+            ]
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id",
+            "description": "Creator id.",
+            "examples": [
+              1
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/AuthorRead",
+            "description": "Creator of the recipe."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "examples": [
+              "2026-09-27T09:30:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "method_id",
+          "dose_grams",
+          "id",
+          "bean_id",
+          "user_id",
+          "owner",
+          "created_at"
+        ],
+        "title": "RecipeRead"
+      },
+      "RecipeUpdate": {
+        "properties": {
+          "grinder_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grinder Id",
+            "description": "Grinder to use (equipment id).",
+            "examples": [
+              1
+            ]
+          },
+          "yield_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Yield Grams",
+            "description": "Target beverage mass in the cup (g).",
+            "examples": [
+              "42"
+            ]
+          },
+          "water_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Grams",
+            "description": "Target water amount (g).",
+            "examples": [
+              "250"
+            ]
+          },
+          "grind_setting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grind Setting",
+            "description": "Target grinder setting.",
+            "examples": [
+              "14"
+            ]
+          },
+          "water_temp_celsius": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Temp Celsius",
+            "description": "Target water temperature (\u00b0C).",
+            "examples": [
+              "94.0"
+            ]
+          },
+          "brew_time_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brew Time Seconds",
+            "description": "Target total brew time (s).",
+            "examples": [
+              30
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Human-readable recipe name.",
+            "examples": [
+              "Brazil espresso"
+            ]
+          },
+          "method_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method Id",
+            "description": "Brew method id.",
+            "examples": [
+              1
+            ]
+          },
+          "dose_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dose Grams",
+            "description": "Target dry coffee dose (g).",
+            "examples": [
+              "18"
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes",
+            "description": "Notes about the recipe itself."
+          }
+        },
+        "type": "object",
+        "title": "RecipeUpdate",
+        "description": "Partial update; bean and creator are immutable."
       },
       "RecoverPassword": {
         "properties": {
