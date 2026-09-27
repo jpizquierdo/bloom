@@ -2,7 +2,7 @@ import {
   recipesCreateRecipeMutation,
   recipesUpdateRecipeMutation,
 } from "@/client/@tanstack/react-query.gen"
-import type { RecipeRead } from "@/client/types.gen"
+import type { BrewRead, RecipeRead } from "@/client/types.gen"
 import {
   PreparationFields,
   type PreparationFormValues,
@@ -69,6 +69,8 @@ interface RecipeDialogProps {
   beanId: number
   suggestedName: string
   recipe: RecipeRead | null
+  /** Seed a new recipe from reusable brew parameters. Brew notes stay on the brew. */
+  prefillFrom?: BrewRead
 }
 
 export function RecipeDialog({
@@ -77,29 +79,31 @@ export function RecipeDialog({
   beanId,
   suggestedName,
   recipe,
+  prefillFrom,
 }: RecipeDialogProps) {
   const feedback = useCrudFeedback()
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY })
 
   useEffect(() => {
     if (!open) return
+    const source = recipe ?? prefillFrom
     form.reset(
-      recipe
+      source
         ? {
-            name: recipe.name,
-            method_id: String(recipe.method_id),
-            grinder_id: recipe.grinder_id ? String(recipe.grinder_id) : "",
-            dose_grams: recipe.dose_grams,
-            yield_grams: recipe.yield_grams ?? "",
-            water_grams: recipe.water_grams ?? "",
-            grind_setting: recipe.grind_setting ?? "",
-            water_temp_celsius: recipe.water_temp_celsius ?? "",
-            brew_time_seconds: recipe.brew_time_seconds?.toString() ?? "",
-            notes: recipe.notes ?? "",
+            name: recipe?.name ?? suggestedName,
+            method_id: String(source.method_id),
+            grinder_id: source.grinder_id ? String(source.grinder_id) : "",
+            dose_grams: source.dose_grams,
+            yield_grams: source.yield_grams ?? "",
+            water_grams: source.water_grams ?? "",
+            grind_setting: source.grind_setting ?? "",
+            water_temp_celsius: source.water_temp_celsius ?? "",
+            brew_time_seconds: source.brew_time_seconds?.toString() ?? "",
+            notes: recipe?.notes ?? "",
           }
         : { ...EMPTY, name: suggestedName },
     )
-  }, [open, recipe, suggestedName, form])
+  }, [open, recipe, prefillFrom, suggestedName, form])
 
   const create = useMutation({
     ...recipesCreateRecipeMutation(),
@@ -145,12 +149,12 @@ export function RecipeDialog({
     <ResourceDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={recipe ? "Edit recipe" : "Add recipe"}
+      title={recipe ? "Edit recipe" : prefillFrom ? "Save brew as recipe" : "Add recipe"}
       description="Reusable preparation targets. Notes stay with the recipe and are not copied to brews."
       form={form}
       onSubmit={onSubmit}
       isPending={create.isPending || update.isPending}
-      submitLabel={recipe ? "Save" : "Add recipe"}
+      submitLabel={recipe ? "Save" : prefillFrom ? "Save recipe" : "Add recipe"}
       wide
     >
       <FormField

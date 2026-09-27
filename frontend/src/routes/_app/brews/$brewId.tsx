@@ -5,10 +5,12 @@ import {
   equipmentListEquipmentOptions,
   lotsGetLotOptions,
   recipesGetRecipeOptions,
+  recipesListRecipesOptions,
   tastingsDeleteTastingMutation,
   tastingsListTastingsOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { TastingRead } from "@/client/types.gen"
+import { RecipeDialog } from "@/components/beans/recipe-dialog"
 import { BrewDialog } from "@/components/brews/brew-dialog"
 import { BrewDiagnostics } from "@/components/brews/diagnostics"
 import { TastingDialog } from "@/components/brews/tasting-dialog"
@@ -33,7 +35,7 @@ import { formatDate, formatDateTime, formatNumber, formatSeconds, humanize } fro
 import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { ArrowLeft, Copy, Pencil, Plus } from "lucide-react"
+import { ArrowLeft, BookmarkPlus, Copy, Pencil, Plus } from "lucide-react"
 import type { ReactNode } from "react"
 import { useState } from "react"
 
@@ -64,9 +66,14 @@ function BrewDetailPage() {
 
   const [brewDialogOpen, setBrewDialogOpen] = useState(false)
   const [duplicating, setDuplicating] = useState(false)
+  const [recipeDialogOpen, setRecipeDialogOpen] = useState(false)
   const [tastingDialogOpen, setTastingDialogOpen] = useState(false)
   const [editingTasting, setEditingTasting] = useState<TastingRead | null>(null)
   const [deletingTasting, setDeletingTasting] = useState<TastingRead | null>(null)
+  const { data: recipesForBean, isPending: recipesPending } = useQuery({
+    ...recipesListRecipesOptions({ path: { bean_id: brew?.bean_id ?? 0 } }),
+    enabled: recipeDialogOpen && brew !== undefined,
+  })
 
   const removeTasting = useMutation({
     ...tastingsDeleteTastingMutation(),
@@ -111,7 +118,7 @@ function BrewDetailPage() {
           .filter(Boolean)
           .join(" · ")}
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
               onClick={() => {
@@ -121,6 +128,10 @@ function BrewDetailPage() {
             >
               <Copy className="size-4" />
               Brew again
+            </Button>
+            <Button variant="outline" onClick={() => setRecipeDialogOpen(true)}>
+              <BookmarkPlus className="size-4" />
+              Save as recipe
             </Button>
             {canEdit(brew, user) ? (
               <Button
@@ -285,6 +296,14 @@ function BrewDetailPage() {
         }}
         brew={duplicating ? null : brew}
         prefillFrom={duplicating ? brew : undefined}
+      />
+      <RecipeDialog
+        open={recipeDialogOpen && !recipesPending}
+        onOpenChange={setRecipeDialogOpen}
+        beanId={brew.bean_id}
+        suggestedName={`${bean?.name ?? "Bean"}: recipe #${(recipesForBean?.length ?? 0) + 1}`}
+        recipe={null}
+        prefillFrom={brew}
       />
       <TastingDialog
         open={tastingDialogOpen}

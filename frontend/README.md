@@ -72,6 +72,8 @@ For a **detail page**, add a `$id.tsx` route beside `index.tsx` and make the lis
 navigate to it (`onRowClick`); `roasters/$roasterId.tsx`, `beans/$beanId.tsx` and
 `brews/$brewId.tsx` are the examples. For a **long pick-list** (e.g. beans), use the
 searchable `Combobox` (`components/data/combobox.tsx`) instead of a plain `Select`.
+The brew list and detail page can create an independent recipe from reusable brew parameters;
+both flows reuse `components/beans/recipe-dialog.tsx` rather than duplicating form behavior.
 
 Two API rules every page must respect:
 

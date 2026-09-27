@@ -4,10 +4,12 @@ import {
   brewsDeleteBrewMutation,
   brewsListBrewsOptions,
   equipmentListEquipmentOptions,
+  recipesListRecipesOptions,
   roastersListRoastersOptions,
   tastingsListAllTastingsOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { BrewRead } from "@/client/types.gen"
+import { RecipeDialog } from "@/components/beans/recipe-dialog"
 import { BrewDialog } from "@/components/brews/brew-dialog"
 import { BrewDiagnostics } from "@/components/brews/diagnostics"
 import { Combobox } from "@/components/data/combobox"
@@ -39,7 +41,7 @@ import { formatDateTime, formatNumber, formatSeconds } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { Plus, StarOff, User, X } from "lucide-react"
+import { BookmarkPlus, Plus, StarOff, User, X } from "lucide-react"
 import type { ReactNode } from "react"
 import { useState } from "react"
 
@@ -62,12 +64,18 @@ function BrewsPage() {
   const [duplicating, setDuplicating] = useState<BrewRead | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState<BrewRead | null>(null)
+  const [savingAsRecipe, setSavingAsRecipe] = useState<BrewRead | null>(null)
   const [roasterFilter, setRoasterFilter] = useState("all")
   const [beanFilter, setBeanFilter] = useState("all")
   const [methodFilter, setMethodFilter] = useState("all")
   const [mineOnly, setMineOnly] = useState(false)
   const [untastedOnly, setUntastedOnly] = useState(false)
   const [search, setSearch] = useState("")
+
+  const { data: recipesForBean, isPending: recipesPending } = useQuery({
+    ...recipesListRecipesOptions({ path: { bean_id: savingAsRecipe?.bean_id ?? 0 } }),
+    enabled: savingAsRecipe !== null,
+  })
 
   const remove = useMutation({
     ...brewsDeleteBrewMutation(),
@@ -295,6 +303,13 @@ function BrewsPage() {
                         setDuplicating(brew)
                         setDialogOpen(true)
                       }}
+                      additionalActions={[
+                        {
+                          label: "Save as recipe",
+                          icon: <BookmarkPlus className="size-4" />,
+                          onSelect: () => setSavingAsRecipe(brew),
+                        },
+                      ]}
                       onDelete={() => setDeleting(brew)}
                     />
                   </CardAction>
@@ -346,6 +361,19 @@ function BrewsPage() {
         }}
         brew={editing}
         prefillFrom={duplicating ?? undefined}
+      />
+
+      <RecipeDialog
+        open={savingAsRecipe !== null && !recipesPending}
+        onOpenChange={(open) => !open && setSavingAsRecipe(null)}
+        beanId={savingAsRecipe?.bean_id ?? 0}
+        suggestedName={
+          savingAsRecipe
+            ? `${beanName(savingAsRecipe.bean_id)}: recipe #${(recipesForBean?.length ?? 0) + 1}`
+            : ""
+        }
+        recipe={null}
+        prefillFrom={savingAsRecipe ?? undefined}
       />
 
       <DeleteAlert

@@ -513,6 +513,9 @@ each bean have zero, one or many explicitly chosen recipes. Names are required f
 not unique; the row id remains the unambiguous identity. The bean detail UI suggests
 `<bean>: recipe #N`, keeps the name editable, and offers every authenticated user the shared
 “Brew” action while reserving edit/delete controls for the creator or an admin.
+The brew list and detail views also offer “Save as recipe”: this creates a new recipe pre-filled
+with reusable preparation parameters only. It does not copy brew notes or extraction-only data,
+change the source brew, or assign recipe provenance retroactively.
 
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
