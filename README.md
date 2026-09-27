@@ -164,9 +164,8 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the data model, the
 ## Status
 
 Backend API and data layer are implemented (users/auth, beans, lots, recipes, brews, tastings,
-lookups). The web UI covers everything except recipe workflows, which are the next delivery
-slice. Password reset works over email; sign-up does not exist yet (the UI shows that screen but
-leaves it inert), and admins create accounts.
+lookups), and the web UI covers all of them. Password reset works over email; sign-up does not
+exist yet (the UI shows that screen but leaves it inert), and admins create accounts.
 
 ## License
 

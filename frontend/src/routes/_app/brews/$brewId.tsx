@@ -4,6 +4,7 @@ import {
   brewsGetBrewOptions,
   equipmentListEquipmentOptions,
   lotsGetLotOptions,
+  recipesGetRecipeOptions,
   tastingsDeleteTastingMutation,
   tastingsListTastingsOptions,
 } from "@/client/@tanstack/react-query.gen"
@@ -55,6 +56,10 @@ function BrewDetailPage() {
   const { data: lot } = useQuery({
     ...lotsGetLotOptions({ path: { lot_id: brew?.lot_id ?? 0 } }),
     enabled: brew?.lot_id != null,
+  })
+  const { data: sourceRecipe } = useQuery({
+    ...recipesGetRecipeOptions({ path: { recipe_id: brew?.recipe_id ?? 0 } }),
+    enabled: brew?.recipe_id != null,
   })
 
   const [brewDialogOpen, setBrewDialogOpen] = useState(false)
@@ -136,7 +141,10 @@ function BrewDetailPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Recipe</CardTitle>
+            <CardTitle>Preparation</CardTitle>
+            {sourceRecipe ? (
+              <CardDescription>Started from recipe: {sourceRecipe.name}</CardDescription>
+            ) : null}
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <Metric label="Dose" value={`${formatNumber(brew.dose_grams)} g`} />

@@ -376,6 +376,11 @@ lists its brews, a brew lists its tastings. Long pick-lists (beans) use the sear
 `Combobox` (`components/data/combobox.tsx`) rather than a plain `Select`; both the filters and
 the row navigation are client-side, consistent with 20.
 
+Recipes stay nested on the bean detail page rather than adding another top-level route: the bean
+is required context, and the useful action is to open the existing brew form from a recipe. The
+recipe and brew dialogs share one preparation-fields component so their common parameters do not
+drift into two subtly different forms.
+
 Two API rules are centralised rather than re-derived per page, because getting either wrong is
 silent:
 
@@ -505,7 +510,9 @@ values (`lot_id`, `brewed_at`, TDS, diagnostics and tastings) do not belong to a
 
 There is deliberately no default recipe. That avoids inventing state during migration and lets
 each bean have zero, one or many explicitly chosen recipes. Names are required for people but
-not unique; the row id remains the unambiguous identity.
+not unique; the row id remains the unambiguous identity. The bean detail UI suggests
+`<bean>: recipe #N`, keeps the name editable, and offers every authenticated user the shared
+“Brew” action while reserving edit/delete controls for the creator or an admin.
 
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.

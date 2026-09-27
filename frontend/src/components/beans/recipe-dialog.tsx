@@ -1,0 +1,185 @@
+import {
+  recipesCreateRecipeMutation,
+  recipesUpdateRecipeMutation,
+} from "@/client/@tanstack/react-query.gen"
+import type { RecipeRead } from "@/client/types.gen"
+import {
+  PreparationFields,
+  type PreparationFormValues,
+} from "@/components/brews/preparation-fields"
+import { ResourceDialog } from "@/components/data/resource-dialog"
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { patchBody, stripEmpty } from "@/lib/format"
+import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation } from "@tanstack/react-query"
+import { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+
+const schema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  method_id: z.string().min(1, "Pick a method"),
+  grinder_id: z.string(),
+  dose_grams: z.string().min(1, "Dose is required"),
+  yield_grams: z.string(),
+  water_grams: z.string(),
+  grind_setting: z.string(),
+  water_temp_celsius: z.string(),
+  brew_time_seconds: z.string(),
+  notes: z.string(),
+})
+
+type FormValues = PreparationFormValues & z.infer<typeof schema>
+
+const CLEARABLE = [
+  "grinder_id",
+  "yield_grams",
+  "water_grams",
+  "grind_setting",
+  "water_temp_celsius",
+  "brew_time_seconds",
+  "notes",
+] as const
+
+const EMPTY: FormValues = {
+  name: "",
+  method_id: "",
+  grinder_id: "",
+  dose_grams: "",
+  yield_grams: "",
+  water_grams: "",
+  grind_setting: "",
+  water_temp_celsius: "",
+  brew_time_seconds: "",
+  notes: "",
+}
+
+interface RecipeDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  beanId: number
+  suggestedName: string
+  recipe: RecipeRead | null
+}
+
+export function RecipeDialog({
+  open,
+  onOpenChange,
+  beanId,
+  suggestedName,
+  recipe,
+}: RecipeDialogProps) {
+  const feedback = useCrudFeedback()
+  const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY })
+
+  useEffect(() => {
+    if (!open) return
+    form.reset(
+      recipe
+        ? {
+            name: recipe.name,
+            method_id: String(recipe.method_id),
+            grinder_id: recipe.grinder_id ? String(recipe.grinder_id) : "",
+            dose_grams: recipe.dose_grams,
+            yield_grams: recipe.yield_grams ?? "",
+            water_grams: recipe.water_grams ?? "",
+            grind_setting: recipe.grind_setting ?? "",
+            water_temp_celsius: recipe.water_temp_celsius ?? "",
+            brew_time_seconds: recipe.brew_time_seconds?.toString() ?? "",
+            notes: recipe.notes ?? "",
+          }
+        : { ...EMPTY, name: suggestedName },
+    )
+  }, [open, recipe, suggestedName, form])
+
+  const create = useMutation({
+    ...recipesCreateRecipeMutation(),
+    onSuccess: feedback.onSuccess("Recipe created"),
+    onError: feedback.onError,
+  })
+  const update = useMutation({
+    ...recipesUpdateRecipeMutation(),
+    onSuccess: feedback.onSuccess("Recipe updated"),
+    onError: feedback.onError,
+  })
+
+  function onSubmit(values: FormValues) {
+    const parameters = {
+      grinder_id: values.grinder_id === "" ? undefined : Number(values.grinder_id),
+      yield_grams: values.yield_grams === "" ? undefined : Number(values.yield_grams),
+      water_grams: values.water_grams === "" ? undefined : Number(values.water_grams),
+      grind_setting: values.grind_setting,
+      water_temp_celsius:
+        values.water_temp_celsius === "" ? undefined : Number(values.water_temp_celsius),
+      brew_time_seconds:
+        values.brew_time_seconds === "" ? undefined : Number(values.brew_time_seconds),
+      notes: values.notes,
+    }
+    const required = {
+      name: values.name.trim(),
+      method_id: Number(values.method_id),
+      dose_grams: Number(values.dose_grams),
+    }
+    const request = recipe
+      ? update.mutateAsync({
+          path: { recipe_id: recipe.id },
+          body: { ...patchBody(parameters, CLEARABLE), ...required },
+        })
+      : create.mutateAsync({
+          path: { bean_id: beanId },
+          body: { ...stripEmpty(parameters), ...required },
+        })
+    return submitAndClose(request, () => onOpenChange(false))
+  }
+
+  return (
+    <ResourceDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={recipe ? "Edit recipe" : "Add recipe"}
+      description="Reusable preparation targets. Notes stay with the recipe and are not copied to brews."
+      form={form}
+      onSubmit={onSubmit}
+      isPending={create.isPending || update.isPending}
+      submitLabel={recipe ? "Save" : "Add recipe"}
+      wide
+    >
+      <FormField
+        control={form.control}
+        name="name"
+        render={({ field }) => (
+          <FormItem className="sm:col-span-2">
+            <FormLabel>Name</FormLabel>
+            <FormControl>
+              <Input placeholder="Brazil: recipe #1" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <PreparationFields />
+      <FormField
+        control={form.control}
+        name="notes"
+        render={({ field }) => (
+          <FormItem className="sm:col-span-2">
+            <FormLabel>Recipe notes</FormLabel>
+            <FormControl>
+              <Textarea rows={3} placeholder="Preparation guidance for next time." {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </ResourceDialog>
+  )
+}
