@@ -49,7 +49,7 @@ bloom/
 │   │   ├── base.py            # SQLAlchemy DeclarativeBase
 │   │   ├── session.py         # engine + session factory
 │   │   └── models/            # ORM models (one concern per file)
-│   │       ├── user.py  bean.py  bean_lot.py  recipe.py  brew.py  brew_method.py  equipment.py  tasting.py
+│   │       ├── user.py  bean.py  bean_lot.py  recipe.py  recipe_favorite.py  brew.py  brew_method.py  equipment.py  tasting.py
 │   ├── schemas/               # Pydantic v2 DTOs (request/response)
 │   │   ├── user.py  bean.py  recipe.py  brew.py  tasting.py  lookups.py
 │   ├── domain/                # PURE functions — no ORM, no FastAPI imports
@@ -99,7 +99,7 @@ Bloom is multi-user with two roles:
 | Role       | Capabilities                                                                 |
 |------------|------------------------------------------------------------------------------|
 | **admin**  | Everything a standard user can do, plus manage users (create, promote/demote, deactivate) and manage shared lookup data (`brew_method`, `equipment`). May edit/delete anyone's data. |
-| **user**   | Add beans, create/use recipes for any bean, brew from any bean, and taste any brew — all shared and readable by everyone. May edit/delete only their own beans, recipes, brews and tastings. Read shared lookup data. |
+| **user**   | Add beans, create/use/favorite recipes for any bean, brew from any bean, and taste any brew — all shared and readable by everyone. May edit/delete only their own beans, recipes, brews and tastings. Read shared lookup data. |
 
 Design points:
 
@@ -135,7 +135,7 @@ Design points:
 
 ## Data model
 
-Nine tables. `brew` is the central, highest-volume entity.
+Ten tables. `brew` is the central, highest-volume entity.
 
 ```
 Entities:
@@ -154,6 +154,9 @@ Ownership (who created each row):
     user 1 ──< recipe     (creator)
     user 1 ──< brew       (author)
     user 1 ──< tasting    (taster)
+
+Personal state:
+    user 1 ──< recipe_favorite >── 1 recipe
 ```
 
 Every user-created row carries who created it: `bean.user_id` (owner), `bean_lot.user_id`
@@ -170,6 +173,7 @@ from it, and several may score that brew.
 | `brew_method` | Lookup: V60, Espresso, AeroPress… with a category.                  |
 | `equipment`   | Grinders, machines, kettles — one table, `type` discriminator.      |
 | `recipe`      | Optional reusable preparation parameters for one bean. Shared; `user_id` is the creator. |
+| `recipe_favorite` | Per-user bookmark of a shared recipe; composite key `(user_id, recipe_id)`. |
 | `brew`        | A single extraction: the objective parameters. Central entity; `user_id` is the author, `lot_id` the optional lot brewed, and `recipe_id` optional provenance. |
 | `tasting`     | A subjective evaluation of a brew (1:N — one per user, several per brew across different users); `user_id` is the taster. |
 
@@ -517,6 +521,12 @@ The brew list and detail views also offer “Save as recipe”: this creates a n
 with reusable preparation parameters only. It does not copy brew notes or extraction-only data,
 change the source brew, or assign recipe provenance retroactively.
 
+Favorites are personal bookmarks, not recipe state and not defaults. Any authenticated user
+may favorite any shared recipe, multiple recipes may be favorited, and another user's marker is
+never exposed. `PUT /recipes/{id}/favorite` and `DELETE /recipes/{id}/favorite` are idempotent
+subresource operations. The bean detail UI marks favorites with a filled star and sorts them
+first for that user; favoriting never auto-selects a recipe or changes brewing behavior.
+
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
 - **First admin via env vars on startup**; further accounts are admin-created and default
@@ -536,6 +546,7 @@ change the source brew, or assign recipe provenance retroactively.
   - `bean` → `brew` → `tasting`, `bean` → `bean_lot`, and `bean` → `recipe`: **CASCADE**. Note:
     because beans are shared, deleting a bean removes *every* user's brews, lots and recipes on
     it (only the owner can trigger this).
+  - `user` / `recipe` → `recipe_favorite`: **CASCADE** (bookmarks have no independent history).
   - `brew.method_id` and `recipe.method_id`: **RESTRICT** (a method in use cannot be deleted).
   - `bean.roaster_id`: **RESTRICT** (a roaster with beans is merged away, never deleted — see 13).
   - `brew.grinder_id`, `recipe.grinder_id`, `brew.lot_id`, and `brew.recipe_id`: **SET NULL**

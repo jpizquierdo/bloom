@@ -13,26 +13,27 @@ router = APIRouter(tags=["recipes"])
 @router.post("/beans/{bean_id}/recipes", response_model=RecipeRead, status_code=status.HTTP_201_CREATED)
 def create_recipe(bean_id: int, data: RecipeCreate, db: DbSession, user: CurrentUser) -> RecipeRead:
     """Create a recipe for any shared bean; you are recorded as its creator."""
-    return recipe_service.create_recipe(db, bean_id, data, user)
+    return recipe_service.serialize(recipe_service.create_recipe(db, bean_id, data, user))
 
 
 @router.get("/beans/{bean_id}/recipes", response_model=list[RecipeRead])
-def list_recipes(bean_id: int, db: DbSession, _user: CurrentUser) -> list[RecipeRead]:
+def list_recipes(bean_id: int, db: DbSession, user: CurrentUser) -> list[RecipeRead]:
     """List a bean's recipes. Any authenticated user may read them."""
-    return recipe_service.list_for_bean(db, bean_id)
+    return recipe_service.list_for_bean(db, bean_id, user.id)
 
 
 @router.get("/recipes/{recipe_id}", response_model=RecipeRead)
-def get_recipe(recipe_id: int, db: DbSession, _user: CurrentUser) -> RecipeRead:
+def get_recipe(recipe_id: int, db: DbSession, user: CurrentUser) -> RecipeRead:
     """Get a recipe by id. Any authenticated user may read it."""
-    return recipe_service.get_recipe(db, recipe_id)
+    return recipe_service.get_recipe_read(db, recipe_id, user.id)
 
 
 @router.patch("/recipes/{recipe_id}", response_model=RecipeRead)
 def update_recipe(recipe_id: int, data: RecipeUpdate, db: DbSession, user: CurrentUser) -> RecipeRead:
     """Update a recipe. Only its creator (or an admin) may edit it."""
     recipe = recipe_service.get_owned_recipe(db, recipe_id, user)
-    return recipe_service.update_recipe(db, recipe, data)
+    recipe = recipe_service.update_recipe(db, recipe, data)
+    return recipe_service.get_recipe_read(db, recipe.id, user.id)
 
 
 @router.delete("/recipes/{recipe_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -40,6 +41,20 @@ def delete_recipe(recipe_id: int, db: DbSession, user: CurrentUser) -> Response:
     """Delete a recipe. Creator or admin only; existing brews remain unchanged."""
     recipe = recipe_service.get_owned_recipe(db, recipe_id, user)
     recipe_service.delete_recipe(db, recipe)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.put("/recipes/{recipe_id}/favorite", status_code=status.HTTP_204_NO_CONTENT)
+def favorite_recipe(recipe_id: int, db: DbSession, user: CurrentUser) -> Response:
+    """Add a shared recipe to your personal favorites; safe to repeat."""
+    recipe_service.favorite_recipe(db, recipe_id, user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.delete("/recipes/{recipe_id}/favorite", status_code=status.HTTP_204_NO_CONTENT)
+def unfavorite_recipe(recipe_id: int, db: DbSession, user: CurrentUser) -> Response:
+    """Remove a shared recipe from your personal favorites; safe to repeat."""
+    recipe_service.unfavorite_recipe(db, recipe_id, user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

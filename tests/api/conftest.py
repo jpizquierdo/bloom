@@ -26,7 +26,7 @@ from bloom.main import create_app
 from bloom.services import users_service
 
 TEST_DB_NAME = "bloom_test"
-_ALL_TABLES = '"user", bean, bean_lot, recipe, brew, tasting, brew_method, equipment, roaster'
+_ALL_TABLES = '"user", bean, bean_lot, recipe, recipe_favorite, brew, tasting, brew_method, equipment, roaster'
 
 
 def _test_database_url() -> str:

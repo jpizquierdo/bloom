@@ -43,6 +43,7 @@ class RecipeRead(RecipeCreate):
     bean_id: int = Field(description="Bean this recipe belongs to.", examples=[1])
     user_id: int = Field(description="Creator id.", examples=[1])
     owner: AuthorRead = Field(description="Creator of the recipe.")
+    is_favorite: bool = Field(description="Whether the requesting user has favorited this recipe.")
     created_at: datetime = Field(examples=["2026-09-27T09:30:00Z"])
 
 

@@ -1198,6 +1198,12 @@ export type RecipeRead = {
      */
     owner: AuthorRead;
     /**
+     * Is Favorite
+     *
+     * Whether the requesting user has favorited this recipe.
+     */
+    is_favorite: boolean;
+    /**
      * Created At
      */
     created_at: string;
@@ -2888,6 +2894,66 @@ export type RecipesUpdateRecipeResponses = {
 };
 
 export type RecipesUpdateRecipeResponse = RecipesUpdateRecipeResponses[keyof RecipesUpdateRecipeResponses];
+
+export type RecipesUnfavoriteRecipeData = {
+    body?: never;
+    path: {
+        /**
+         * Recipe Id
+         */
+        recipe_id: number;
+    };
+    query?: never;
+    url: '/api/v1/recipes/{recipe_id}/favorite';
+};
+
+export type RecipesUnfavoriteRecipeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesUnfavoriteRecipeError = RecipesUnfavoriteRecipeErrors[keyof RecipesUnfavoriteRecipeErrors];
+
+export type RecipesUnfavoriteRecipeResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RecipesUnfavoriteRecipeResponse = RecipesUnfavoriteRecipeResponses[keyof RecipesUnfavoriteRecipeResponses];
+
+export type RecipesFavoriteRecipeData = {
+    body?: never;
+    path: {
+        /**
+         * Recipe Id
+         */
+        recipe_id: number;
+    };
+    query?: never;
+    url: '/api/v1/recipes/{recipe_id}/favorite';
+};
+
+export type RecipesFavoriteRecipeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RecipesFavoriteRecipeError = RecipesFavoriteRecipeErrors[keyof RecipesFavoriteRecipeErrors];
+
+export type RecipesFavoriteRecipeResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RecipesFavoriteRecipeResponse = RecipesFavoriteRecipeResponses[keyof RecipesFavoriteRecipeResponses];
 
 export type RecipesCreateBrewFromRecipeData = {
     body: BrewFromRecipeCreate;

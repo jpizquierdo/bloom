@@ -2819,6 +2819,11 @@ export const RecipeReadSchema = {
             $ref: '#/components/schemas/AuthorRead',
             description: 'Creator of the recipe.'
         },
+        is_favorite: {
+            type: 'boolean',
+            title: 'Is Favorite',
+            description: 'Whether the requesting user has favorited this recipe.'
+        },
         created_at: {
             type: 'string',
             format: 'date-time',
@@ -2837,6 +2842,7 @@ export const RecipeReadSchema = {
         'bean_id',
         'user_id',
         'owner',
+        'is_favorite',
         'created_at'
     ],
     title: 'RecipeRead'

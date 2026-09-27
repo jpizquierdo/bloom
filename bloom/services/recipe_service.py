@@ -6,7 +6,7 @@ from bloom.core.logger import get_logger
 from bloom.db.models.recipe import Recipe
 from bloom.db.models.user import User
 from bloom.repositories import recipes as recipes_repo
-from bloom.schemas.recipe import RecipeCreate, RecipeUpdate
+from bloom.schemas.recipe import RecipeCreate, RecipeRead, RecipeUpdate
 from bloom.services import bean_service, lookups_service
 from bloom.services.access import owns_or_admin
 from bloom.services.errors import ForbiddenError, NotFoundError
@@ -14,10 +14,18 @@ from bloom.services.errors import ForbiddenError, NotFoundError
 logger = get_logger(__name__)
 
 
-def list_for_bean(db: Session, bean_id: int) -> list[Recipe]:
+def serialize(recipe: Recipe, *, is_favorite: bool = False) -> RecipeRead:
+    """Shape a shared recipe with favorite state for the requesting user."""
+    values = {field: getattr(recipe, field) for field in RecipeRead.model_fields if field != "is_favorite"}
+    return RecipeRead.model_validate({**values, "is_favorite": is_favorite})
+
+
+def list_for_bean(db: Session, bean_id: int, user_id: int) -> list[RecipeRead]:
     """List a bean's recipes after confirming the shared bean exists."""
     bean_service.get_bean(db, bean_id)
-    return recipes_repo.list_for_bean(db, bean_id)
+    recipes = recipes_repo.list_for_bean(db, bean_id)
+    favorite_ids = recipes_repo.favorite_ids_for_user(db, user_id, [recipe.id for recipe in recipes])
+    return [serialize(recipe, is_favorite=recipe.id in favorite_ids) for recipe in recipes]
 
 
 def get_recipe(db: Session, recipe_id: int) -> Recipe:
@@ -26,6 +34,13 @@ def get_recipe(db: Session, recipe_id: int) -> Recipe:
     if recipe is None:
         raise NotFoundError("Recipe not found")
     return recipe
+
+
+def get_recipe_read(db: Session, recipe_id: int, user_id: int) -> RecipeRead:
+    """Fetch a shared recipe with favorite state for the requesting user."""
+    recipe = get_recipe(db, recipe_id)
+    favorite_ids = recipes_repo.favorite_ids_for_user(db, user_id, [recipe.id])
+    return serialize(recipe, is_favorite=recipe.id in favorite_ids)
 
 
 def get_owned_recipe(db: Session, recipe_id: int, user: User) -> Recipe:
@@ -70,3 +85,19 @@ def delete_recipe(db: Session, recipe: Recipe) -> None:
     recipes_repo.delete(db, recipe)
     db.commit()
     logger.info("Recipe %s deleted", recipe_id)
+
+
+def favorite_recipe(db: Session, recipe_id: int, user: User) -> None:
+    """Idempotently add the shared recipe to the user's personal favorites."""
+    get_recipe(db, recipe_id)
+    recipes_repo.add_favorite(db, recipe_id=recipe_id, user_id=user.id)
+    db.commit()
+    logger.info("Recipe %s favorited by user %s", recipe_id, user.id)
+
+
+def unfavorite_recipe(db: Session, recipe_id: int, user: User) -> None:
+    """Idempotently remove the shared recipe from the user's personal favorites."""
+    get_recipe(db, recipe_id)
+    recipes_repo.remove_favorite(db, recipe_id=recipe_id, user_id=user.id)
+    db.commit()
+    logger.info("Recipe %s unfavorited by user %s", recipe_id, user.id)

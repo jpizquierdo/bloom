@@ -1,6 +1,9 @@
 """Recipe CRUD, ownership, lifecycle, and one-way brew snapshots."""
 
 import pytest
+from sqlalchemy import func, select
+
+from bloom.db.models.recipe_favorite import RecipeFavorite
 
 
 @pytest.fixture
@@ -81,6 +84,42 @@ def test_any_user_can_brew_from_a_shared_recipe(client, alice_headers, bob_heade
     response = client.post(f"/recipes/{recipe['id']}/brews", headers=bob_headers, json={})
     assert response.status_code == 201
     assert response.json()["user_id"] == users["bob"].id
+
+
+def test_recipe_favorites_are_personal_and_idempotent(client, alice_headers, bob_headers, lookups, bean_id):
+    recipe = _create_recipe(client, alice_headers, bean_id, lookups).json()
+    favorite_url = f"/recipes/{recipe['id']}/favorite"
+
+    assert recipe["is_favorite"] is False
+    assert client.put(favorite_url, headers=alice_headers).status_code == 204
+    assert client.put(favorite_url, headers=alice_headers).status_code == 204
+    assert client.get(f"/recipes/{recipe['id']}", headers=alice_headers).json()["is_favorite"] is True
+    assert client.get(f"/beans/{bean_id}/recipes", headers=alice_headers).json()[0]["is_favorite"] is True
+    updated = client.patch(f"/recipes/{recipe['id']}", headers=alice_headers, json={"name": "Favorite recipe"})
+    assert updated.json()["is_favorite"] is True
+    assert client.get(f"/recipes/{recipe['id']}", headers=bob_headers).json()["is_favorite"] is False
+
+    assert client.put(favorite_url, headers=bob_headers).status_code == 204
+    assert client.delete(favorite_url, headers=alice_headers).status_code == 204
+    assert client.delete(favorite_url, headers=alice_headers).status_code == 204
+    assert client.get(f"/recipes/{recipe['id']}", headers=alice_headers).json()["is_favorite"] is False
+    assert client.get(f"/recipes/{recipe['id']}", headers=bob_headers).json()["is_favorite"] is True
+
+
+def test_favorite_missing_recipe_is_404(client, alice_headers):
+    assert client.put("/recipes/9999/favorite", headers=alice_headers).status_code == 404
+    assert client.delete("/recipes/9999/favorite", headers=alice_headers).status_code == 404
+
+
+def test_deleting_recipe_cascades_to_favorites(client, db, alice_headers, bob_headers, lookups, bean_id):
+    recipe = _create_recipe(client, alice_headers, bean_id, lookups).json()
+    favorite_url = f"/recipes/{recipe['id']}/favorite"
+    assert client.put(favorite_url, headers=alice_headers).status_code == 204
+    assert client.put(favorite_url, headers=bob_headers).status_code == 204
+    assert db.scalar(select(func.count()).select_from(RecipeFavorite)) == 2
+
+    assert client.delete(f"/recipes/{recipe['id']}", headers=alice_headers).status_code == 204
+    assert db.scalar(select(func.count()).select_from(RecipeFavorite)) == 0
 
 
 def test_update_recipe_and_clear_nullable_fields(client, alice_headers, lookups, bean_id):

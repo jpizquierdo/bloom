@@ -117,7 +117,8 @@ use recipes for any bean, brew from any bean and taste any brew; only a row's cr
 admin) may edit or delete it. A **bean is the coffee**, each bag you buy is a **lot**, and an
 optional **recipe** is reusable preparation intent. A brew stores its own values even when it
 starts from a recipe. The web UI can also save a brew's reusable preparation values as a new,
-independent recipe. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the data model.
+independent recipe, and each user can star personal favorites without changing the shared recipe.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the data model.
 
 ## Development
 

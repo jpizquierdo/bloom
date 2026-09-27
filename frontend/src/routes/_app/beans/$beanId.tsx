@@ -3,7 +3,9 @@ import {
   brewMethodsListBrewMethodsOptions,
   brewsListBrewsOptions,
   recipesDeleteRecipeMutation,
+  recipesFavoriteRecipeMutation,
   recipesListRecipesOptions,
+  recipesUnfavoriteRecipeMutation,
   lotsDeleteLotMutation,
   lotsListLotsOptions,
 } from "@/client/@tanstack/react-query.gen"
@@ -29,7 +31,7 @@ import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowLeft, Coffee, Merge, Pencil, Plus } from "lucide-react"
+import { ArrowLeft, Coffee, Merge, Pencil, Plus, Star } from "lucide-react"
 import type { ReactNode } from "react"
 import { useState } from "react"
 
@@ -70,14 +72,41 @@ function BeanDetailPage() {
     onSuccess: feedback.onSuccess("Recipe deleted"),
     onError: feedback.onError,
   })
+  const favoriteRecipe = useMutation({
+    ...recipesFavoriteRecipeMutation(),
+    onSuccess: feedback.onSuccess("Recipe added to favorites"),
+    onError: feedback.onError,
+  })
+  const unfavoriteRecipe = useMutation({
+    ...recipesUnfavoriteRecipeMutation(),
+    onSuccess: feedback.onSuccess("Recipe removed from favorites"),
+    onError: feedback.onError,
+  })
 
   if (isLoading || !bean) {
     return <Skeleton className="h-64 w-full" />
   }
 
   const brews = allBrews?.filter((brew) => brew.bean_id === id) ?? []
+  const sortedRecipes = [...(recipes ?? [])].sort(
+    (a, b) => Number(b.is_favorite) - Number(a.is_favorite) || a.id - b.id,
+  )
   const methodName = (methodId: number) =>
     methods?.find((method) => method.id === methodId)?.name ?? `#${methodId}`
+
+  function toggleFavorite(recipe: RecipeRead) {
+    const options = { path: { recipe_id: recipe.id } }
+    const updateViewedRecipe = (isFavorite: boolean) => {
+      setViewingRecipe((current) =>
+        current?.id === recipe.id ? { ...current, is_favorite: isFavorite } : current,
+      )
+    }
+    if (recipe.is_favorite) {
+      unfavoriteRecipe.mutate(options, { onSuccess: () => updateViewedRecipe(false) })
+    } else {
+      favoriteRecipe.mutate(options, { onSuccess: () => updateViewedRecipe(true) })
+    }
+  }
 
   const lotColumns: ColumnDef<BeanLotRead, unknown>[] = [
     {
@@ -169,7 +198,35 @@ function BeanDetailPage() {
     {
       accessorKey: "name",
       header: "Name",
-      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+      cell: ({ row }) => {
+        const recipe = row.original
+        const label = recipe.is_favorite ? "Remove from favorites" : "Add to favorites"
+        return (
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={label}
+              aria-pressed={recipe.is_favorite}
+              title={label}
+              disabled={favoriteRecipe.isPending || unfavoriteRecipe.isPending}
+              onClick={(event) => {
+                event.stopPropagation()
+                toggleFavorite(recipe)
+              }}
+            >
+              <Star
+                className={
+                  recipe.is_favorite
+                    ? "size-4 fill-amber-400 text-amber-500"
+                    : "size-4 text-muted-foreground"
+                }
+              />
+            </Button>
+            <span className="font-medium">{recipe.name}</span>
+          </div>
+        )
+      },
     },
     {
       id: "method",
@@ -353,7 +410,7 @@ function BeanDetailPage() {
 
       <DataTable
         columns={recipeColumns}
-        data={recipes}
+        data={sortedRecipes}
         emptyMessage="No recipes yet. Add a reusable starting point for this bean."
         onRowClick={setViewingRecipe}
       />
@@ -418,6 +475,8 @@ function BeanDetailPage() {
       <RecipeDetailsDialog
         recipe={viewingRecipe}
         onOpenChange={(open) => !open && setViewingRecipe(null)}
+        onToggleFavorite={toggleFavorite}
+        favoritePending={favoriteRecipe.isPending || unfavoriteRecipe.isPending}
       />
       <BrewDialog
         open={brewDialogOpen}

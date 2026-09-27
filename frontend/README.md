@@ -74,6 +74,8 @@ navigate to it (`onRowClick`); `roasters/$roasterId.tsx`, `beans/$beanId.tsx` an
 searchable `Combobox` (`components/data/combobox.tsx`) instead of a plain `Select`.
 The brew list and detail page can create an independent recipe from reusable brew parameters;
 both flows reuse `components/beans/recipe-dialog.tsx` rather than duplicating form behavior.
+Recipe stars are personal to the current user; starred recipes sort first on the bean detail
+page but are not treated as defaults.
 
 Two API rules every page must respect:
 

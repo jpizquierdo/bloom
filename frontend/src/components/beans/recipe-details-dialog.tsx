@@ -3,6 +3,7 @@ import {
   equipmentListEquipmentOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { RecipeRead } from "@/client/types.gen"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -12,14 +13,22 @@ import {
 } from "@/components/ui/dialog"
 import { formatDateTime, formatNumber, formatSeconds } from "@/lib/format"
 import { useQuery } from "@tanstack/react-query"
+import { Star } from "lucide-react"
 import type { ReactNode } from "react"
 
 interface RecipeDetailsDialogProps {
   recipe: RecipeRead | null
   onOpenChange: (open: boolean) => void
+  onToggleFavorite: (recipe: RecipeRead) => void
+  favoritePending: boolean
 }
 
-export function RecipeDetailsDialog({ recipe, onOpenChange }: RecipeDetailsDialogProps) {
+export function RecipeDetailsDialog({
+  recipe,
+  onOpenChange,
+  onToggleFavorite,
+  favoritePending,
+}: RecipeDetailsDialogProps) {
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
   const { data: equipment } = useQuery(equipmentListEquipmentOptions())
   const method = methods?.find((item) => item.id === recipe?.method_id)
@@ -68,6 +77,23 @@ export function RecipeDetailsDialog({ recipe, onOpenChange }: RecipeDetailsDialo
                 <p className="whitespace-pre-wrap text-sm">{recipe.notes}</p>
               </div>
             ) : null}
+            <Button
+              variant="outline"
+              size="sm"
+              className="justify-self-end"
+              aria-pressed={recipe.is_favorite}
+              disabled={favoritePending}
+              onClick={() => onToggleFavorite(recipe)}
+            >
+              <Star
+                className={
+                  recipe.is_favorite
+                    ? "size-4 fill-amber-400 text-amber-500"
+                    : "size-4 text-muted-foreground"
+                }
+              />
+              {recipe.is_favorite ? "Remove from favorites" : "Add to favorites"}
+            </Button>
           </div>
         ) : null}
       </DialogContent>

@@ -1860,6 +1860,86 @@
         }
       }
     },
+    "/api/v1/recipes/{recipe_id}/favorite": {
+      "put": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Favorite Recipe",
+        "description": "Add a shared recipe to your personal favorites; safe to repeat.",
+        "operationId": "recipes-favorite_recipe",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Unfavorite Recipe",
+        "description": "Remove a shared recipe from your personal favorites; safe to repeat.",
+        "operationId": "recipes-unfavorite_recipe",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "recipe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Recipe Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/recipes/{recipe_id}/brews": {
       "post": {
         "tags": [
@@ -5262,6 +5342,11 @@
             "$ref": "#/components/schemas/AuthorRead",
             "description": "Creator of the recipe."
           },
+          "is_favorite": {
+            "type": "boolean",
+            "title": "Is Favorite",
+            "description": "Whether the requesting user has favorited this recipe."
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -5280,6 +5365,7 @@
           "bean_id",
           "user_id",
           "owner",
+          "is_favorite",
           "created_at"
         ],
         "title": "RecipeRead"
