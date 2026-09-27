@@ -298,11 +298,12 @@ function BrewDetailPage() {
         prefillFrom={duplicating ? brew : undefined}
       />
       <RecipeDialog
-        open={recipeDialogOpen && !recipesPending}
+        open={recipeDialogOpen}
         onOpenChange={setRecipeDialogOpen}
         beanId={brew.bean_id}
         suggestedName={`${bean?.name ?? "Bean"}: recipe #${(recipesForBean?.length ?? 0) + 1}`}
         recipe={null}
+        isLoading={recipesPending}
         prefillFrom={brew}
       />
       <TastingDialog

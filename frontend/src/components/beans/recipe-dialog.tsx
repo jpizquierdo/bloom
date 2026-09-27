@@ -9,6 +9,13 @@ import {
 } from "@/components/brews/preparation-fields"
 import { ResourceDialog } from "@/components/data/resource-dialog"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   FormControl,
   FormField,
   FormItem,
@@ -21,6 +28,7 @@ import { patchBody, stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
+import { Loader2 } from "lucide-react"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -69,6 +77,7 @@ interface RecipeDialogProps {
   beanId: number
   suggestedName: string
   recipe: RecipeRead | null
+  isLoading?: boolean
   /** Seed a new recipe from reusable brew parameters. Brew notes stay on the brew. */
   prefillFrom?: BrewRead
 }
@@ -79,6 +88,7 @@ export function RecipeDialog({
   beanId,
   suggestedName,
   recipe,
+  isLoading = false,
   prefillFrom,
 }: RecipeDialogProps) {
   const feedback = useCrudFeedback()
@@ -143,6 +153,23 @@ export function RecipeDialog({
           body: { ...stripEmpty(parameters), ...required },
         })
     return submitAndClose(request, () => onOpenChange(false))
+  }
+
+  if (isLoading) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save brew as recipe</DialogTitle>
+            <DialogDescription>Preparing the suggested recipe name.</DialogDescription>
+          </DialogHeader>
+          <div role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            Loading recipes…
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
   }
 
   return (

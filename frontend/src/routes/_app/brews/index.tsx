@@ -364,7 +364,7 @@ function BrewsPage() {
       />
 
       <RecipeDialog
-        open={savingAsRecipe !== null && !recipesPending}
+        open={savingAsRecipe !== null}
         onOpenChange={(open) => !open && setSavingAsRecipe(null)}
         beanId={savingAsRecipe?.bean_id ?? 0}
         suggestedName={
@@ -373,6 +373,7 @@ function BrewsPage() {
             : ""
         }
         recipe={null}
+        isLoading={recipesPending}
         prefillFrom={savingAsRecipe ?? undefined}
       />
 

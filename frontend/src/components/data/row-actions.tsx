@@ -20,7 +20,7 @@ interface RowActionsProps {
   /** Edit and delete are hidden for rows the current user does not own. */
   canEdit: boolean
   deleteLabel?: string
-  /** Optional duplicate action, rendered between Edit and Delete when provided. */
+  /** Optional create-from-existing action, available independently of edit ownership. */
   onDuplicate?: () => void
   duplicateLabel?: string
   additionalActions?: AdditionalRowAction[]
@@ -35,7 +35,7 @@ export function RowActions({
   duplicateLabel = "Duplicate",
   additionalActions = [],
 }: RowActionsProps) {
-  if (!canEdit && additionalActions.length === 0) return null
+  if (!canEdit && !onDuplicate && additionalActions.length === 0) return null
 
   return (
     <DropdownMenu>
@@ -57,7 +57,7 @@ export function RowActions({
             Edit
           </DropdownMenuItem>
         ) : null}
-        {canEdit && onDuplicate ? (
+        {onDuplicate ? (
           <DropdownMenuItem onSelect={onDuplicate}>
             <Copy className="size-4" />
             {duplicateLabel}
