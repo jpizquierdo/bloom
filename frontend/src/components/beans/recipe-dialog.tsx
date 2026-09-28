@@ -3,10 +3,7 @@ import {
   recipesUpdateRecipeMutation,
 } from "@/client/@tanstack/react-query.gen"
 import type { BrewRead, RecipeRead } from "@/client/types.gen"
-import {
-  PreparationFields,
-  type PreparationFormValues,
-} from "@/components/brews/preparation-fields"
+import { PreparationFields } from "@/components/brews/preparation-fields"
 import { ResourceDialog } from "@/components/data/resource-dialog"
 import {
   Dialog,
@@ -24,6 +21,13 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  MAX_BREWING_NOTES_LENGTH,
+  MAX_RECIPE_NAME_LENGTH,
+  brewingNotesSchema,
+  preparationFieldSchema,
+  recipeNameSchema,
+} from "@/lib/brewing-validation"
 import { patchBody, stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -34,19 +38,12 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 const schema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  method_id: z.string().min(1, "Pick a method"),
-  grinder_id: z.string(),
-  dose_grams: z.string().min(1, "Dose is required"),
-  yield_grams: z.string(),
-  water_grams: z.string(),
-  grind_setting: z.string(),
-  water_temp_celsius: z.string(),
-  brew_time_seconds: z.string(),
-  notes: z.string(),
+  name: recipeNameSchema,
+  ...preparationFieldSchema,
+  notes: brewingNotesSchema,
 })
 
-type FormValues = PreparationFormValues & z.infer<typeof schema>
+type FormValues = z.infer<typeof schema>
 
 const CLEARABLE = [
   "grinder_id",
@@ -191,7 +188,11 @@ export function RecipeDialog({
           <FormItem className="sm:col-span-2">
             <FormLabel>Name</FormLabel>
             <FormControl>
-              <Input placeholder="Brazil: recipe #1" {...field} />
+              <Input
+                maxLength={MAX_RECIPE_NAME_LENGTH}
+                placeholder="Brazil: recipe #1"
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -205,7 +206,12 @@ export function RecipeDialog({
           <FormItem className="sm:col-span-2">
             <FormLabel>Recipe notes</FormLabel>
             <FormControl>
-              <Textarea rows={3} placeholder="Preparation guidance for next time." {...field} />
+              <Textarea
+                rows={3}
+                maxLength={MAX_BREWING_NOTES_LENGTH}
+                placeholder="Preparation guidance for next time."
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

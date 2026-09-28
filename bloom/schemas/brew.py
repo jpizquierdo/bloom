@@ -5,7 +5,15 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from bloom.schemas.common import reject_null
+from bloom.schemas.common import (
+    MAX_BREW_TIME_SECONDS,
+    MAX_BREWING_MASS_GRAMS,
+    MAX_BREWING_NOTES_LENGTH,
+    MAX_GRIND_SETTING_LENGTH,
+    MAX_TDS_PERCENT,
+    MAX_WATER_TEMP_CELSIUS,
+    reject_null,
+)
 from bloom.schemas.user import AuthorRead
 
 
@@ -21,25 +29,76 @@ class BrewBase(BaseModel):
         description="When it was brewed (defaults to now).",
         examples=["2026-07-12T08:00:00Z"],
     )
-    yield_grams: Decimal | None = Field(default=None, gt=0, description="Beverage mass in the cup (g).", examples=["250"])
-    water_grams: Decimal | None = Field(default=None, gt=0, description="Water used (g); for filter/immersion.", examples=["250"])
-    grind_setting: str | None = Field(default=None, description="Grinder setting (grinder-specific).", examples=["18"])
-    water_temp_celsius: Decimal | None = Field(default=None, description="Water temperature (°C).", examples=["93.0"])
-    brew_time_seconds: int | None = Field(default=None, gt=0, description="Total brew time (s).", examples=[150])
-    tds_percent: Decimal | None = Field(default=None, ge=0, description="Measured TDS % (refractometer).", examples=["1.35"])
-    notes: str | None = Field(default=None, description="Free-form notes.", examples=["Even extraction"])
+    yield_grams: Decimal | None = Field(
+        default=None,
+        gt=0,
+        le=MAX_BREWING_MASS_GRAMS,
+        description="Beverage mass in the cup (g).",
+        examples=["250"],
+    )
+    water_grams: Decimal | None = Field(
+        default=None,
+        gt=0,
+        le=MAX_BREWING_MASS_GRAMS,
+        description="Water used (g); for filter/immersion.",
+        examples=["250"],
+    )
+    grind_setting: str | None = Field(
+        default=None,
+        max_length=MAX_GRIND_SETTING_LENGTH,
+        description="Grinder setting (grinder-specific).",
+        examples=["18"],
+    )
+    water_temp_celsius: Decimal | None = Field(
+        default=None,
+        ge=0,
+        le=MAX_WATER_TEMP_CELSIUS,
+        description="Water temperature (°C).",
+        examples=["93.0"],
+    )
+    brew_time_seconds: int | None = Field(
+        default=None,
+        gt=0,
+        le=MAX_BREW_TIME_SECONDS,
+        description="Total brew time (s).",
+        examples=[150],
+    )
+    tds_percent: Decimal | None = Field(
+        default=None,
+        ge=0,
+        le=MAX_TDS_PERCENT,
+        description="Measured TDS % (refractometer).",
+        examples=["1.35"],
+    )
+    notes: str | None = Field(
+        default=None,
+        max_length=MAX_BREWING_NOTES_LENGTH,
+        description="Free-form notes.",
+        examples=["Even extraction"],
+    )
 
 
 class BrewCreate(BrewBase):
     bean_id: int = Field(description="Bean brewed (any shared bean).", examples=[1])
     method_id: int = Field(description="Brew method id.", examples=[1])
-    dose_grams: Decimal = Field(gt=0, description="Dry coffee dose (g).", examples=["15"])
+    dose_grams: Decimal = Field(
+        gt=0,
+        le=MAX_BREWING_MASS_GRAMS,
+        description="Dry coffee dose (g).",
+        examples=["15"],
+    )
 
 
 class BrewUpdate(BrewBase):
     """Partial update. bean_id/method_id are immutable after creation."""
 
-    dose_grams: Decimal | None = Field(default=None, gt=0, description="Dry coffee dose (g).", examples=["15"])
+    dose_grams: Decimal | None = Field(
+        default=None,
+        gt=0,
+        le=MAX_BREWING_MASS_GRAMS,
+        description="Dry coffee dose (g).",
+        examples=["15"],
+    )
 
     # dose_grams and brewed_at are NOT NULL columns (brewed_at has a server default): omit
     # them to leave them unchanged; an explicit null is a 422, never a DB error.

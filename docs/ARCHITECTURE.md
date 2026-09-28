@@ -505,6 +505,14 @@ table does not create recipes for existing beans, and a brew still works without
 are shared like the rest of the log: anyone may create, read or use one, while only its creator
 or an admin may edit/delete it.
 
+Recipes currently inherit the same parent lifecycle as brews and lots. A bean owner cannot
+directly edit or delete another user's recipe, but deleting that bean cascades every dependent
+row regardless of author, and merging two editable beans moves every dependent row to the
+target. This is the existing shared-entity lifecycle model, not a recipe-specific ownership
+exception. A future, cross-entity lifecycle change may replace destructive user deletion with
+archiving and reserve merges containing foreign-authored children for admins; that policy is
+deliberately outside the recipe feature.
+
 Brewing from a recipe copies those preparation parameters into a new `brew` once. Callers may
 override the copy while logging what actually happened. `brew.recipe_id` is nullable provenance,
 not live inheritance: later recipe edits never alter the brew, and deleting the recipe sets the
@@ -545,7 +553,9 @@ first for that user; favoriting never auto-selects a recipe or changes brewing b
 - **`ON DELETE` policies**:
   - `bean` → `brew` → `tasting`, `bean` → `bean_lot`, and `bean` → `recipe`: **CASCADE**. Note:
     because beans are shared, deleting a bean removes *every* user's brews, lots and recipes on
-    it (only the owner can trigger this).
+    it (only the bean owner or an admin can trigger this). Likewise, merging two beans moves all
+    of their children regardless of child author. This inherited lifecycle is applied uniformly;
+    it is not an alternate authorization path on an individual child row.
   - `user` / `recipe` → `recipe_favorite`: **CASCADE** (bookmarks have no independent history).
   - `brew.method_id` and `recipe.method_id`: **RESTRICT** (a method in use cannot be deleted).
   - `bean.roaster_id`: **RESTRICT** (a roaster with beans is merged away, never deleted — see 13).

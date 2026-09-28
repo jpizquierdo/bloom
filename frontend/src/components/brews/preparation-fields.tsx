@@ -18,19 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  MAX_BREW_TIME_SECONDS,
+  MAX_BREWING_MASS_GRAMS,
+  MAX_GRIND_SETTING_LENGTH,
+  MAX_WATER_TEMP_CELSIUS,
+  type PreparationFormValues,
+} from "@/lib/brewing-validation"
 import { useQuery } from "@tanstack/react-query"
 import { useFormContext } from "react-hook-form"
-
-export interface PreparationFormValues {
-  method_id: string
-  grinder_id: string
-  dose_grams: string
-  yield_grams: string
-  water_grams: string
-  grind_setting: string
-  water_temp_celsius: string
-  brew_time_seconds: string
-}
 
 interface PreparationFieldsProps {
   methodDisabled?: boolean
@@ -80,7 +76,14 @@ export function PreparationFields({
           <FormItem>
             <FormLabel>Dose (g)</FormLabel>
             <FormControl>
-              <Input type="number" min={0} step="0.1" placeholder="18.0" {...field} />
+              <Input
+                type="number"
+                min={0}
+                max={MAX_BREWING_MASS_GRAMS}
+                step="0.1"
+                placeholder="18.0"
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -93,7 +96,14 @@ export function PreparationFields({
           <FormItem>
             <FormLabel>Yield (g)</FormLabel>
             <FormControl>
-              <Input type="number" min={0} step="0.1" placeholder="36.0" {...field} />
+              <Input
+                type="number"
+                min={0}
+                max={MAX_BREWING_MASS_GRAMS}
+                step="0.1"
+                placeholder="36.0"
+                {...field}
+              />
             </FormControl>
             <FormDescription>Beverage in the cup.</FormDescription>
             <FormMessage />
@@ -107,7 +117,14 @@ export function PreparationFields({
           <FormItem>
             <FormLabel>Water (g)</FormLabel>
             <FormControl>
-              <Input type="number" min={0} step="0.1" placeholder="300" {...field} />
+              <Input
+                type="number"
+                min={0}
+                max={MAX_BREWING_MASS_GRAMS}
+                step="0.1"
+                placeholder="300"
+                {...field}
+              />
             </FormControl>
             <FormDescription>Filter and immersion brews.</FormDescription>
             <FormMessage />
@@ -149,7 +166,7 @@ export function PreparationFields({
           <FormItem>
             <FormLabel>Grind setting</FormLabel>
             <FormControl>
-              <Input placeholder="2.5" {...field} />
+              <Input maxLength={MAX_GRIND_SETTING_LENGTH} placeholder="2.5" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -162,7 +179,14 @@ export function PreparationFields({
           <FormItem>
             <FormLabel>Water temp (°C)</FormLabel>
             <FormControl>
-              <Input type="number" step="0.1" placeholder="93.0" {...field} />
+              <Input
+                type="number"
+                min={0}
+                max={MAX_WATER_TEMP_CELSIUS}
+                step="0.1"
+                placeholder="93.0"
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -175,7 +199,13 @@ export function PreparationFields({
           <FormItem>
             <FormLabel>Brew time (s)</FormLabel>
             <FormControl>
-              <Input type="number" min={0} placeholder="28" {...field} />
+              <Input
+                type="number"
+                min={0}
+                max={MAX_BREW_TIME_SECONDS}
+                placeholder="28"
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

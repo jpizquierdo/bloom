@@ -238,7 +238,7 @@ export const beansCreateBean = <ThrowOnError extends boolean = false>(options: O
 /**
  * Delete Bean
  *
- * Delete a bean (cascades to its brews and tastings). Owner or admin only.
+ * Delete a bean and all dependent shared rows, regardless of author. Owner or admin only.
  */
 export const beansDeleteBean = <ThrowOnError extends boolean = false>(options: Options<BeansDeleteBeanData, ThrowOnError>): RequestResult<BeansDeleteBeanResponses, BeansDeleteBeanErrors, ThrowOnError> => (options.client ?? client).delete<BeansDeleteBeanResponses, BeansDeleteBeanErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -281,7 +281,7 @@ export const beansUpdateBean = <ThrowOnError extends boolean = false>(options: O
  * Fold a duplicate into this bean: its brews, lots and recipes move here.
  *
  * You must own both beans (or be an admin). This bean keeps its own values and adopts
- * the duplicate's for anything it left empty.
+ * the duplicate's for anything it left empty. Shared child rows move regardless of author.
  */
 export const beansMergeBean = <ThrowOnError extends boolean = false>(options: Options<BeansMergeBeanData, ThrowOnError>): RequestResult<BeansMergeBeanResponses, BeansMergeBeanErrors, ThrowOnError> => (options.client ?? client).post<BeansMergeBeanResponses, BeansMergeBeanErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

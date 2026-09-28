@@ -6,10 +6,7 @@ import {
   recipesCreateBrewFromRecipeMutation,
 } from "@/client/@tanstack/react-query.gen"
 import type { BeanLotRead, BrewRead, RecipeRead } from "@/client/types.gen"
-import {
-  PreparationFields,
-  type PreparationFormValues,
-} from "@/components/brews/preparation-fields"
+import { PreparationFields } from "@/components/brews/preparation-fields"
 import { Combobox } from "@/components/data/combobox"
 import { ResourceDialog } from "@/components/data/resource-dialog"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -31,6 +28,13 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { beanLabel } from "@/lib/domain"
+import {
+  MAX_BREWING_NOTES_LENGTH,
+  MAX_TDS_PERCENT,
+  brewingNotesSchema,
+  preparationFieldSchema,
+  tdsSchema,
+} from "@/lib/brewing-validation"
 import { patchBody, stripEmpty, toDateTimeLocal } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -42,20 +46,13 @@ import { z } from "zod"
 const schema = z.object({
   bean_id: z.string().min(1, "Pick a bean"),
   lot_id: z.string(),
-  method_id: z.string().min(1, "Pick a method"),
-  grinder_id: z.string(),
-  dose_grams: z.string().min(1, "Dose is required"),
-  yield_grams: z.string(),
-  water_grams: z.string(),
-  grind_setting: z.string(),
-  water_temp_celsius: z.string(),
-  brew_time_seconds: z.string(),
-  tds_percent: z.string(),
+  ...preparationFieldSchema,
+  tds_percent: tdsSchema,
   brewed_at: z.string(),
-  notes: z.string(),
+  notes: brewingNotesSchema,
 })
 
-type FormValues = PreparationFormValues & z.infer<typeof schema>
+type FormValues = z.infer<typeof schema>
 
 // Nullable columns: on edit, clearing one sends an explicit null (see patchBody). brewed_at is
 // NOT NULL (server default now()), so it is omitted when blank, never nulled.
@@ -362,7 +359,14 @@ export function BrewDialog({
           <FormItem>
             <FormLabel>TDS (%)</FormLabel>
             <FormControl>
-              <Input type="number" step="0.01" placeholder="1.35" {...field} />
+              <Input
+                type="number"
+                min={0}
+                max={MAX_TDS_PERCENT}
+                step="0.01"
+                placeholder="1.35"
+                {...field}
+              />
             </FormControl>
             <FormDescription>From the refractometer.</FormDescription>
             <FormMessage />
@@ -390,7 +394,12 @@ export function BrewDialog({
           <FormItem className="sm:col-span-2">
             <FormLabel>Notes</FormLabel>
             <FormControl>
-              <Textarea rows={3} placeholder="Bloomed 45 s, gentle pours." {...field} />
+              <Textarea
+                rows={3}
+                maxLength={MAX_BREWING_NOTES_LENGTH}
+                placeholder="Bloomed 45 s, gentle pours."
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

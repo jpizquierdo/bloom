@@ -132,6 +132,18 @@ def bob_headers(client, users) -> dict:
 
 
 @pytest.fixture
+def charlie_headers(client, db, users) -> dict:
+    users_service.create_user(
+        db,
+        email="charlie@example.com",
+        username="charlie",
+        password="charliepass1",
+        role="user",
+    )
+    return _headers(client, "charlie@example.com", "charliepass1")
+
+
+@pytest.fixture
 def lookups(client, admin_headers) -> dict:
     """Seed a filter method, an espresso method, and a grinder; return their ids."""
     filter_method = client.post(

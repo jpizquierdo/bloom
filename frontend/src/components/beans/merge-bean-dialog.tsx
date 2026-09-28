@@ -70,7 +70,7 @@ export function MergeBeanDialog({ open, onOpenChange, bean }: MergeBeanDialogPro
       open={open}
       onOpenChange={onOpenChange}
       title="Merge a duplicate"
-      description={`Pick the duplicate of "${bean.name}". Its brews and lots move here, then it is deleted.`}
+      description={`Pick the duplicate of "${bean.name}". All of its lots, recipes and brews move here, including entries from other users, then it is deleted.`}
       form={form}
       onSubmit={onSubmit}
       isPending={merge.isPending}

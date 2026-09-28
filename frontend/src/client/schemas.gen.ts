@@ -1215,6 +1215,7 @@ export const BrewCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -1235,6 +1236,7 @@ export const BrewCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -1254,7 +1256,8 @@ export const BrewCreateSchema = {
         grind_setting: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 100
                 },
                 {
                     type: 'null'
@@ -1269,7 +1272,9 @@ export const BrewCreateSchema = {
         water_temp_celsius: {
             anyOf: [
                 {
-                    type: 'number'
+                    type: 'number',
+                    maximum: 999.9,
+                    minimum: 0
                 },
                 {
                     type: 'string',
@@ -1289,6 +1294,7 @@ export const BrewCreateSchema = {
             anyOf: [
                 {
                     type: 'integer',
+                    maximum: 2147483647,
                     exclusiveMinimum: 0
                 },
                 {
@@ -1305,6 +1311,7 @@ export const BrewCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 99.99,
                     minimum: 0
                 },
                 {
@@ -1324,7 +1331,8 @@ export const BrewCreateSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 10000
                 },
                 {
                     type: 'null'
@@ -1356,6 +1364,7 @@ export const BrewCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -1400,6 +1409,7 @@ export const BrewFromRecipeCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -1420,6 +1430,7 @@ export const BrewFromRecipeCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -1439,7 +1450,8 @@ export const BrewFromRecipeCreateSchema = {
         grind_setting: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 100
                 },
                 {
                     type: 'null'
@@ -1454,7 +1466,9 @@ export const BrewFromRecipeCreateSchema = {
         water_temp_celsius: {
             anyOf: [
                 {
-                    type: 'number'
+                    type: 'number',
+                    maximum: 999.9,
+                    minimum: 0
                 },
                 {
                     type: 'string',
@@ -1474,6 +1488,7 @@ export const BrewFromRecipeCreateSchema = {
             anyOf: [
                 {
                     type: 'integer',
+                    maximum: 2147483647,
                     exclusiveMinimum: 0
                 },
                 {
@@ -1505,6 +1520,7 @@ export const BrewFromRecipeCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -1538,6 +1554,7 @@ export const BrewFromRecipeCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 99.99,
                     minimum: 0
                 },
                 {
@@ -1557,7 +1574,8 @@ export const BrewFromRecipeCreateSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 10000
                 },
                 {
                     type: 'null'
@@ -1821,7 +1839,8 @@ export const BrewReadSchema = {
         grind_setting: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 100
                 },
                 {
                     type: 'null'
@@ -1853,6 +1872,7 @@ export const BrewReadSchema = {
             anyOf: [
                 {
                     type: 'integer',
+                    maximum: 2147483647,
                     exclusiveMinimum: 0
                 },
                 {
@@ -1884,7 +1904,8 @@ export const BrewReadSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 10000
                 },
                 {
                     type: 'null'
@@ -2059,6 +2080,7 @@ export const BrewUpdateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2079,6 +2101,7 @@ export const BrewUpdateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2098,7 +2121,8 @@ export const BrewUpdateSchema = {
         grind_setting: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 100
                 },
                 {
                     type: 'null'
@@ -2113,7 +2137,9 @@ export const BrewUpdateSchema = {
         water_temp_celsius: {
             anyOf: [
                 {
-                    type: 'number'
+                    type: 'number',
+                    maximum: 999.9,
+                    minimum: 0
                 },
                 {
                     type: 'string',
@@ -2133,6 +2159,7 @@ export const BrewUpdateSchema = {
             anyOf: [
                 {
                     type: 'integer',
+                    maximum: 2147483647,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2149,6 +2176,7 @@ export const BrewUpdateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 99.99,
                     minimum: 0
                 },
                 {
@@ -2168,7 +2196,8 @@ export const BrewUpdateSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 10000
                 },
                 {
                     type: 'null'
@@ -2184,6 +2213,7 @@ export const BrewUpdateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2512,6 +2542,7 @@ export const RecipeCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2532,6 +2563,7 @@ export const RecipeCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2551,7 +2583,8 @@ export const RecipeCreateSchema = {
         grind_setting: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 100
                 },
                 {
                     type: 'null'
@@ -2566,7 +2599,9 @@ export const RecipeCreateSchema = {
         water_temp_celsius: {
             anyOf: [
                 {
-                    type: 'number'
+                    type: 'number',
+                    maximum: 999.9,
+                    minimum: 0
                 },
                 {
                     type: 'string',
@@ -2586,6 +2621,7 @@ export const RecipeCreateSchema = {
             anyOf: [
                 {
                     type: 'integer',
+                    maximum: 2147483647,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2600,6 +2636,7 @@ export const RecipeCreateSchema = {
         },
         name: {
             type: 'string',
+            maxLength: 200,
             title: 'Name',
             description: 'Human-readable recipe name.',
             examples: [
@@ -2618,6 +2655,7 @@ export const RecipeCreateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2634,7 +2672,8 @@ export const RecipeCreateSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 10000
                 },
                 {
                     type: 'null'
@@ -2708,7 +2747,8 @@ export const RecipeReadSchema = {
         grind_setting: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 100
                 },
                 {
                     type: 'null'
@@ -2740,6 +2780,7 @@ export const RecipeReadSchema = {
             anyOf: [
                 {
                     type: 'integer',
+                    maximum: 2147483647,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2754,6 +2795,7 @@ export const RecipeReadSchema = {
         },
         name: {
             type: 'string',
+            maxLength: 200,
             title: 'Name',
             description: 'Human-readable recipe name.',
             examples: [
@@ -2780,7 +2822,8 @@ export const RecipeReadSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 10000
                 },
                 {
                     type: 'null'
@@ -2869,6 +2912,7 @@ export const RecipeUpdateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2889,6 +2933,7 @@ export const RecipeUpdateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2908,7 +2953,8 @@ export const RecipeUpdateSchema = {
         grind_setting: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 100
                 },
                 {
                     type: 'null'
@@ -2923,7 +2969,9 @@ export const RecipeUpdateSchema = {
         water_temp_celsius: {
             anyOf: [
                 {
-                    type: 'number'
+                    type: 'number',
+                    maximum: 999.9,
+                    minimum: 0
                 },
                 {
                     type: 'string',
@@ -2943,6 +2991,7 @@ export const RecipeUpdateSchema = {
             anyOf: [
                 {
                     type: 'integer',
+                    maximum: 2147483647,
                     exclusiveMinimum: 0
                 },
                 {
@@ -2958,7 +3007,8 @@ export const RecipeUpdateSchema = {
         name: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 200
                 },
                 {
                     type: 'null'
@@ -2989,6 +3039,7 @@ export const RecipeUpdateSchema = {
             anyOf: [
                 {
                     type: 'number',
+                    maximum: 9999.99,
                     exclusiveMinimum: 0
                 },
                 {
@@ -3008,7 +3059,8 @@ export const RecipeUpdateSchema = {
         notes: {
             anyOf: [
                 {
-                    type: 'string'
+                    type: 'string',
+                    maxLength: 10000
                 },
                 {
                     type: 'null'

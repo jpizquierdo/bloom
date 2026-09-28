@@ -363,7 +363,7 @@ export const beansCreateBeanMutation = (options?: Partial<Options<BeansCreateBea
 /**
  * Delete Bean
  *
- * Delete a bean (cascades to its brews and tastings). Owner or admin only.
+ * Delete a bean and all dependent shared rows, regardless of author. Owner or admin only.
  */
 export const beansDeleteBeanMutation = (options?: Partial<Options<BeansDeleteBeanData>>): UseMutationOptions<BeansDeleteBeanResponse, BeansDeleteBeanError, Options<BeansDeleteBeanData>> => {
     const mutationOptions: UseMutationOptions<BeansDeleteBeanResponse, BeansDeleteBeanError, Options<BeansDeleteBeanData>> = {
@@ -427,7 +427,7 @@ export const beansUpdateBeanMutation = (options?: Partial<Options<BeansUpdateBea
  * Fold a duplicate into this bean: its brews, lots and recipes move here.
  *
  * You must own both beans (or be an admin). This bean keeps its own values and adopts
- * the duplicate's for anything it left empty.
+ * the duplicate's for anything it left empty. Shared child rows move regardless of author.
  */
 export const beansMergeBeanMutation = (options?: Partial<Options<BeansMergeBeanData>>): UseMutationOptions<BeansMergeBeanResponse, BeansMergeBeanError, Options<BeansMergeBeanData>> => {
     const mutationOptions: UseMutationOptions<BeansMergeBeanResponse, BeansMergeBeanError, Options<BeansMergeBeanData>> = {

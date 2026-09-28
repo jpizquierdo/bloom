@@ -827,7 +827,7 @@
           "beans"
         ],
         "summary": "Delete Bean",
-        "description": "Delete a bean (cascades to its brews and tastings). Owner or admin only.",
+        "description": "Delete a bean and all dependent shared rows, regardless of author. Owner or admin only.",
         "operationId": "beans-delete_bean",
         "security": [
           {
@@ -868,7 +868,7 @@
           "beans"
         ],
         "summary": "Merge Bean",
-        "description": "Fold a duplicate into this bean: its brews, lots and recipes move here.\n\nYou must own both beans (or be an admin). This bean keeps its own values and adopts\nthe duplicate's for anything it left empty.",
+        "description": "Fold a duplicate into this bean: its brews, lots and recipes move here.\n\nYou must own both beans (or be an admin). This bean keeps its own values and adopts\nthe duplicate's for anything it left empty. Shared child rows move regardless of author.",
         "operationId": "beans-merge_bean",
         "security": [
           {
@@ -3752,6 +3752,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -3772,6 +3773,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -3791,7 +3793,8 @@
           "grind_setting": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 100
               },
               {
                 "type": "null"
@@ -3806,7 +3809,9 @@
           "water_temp_celsius": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 999.9,
+                "minimum": 0.0
               },
               {
                 "type": "string",
@@ -3826,6 +3831,7 @@
             "anyOf": [
               {
                 "type": "integer",
+                "maximum": 2147483647.0,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -3842,6 +3848,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 99.99,
                 "minimum": 0.0
               },
               {
@@ -3861,7 +3868,8 @@
           "notes": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 10000
               },
               {
                 "type": "null"
@@ -3893,6 +3901,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -3936,6 +3945,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -3956,6 +3966,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -3975,7 +3986,8 @@
           "grind_setting": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 100
               },
               {
                 "type": "null"
@@ -3990,7 +4002,9 @@
           "water_temp_celsius": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 999.9,
+                "minimum": 0.0
               },
               {
                 "type": "string",
@@ -4010,6 +4024,7 @@
             "anyOf": [
               {
                 "type": "integer",
+                "maximum": 2147483647.0,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -4041,6 +4056,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -4074,6 +4090,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 99.99,
                 "minimum": 0.0
               },
               {
@@ -4093,7 +4110,8 @@
           "notes": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 10000
               },
               {
                 "type": "null"
@@ -4353,7 +4371,8 @@
           "grind_setting": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 100
               },
               {
                 "type": "null"
@@ -4385,6 +4404,7 @@
             "anyOf": [
               {
                 "type": "integer",
+                "maximum": 2147483647.0,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -4416,7 +4436,8 @@
           "notes": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 10000
               },
               {
                 "type": "null"
@@ -4590,6 +4611,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -4610,6 +4632,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -4629,7 +4652,8 @@
           "grind_setting": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 100
               },
               {
                 "type": "null"
@@ -4644,7 +4668,9 @@
           "water_temp_celsius": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 999.9,
+                "minimum": 0.0
               },
               {
                 "type": "string",
@@ -4664,6 +4690,7 @@
             "anyOf": [
               {
                 "type": "integer",
+                "maximum": 2147483647.0,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -4680,6 +4707,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 99.99,
                 "minimum": 0.0
               },
               {
@@ -4699,7 +4727,8 @@
           "notes": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 10000
               },
               {
                 "type": "null"
@@ -4715,6 +4744,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -5036,6 +5066,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -5056,6 +5087,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -5075,7 +5107,8 @@
           "grind_setting": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 100
               },
               {
                 "type": "null"
@@ -5090,7 +5123,9 @@
           "water_temp_celsius": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 999.9,
+                "minimum": 0.0
               },
               {
                 "type": "string",
@@ -5110,6 +5145,7 @@
             "anyOf": [
               {
                 "type": "integer",
+                "maximum": 2147483647.0,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -5124,6 +5160,7 @@
           },
           "name": {
             "type": "string",
+            "maxLength": 200,
             "title": "Name",
             "description": "Human-readable recipe name.",
             "examples": [
@@ -5142,6 +5179,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -5158,7 +5196,8 @@
           "notes": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 10000
               },
               {
                 "type": "null"
@@ -5231,7 +5270,8 @@
           "grind_setting": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 100
               },
               {
                 "type": "null"
@@ -5263,6 +5303,7 @@
             "anyOf": [
               {
                 "type": "integer",
+                "maximum": 2147483647.0,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -5277,6 +5318,7 @@
           },
           "name": {
             "type": "string",
+            "maxLength": 200,
             "title": "Name",
             "description": "Human-readable recipe name.",
             "examples": [
@@ -5303,7 +5345,8 @@
           "notes": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 10000
               },
               {
                 "type": "null"
@@ -5391,6 +5434,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -5411,6 +5455,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -5430,7 +5475,8 @@
           "grind_setting": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 100
               },
               {
                 "type": "null"
@@ -5445,7 +5491,9 @@
           "water_temp_celsius": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "maximum": 999.9,
+                "minimum": 0.0
               },
               {
                 "type": "string",
@@ -5465,6 +5513,7 @@
             "anyOf": [
               {
                 "type": "integer",
+                "maximum": 2147483647.0,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -5480,7 +5529,8 @@
           "name": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 200
               },
               {
                 "type": "null"
@@ -5511,6 +5561,7 @@
             "anyOf": [
               {
                 "type": "number",
+                "maximum": 9999.99,
                 "exclusiveMinimum": 0.0
               },
               {
@@ -5530,7 +5581,8 @@
           "notes": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 10000
               },
               {
                 "type": "null"

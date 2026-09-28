@@ -4,6 +4,15 @@ import pytest
 from sqlalchemy import func, select
 
 from bloom.db.models.recipe_favorite import RecipeFavorite
+from bloom.schemas.common import (
+    MAX_BREW_TIME_SECONDS,
+    MAX_BREWING_MASS_GRAMS,
+    MAX_BREWING_NOTES_LENGTH,
+    MAX_GRIND_SETTING_LENGTH,
+    MAX_RECIPE_NAME_LENGTH,
+    MAX_TDS_PERCENT,
+    MAX_WATER_TEMP_CELSIUS,
+)
 
 
 @pytest.fixture
@@ -53,6 +62,23 @@ def test_create_list_and_get_recipe(client, alice_headers, users, lookups, bean_
 
 def test_recipes_are_optional(client, alice_headers, bean_id):
     assert client.get(f"/beans/{bean_id}/recipes", headers=alice_headers).json() == []
+
+
+def test_recipe_endpoints_require_authentication(client, alice_headers, lookups, bean_id):
+    recipe = _create_recipe(client, alice_headers, bean_id, lookups).json()
+    requests = (
+        ("POST", f"/beans/{bean_id}/recipes", _recipe_payload(lookups)),
+        ("GET", f"/beans/{bean_id}/recipes", None),
+        ("GET", f"/recipes/{recipe['id']}", None),
+        ("PATCH", f"/recipes/{recipe['id']}", {"name": "Unauthorized"}),
+        ("DELETE", f"/recipes/{recipe['id']}", None),
+        ("PUT", f"/recipes/{recipe['id']}/favorite", None),
+        ("DELETE", f"/recipes/{recipe['id']}/favorite", None),
+        ("POST", f"/recipes/{recipe['id']}/brews", {}),
+    )
+
+    for method, path, body in requests:
+        assert client.request(method, path, json=body).status_code == 401
 
 
 def test_recipes_are_shared_but_writes_are_creator_owned(
@@ -111,6 +137,14 @@ def test_favorite_missing_recipe_is_404(client, alice_headers):
     assert client.delete("/recipes/9999/favorite", headers=alice_headers).status_code == 404
 
 
+def test_favorite_does_not_grant_recipe_write_access(client, alice_headers, bob_headers, lookups, bean_id):
+    recipe = _create_recipe(client, alice_headers, bean_id, lookups).json()
+    assert client.put(f"/recipes/{recipe['id']}/favorite", headers=bob_headers).status_code == 204
+
+    assert client.patch(f"/recipes/{recipe['id']}", headers=bob_headers, json={"name": "Bob's"}).status_code == 403
+    assert client.delete(f"/recipes/{recipe['id']}", headers=bob_headers).status_code == 403
+
+
 def test_deleting_recipe_cascades_to_favorites(client, db, alice_headers, bob_headers, lookups, bean_id):
     recipe = _create_recipe(client, alice_headers, bean_id, lookups).json()
     favorite_url = f"/recipes/{recipe['id']}/favorite"
@@ -151,10 +185,72 @@ def test_recipe_validates_name_and_references(client, alice_headers, lookups, be
     assert client.get("/beans/9999/recipes", headers=alice_headers).status_code == 404
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("dose_grams", str(MAX_BREWING_MASS_GRAMS + 1)),
+        ("yield_grams", str(MAX_BREWING_MASS_GRAMS + 1)),
+        ("water_grams", str(MAX_BREWING_MASS_GRAMS + 1)),
+        ("water_temp_celsius", str(MAX_WATER_TEMP_CELSIUS + 1)),
+        ("brew_time_seconds", MAX_BREW_TIME_SECONDS + 1),
+    ],
+)
+def test_recipe_rejects_values_beyond_database_capacity(client, alice_headers, lookups, bean_id, field, value):
+    assert _create_recipe(client, alice_headers, bean_id, lookups, **{field: value}).status_code == 422
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("name", "x" * (MAX_RECIPE_NAME_LENGTH + 1)),
+        ("grind_setting", "x" * (MAX_GRIND_SETTING_LENGTH + 1)),
+        ("notes", "x" * (MAX_BREWING_NOTES_LENGTH + 1)),
+    ],
+)
+def test_recipe_rejects_oversized_text(client, alice_headers, lookups, bean_id, field, value):
+    assert _create_recipe(client, alice_headers, bean_id, lookups, **{field: value}).status_code == 422
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("name", "x" * (MAX_RECIPE_NAME_LENGTH + 1)),
+        ("dose_grams", str(MAX_BREWING_MASS_GRAMS + 1)),
+        ("notes", "x" * (MAX_BREWING_NOTES_LENGTH + 1)),
+    ],
+)
+def test_recipe_update_enforces_input_limits(client, alice_headers, lookups, bean_id, field, value):
+    recipe = _create_recipe(client, alice_headers, bean_id, lookups).json()
+    response = client.patch(
+        f"/recipes/{recipe['id']}",
+        headers=alice_headers,
+        json={field: value},
+    )
+    assert response.status_code == 422
+
+
 @pytest.mark.parametrize("field", ["dose_grams", "brewed_at"])
 def test_brew_from_recipe_rejects_null_required_values(client, alice_headers, lookups, bean_id, field):
     recipe = _create_recipe(client, alice_headers, bean_id, lookups).json()
     response = client.post(f"/recipes/{recipe['id']}/brews", headers=alice_headers, json={field: None})
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("dose_grams", str(MAX_BREWING_MASS_GRAMS + 1)),
+        ("tds_percent", str(MAX_TDS_PERCENT + 1)),
+        ("notes", "x" * (MAX_BREWING_NOTES_LENGTH + 1)),
+    ],
+)
+def test_brew_from_recipe_rejects_oversized_overrides(client, alice_headers, lookups, bean_id, field, value):
+    recipe = _create_recipe(client, alice_headers, bean_id, lookups).json()
+    response = client.post(
+        f"/recipes/{recipe['id']}/brews",
+        headers=alice_headers,
+        json={field: value},
+    )
     assert response.status_code == 422
 
 
@@ -246,14 +342,22 @@ def test_brew_from_recipe_rejects_lot_from_another_bean(client, alice_headers, l
     assert response.status_code == 422
 
 
-def test_bean_merge_moves_recipes(client, alice_headers, lookups):
+def test_bean_merge_moves_foreign_owned_recipes_and_preserves_favorites(
+    client,
+    alice_headers,
+    bob_headers,
+    charlie_headers,
+    lookups,
+    users,
+):
     target = client.post("/beans", headers=alice_headers, json={"name": "Brazil", "roaster": "Nomad"}).json()
     source = client.post(
         "/beans?allow_duplicate=true",
         headers=alice_headers,
         json={"name": "Brazil", "roaster": "Nomad"},
     ).json()
-    recipe = _create_recipe(client, alice_headers, source["id"], lookups).json()
+    recipe = _create_recipe(client, bob_headers, source["id"], lookups).json()
+    assert client.put(f"/recipes/{recipe['id']}/favorite", headers=charlie_headers).status_code == 204
 
     response = client.post(
         f"/beans/{target['id']}/merge",
@@ -262,10 +366,26 @@ def test_bean_merge_moves_recipes(client, alice_headers, lookups):
     )
 
     assert response.status_code == 200
-    assert client.get(f"/recipes/{recipe['id']}", headers=alice_headers).json()["bean_id"] == target["id"]
+    moved = client.get(f"/recipes/{recipe['id']}", headers=charlie_headers).json()
+    assert moved["bean_id"] == target["id"]
+    assert moved["user_id"] == users["bob"].id
+    assert moved["is_favorite"] is True
 
 
-def test_delete_bean_cascades_to_recipe(client, alice_headers, lookups, bean_id):
-    recipe = _create_recipe(client, alice_headers, bean_id, lookups).json()
+def test_bean_owner_delete_cascades_foreign_recipe_and_favorite(
+    client,
+    db,
+    alice_headers,
+    bob_headers,
+    charlie_headers,
+    lookups,
+    bean_id,
+):
+    recipe = _create_recipe(client, bob_headers, bean_id, lookups).json()
+    favorite_url = f"/recipes/{recipe['id']}/favorite"
+    assert client.put(favorite_url, headers=charlie_headers).status_code == 204
+    assert client.delete(f"/recipes/{recipe['id']}", headers=alice_headers).status_code == 403
+
     assert client.delete(f"/beans/{bean_id}", headers=alice_headers).status_code == 204
     assert client.get(f"/recipes/{recipe['id']}", headers=alice_headers).status_code == 404
+    assert db.scalar(select(func.count()).select_from(RecipeFavorite)) == 0

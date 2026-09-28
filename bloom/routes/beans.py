@@ -54,14 +54,14 @@ def merge_bean(bean_id: int, data: BeanMerge, db: DbSession, user: CurrentUser) 
     """Fold a duplicate into this bean: its brews, lots and recipes move here.
 
     You must own both beans (or be an admin). This bean keeps its own values and adopts
-    the duplicate's for anything it left empty.
+    the duplicate's for anything it left empty. Shared child rows move regardless of author.
     """
     return bean_service.merge_beans(db, target_id=bean_id, source_id=data.source_id, user=user)
 
 
 @router.delete("/{bean_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_bean(bean_id: int, db: DbSession, user: CurrentUser) -> Response:
-    """Delete a bean (cascades to its brews and tastings). Owner or admin only."""
+    """Delete a bean and all dependent shared rows, regardless of author. Owner or admin only."""
     bean = bean_service.get_owned_bean(db, bean_id, user)
     bean_service.delete_bean(db, bean)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -120,7 +120,7 @@ def update_bean(db: Session, bean: Bean, data: BeanUpdate, allow_duplicate: bool
 
 
 def merge_beans(db: Session, *, target_id: int, source_id: int, user: User) -> Bean:
-    """Move every brew, lot and recipe onto ``target_id``, then delete the source."""
+    """Move every child onto ``target_id`` regardless of author, then delete the source."""
     if target_id == source_id:
         raise ConflictError("Cannot merge a bean into itself")
     target = get_owned_bean(db, target_id, user)
@@ -160,7 +160,7 @@ def merge_beans(db: Session, *, target_id: int, source_id: int, user: User) -> B
 
 
 def delete_bean(db: Session, bean: Bean) -> None:
-    """Delete an already-authorized bean (cascades to its brews/tastings)."""
+    """Delete an already-authorized bean and all dependent shared rows."""
     bean_id = bean.id
     beans_repo.delete(db, bean)
     db.commit()
