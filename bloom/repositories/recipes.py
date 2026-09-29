@@ -32,8 +32,6 @@ def delete(db: Session, recipe: Recipe) -> None:
 
 
 def favorite_ids_for_user(db: Session, user_id: int, recipe_ids: list[int]) -> set[int]:
-    if not recipe_ids:
-        return set()
     stmt = select(RecipeFavorite.recipe_id).where(
         RecipeFavorite.user_id == user_id,
         RecipeFavorite.recipe_id.in_(recipe_ids),

@@ -16,24 +16,7 @@ logger = get_logger(__name__)
 
 def serialize(recipe: Recipe, *, is_favorite: bool = False) -> RecipeRead:
     """Shape a shared recipe with favorite state for the requesting user."""
-    return RecipeRead(
-        id=recipe.id,
-        bean_id=recipe.bean_id,
-        user_id=recipe.user_id,
-        owner=recipe.owner,
-        name=recipe.name,
-        method_id=recipe.method_id,
-        grinder_id=recipe.grinder_id,
-        dose_grams=recipe.dose_grams,
-        yield_grams=recipe.yield_grams,
-        water_grams=recipe.water_grams,
-        grind_setting=recipe.grind_setting,
-        water_temp_celsius=recipe.water_temp_celsius,
-        brew_time_seconds=recipe.brew_time_seconds,
-        notes=recipe.notes,
-        is_favorite=is_favorite,
-        created_at=recipe.created_at,
-    )
+    return RecipeRead.model_validate(recipe).model_copy(update={"is_favorite": is_favorite})
 
 
 def list_for_bean(db: Session, bean_id: int, user_id: int) -> list[RecipeRead]:

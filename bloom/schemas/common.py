@@ -16,6 +16,13 @@ MAX_RECIPE_NAME_LENGTH = 200
 MAX_GRIND_SETTING_LENGTH = 100
 MAX_BREWING_NOTES_LENGTH = 10_000
 
+Grams = Annotated[Decimal, Field(gt=0, le=MAX_BREWING_MASS_GRAMS)]
+Celsius = Annotated[Decimal, Field(ge=0, le=MAX_WATER_TEMP_CELSIUS)]
+TdsPercent = Annotated[Decimal, Field(ge=0, le=MAX_TDS_PERCENT)]
+Seconds = Annotated[int, Field(gt=0, le=MAX_BREW_TIME_SECONDS)]
+GrindSetting = Annotated[str, Field(max_length=MAX_GRIND_SETTING_LENGTH)]
+Notes = Annotated[str, Field(max_length=MAX_BREWING_NOTES_LENGTH)]
+
 
 class Message(BaseModel):
     """A human-readable outcome, for endpoints with nothing else to return."""

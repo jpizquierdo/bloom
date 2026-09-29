@@ -12,22 +12,14 @@ from bloom.db.models.user import User
 from bloom.domain.calculations import brew_ratio, classify_extraction, extraction_yield
 from bloom.repositories import brews as brews_repo
 from bloom.schemas.brew import BrewCreate, BrewRead, BrewUpdate, ExtractionDiagnosticsRead
-from bloom.schemas.recipe import BrewFromRecipeCreate
+from bloom.schemas.recipe import BrewFromRecipeCreate, RecipeParameters
 from bloom.services import bean_lot_service, bean_service, lookups_service, recipe_service
 from bloom.services.access import owns_or_admin
 from bloom.services.errors import ForbiddenError, NotFoundError, UnprocessableError
 
 logger = get_logger(__name__)
 
-_RECIPE_PARAMETER_FIELDS = (
-    "grinder_id",
-    "dose_grams",
-    "yield_grams",
-    "water_grams",
-    "grind_setting",
-    "water_temp_celsius",
-    "brew_time_seconds",
-)
+_RECIPE_PARAMETER_FIELDS = (*RecipeParameters.model_fields, "dose_grams")
 
 
 def serialize(brew: Brew) -> BrewRead:
@@ -71,7 +63,7 @@ def get_owned_brew(db: Session, brew_id: int, user: User) -> Brew:
     return brew
 
 
-def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
+def create_brew(db: Session, data: BrewCreate, user: User, recipe_id: int | None = None) -> Brew:
     """Create a brew (authored by ``user``) after validating its references.
 
     Beans are shared, so a brew may be made from any existing bean; ``user`` is
@@ -86,7 +78,7 @@ def create_brew(db: Session, data: BrewCreate, user: User) -> Brew:
     lot = _resolve_lot(db, data.lot_id, data.bean_id) if data.lot_id is not None else None
 
     payload = data.model_dump(exclude_none=True)
-    brew = brews_repo.add(db, user_id=user.id, **payload)
+    brew = brews_repo.add(db, user_id=user.id, recipe_id=recipe_id, **payload)
     db.commit()
     db.refresh(brew)
     logger.info("Brew %s created by user %s (bean %s)", brew.id, user.id, brew.bean_id)
@@ -100,27 +92,7 @@ def create_brew_from_recipe(db: Session, recipe_id: int, data: BrewFromRecipeCre
     recipe = recipe_service.get_recipe(db, recipe_id)
     payload = {field: getattr(recipe, field) for field in _RECIPE_PARAMETER_FIELDS}
     payload.update(data.model_dump(exclude_unset=True))
-
-    grinder_id = payload.get("grinder_id")
-    if grinder_id is not None:
-        lookups_service.get_equipment(db, grinder_id)
-    lot_id = payload.get("lot_id")
-    lot = _resolve_lot(db, lot_id, recipe.bean_id) if lot_id is not None else None
-
-    brew = brews_repo.add(
-        db,
-        user_id=user.id,
-        bean_id=recipe.bean_id,
-        method_id=recipe.method_id,
-        recipe_id=recipe.id,
-        **payload,
-    )
-    db.commit()
-    db.refresh(brew)
-    logger.info("Brew %s created by user %s from recipe %s", brew.id, user.id, recipe.id)
-    if lot is not None and lot.is_finished:
-        logger.warning("Brew %s created on a finished lot (%s)", brew.id, lot.id)
-    return brew
+    return create_brew(db, BrewCreate(bean_id=recipe.bean_id, method_id=recipe.method_id, **payload), user, recipe_id=recipe.id)
 
 
 def _resolve_lot(db: Session, lot_id: int, bean_id: int) -> BeanLot:

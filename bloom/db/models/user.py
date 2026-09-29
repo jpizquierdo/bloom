@@ -12,7 +12,6 @@ from bloom.db.base import Base
 
 if TYPE_CHECKING:
     from bloom.db.models.bean import Bean
-    from bloom.db.models.recipe import Recipe
 
 
 class User(Base):
@@ -46,4 +45,3 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     beans: Mapped[list[Bean]] = relationship(back_populates="owner")
-    recipes: Mapped[list[Recipe]] = relationship(back_populates="owner")

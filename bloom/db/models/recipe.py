@@ -53,7 +53,7 @@ class Recipe(Base):
     notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
-    owner: Mapped[User] = relationship(back_populates="recipes")
+    owner: Mapped[User] = relationship()
     bean: Mapped[Bean] = relationship(back_populates="recipes")
     method: Mapped[BrewMethod] = relationship()
     grinder: Mapped[Equipment | None] = relationship()

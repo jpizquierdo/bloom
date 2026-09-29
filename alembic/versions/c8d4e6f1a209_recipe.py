@@ -1,7 +1,8 @@
-"""add reusable recipes per bean
+"""add reusable recipes per bean and personal favorites
 
 Recipes are optional children of beans. Existing rows need no backfill. A brew may
 record nullable recipe provenance, while retaining its own copied parameters.
+Favorites are user-specific bookmarks of shared recipes.
 
 Revision ID: c8d4e6f1a209
 Revises: b7c2d3e4f5a6
@@ -57,9 +58,22 @@ def upgrade() -> None:
     op.create_foreign_key('fk_brew_recipe_id', 'brew', 'recipe', ['recipe_id'], ['id'], ondelete='SET NULL')
     op.create_index('idx_brew_recipe_id', 'brew', ['recipe_id'])
 
+    op.create_table(
+        'recipe_favorite',
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('recipe_id', sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(['recipe_id'], ['recipe.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('user_id', 'recipe_id'),
+    )
+    op.create_index('idx_recipe_favorite_recipe_id', 'recipe_favorite', ['recipe_id'])
+
 
 def downgrade() -> None:
     """Downgrade schema."""
+    op.drop_index('idx_recipe_favorite_recipe_id', table_name='recipe_favorite')
+    op.drop_table('recipe_favorite')
+
     op.drop_index('idx_brew_recipe_id', table_name='brew')
     op.drop_constraint('fk_brew_recipe_id', 'brew', type_='foreignkey')
     op.drop_column('brew', 'recipe_id')
