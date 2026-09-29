@@ -3,6 +3,7 @@ import {
   equipmentListEquipmentOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { RecipeRead } from "@/client/types.gen"
+import { Metric } from "@/components/data/metric"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -14,7 +15,6 @@ import {
 import { formatDateTime, formatNumber, formatSeconds } from "@/lib/format"
 import { useQuery } from "@tanstack/react-query"
 import { Star } from "lucide-react"
-import type { ReactNode } from "react"
 
 interface RecipeDetailsDialogProps {
   recipe: RecipeRead | null
@@ -98,14 +98,5 @@ export function RecipeDetailsDialog({
         ) : null}
       </DialogContent>
     </Dialog>
-  )
-}
-
-function Metric({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="grid gap-1">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="font-medium tabular-nums">{value}</span>
-    </div>
   )
 }

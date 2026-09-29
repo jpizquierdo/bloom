@@ -197,48 +197,20 @@ export function BrewDialog({
       notes: values.notes,
     }
 
-    const recipeParameters = {
-      grinder_id: measures.grinder_id,
-      yield_grams: measures.yield_grams,
-      water_grams: measures.water_grams,
-      grind_setting: measures.grind_setting,
-      water_temp_celsius: measures.water_temp_celsius,
-      brew_time_seconds: measures.brew_time_seconds,
-    }
+    // Brewing from a recipe patches its snapshot: a cleared field overrides the recipe with null.
+    const patch = { ...patchBody(measures, CLEARABLE), dose_grams: Number(values.dose_grams) }
     const request = brew
-      ? update.mutateAsync({
-          path: { brew_id: brew.id },
-          body: { ...patchBody(measures, CLEARABLE), dose_grams: Number(values.dose_grams) },
-        })
+      ? update.mutateAsync({ path: { brew_id: brew.id }, body: patch })
       : recipe
-        ? createFromRecipe.mutateAsync({
-            path: { recipe_id: recipe.id },
+        ? createFromRecipe.mutateAsync({ path: { recipe_id: recipe.id }, body: patch })
+        : create.mutateAsync({
             body: {
-              ...patchBody(recipeParameters, [
-                "grinder_id",
-                "yield_grams",
-                "water_grams",
-                "grind_setting",
-                "water_temp_celsius",
-                "brew_time_seconds",
-              ]),
-              ...stripEmpty({
-                lot_id: measures.lot_id,
-                tds_percent: measures.tds_percent,
-                brewed_at: measures.brewed_at,
-                notes: measures.notes,
-              }),
+              ...stripEmpty(measures),
+              bean_id: Number(values.bean_id),
+              method_id: Number(values.method_id),
               dose_grams: Number(values.dose_grams),
             },
           })
-      : create.mutateAsync({
-          body: {
-            ...stripEmpty(measures),
-            bean_id: Number(values.bean_id),
-            method_id: Number(values.method_id),
-            dose_grams: Number(values.dose_grams),
-          },
-        })
     return submitAndClose(request, () => onOpenChange(false))
   }
 

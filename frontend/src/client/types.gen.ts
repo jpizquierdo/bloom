@@ -1202,7 +1202,7 @@ export type RecipeRead = {
      *
      * Whether the requesting user has favorited this recipe.
      */
-    is_favorite: boolean;
+    is_favorite?: boolean;
     /**
      * Created At
      */

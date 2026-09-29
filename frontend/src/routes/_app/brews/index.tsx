@@ -4,7 +4,6 @@ import {
   brewsDeleteBrewMutation,
   brewsListBrewsOptions,
   equipmentListEquipmentOptions,
-  recipesListRecipesOptions,
   roastersListRoastersOptions,
   tastingsListAllTastingsOptions,
 } from "@/client/@tanstack/react-query.gen"
@@ -14,6 +13,7 @@ import { BrewDialog } from "@/components/brews/brew-dialog"
 import { BrewDiagnostics } from "@/components/brews/diagnostics"
 import { Combobox } from "@/components/data/combobox"
 import { DeleteAlert } from "@/components/data/delete-alert"
+import { Metric } from "@/components/data/metric"
 import { PageHeader } from "@/components/data/page-header"
 import { RowActions } from "@/components/data/row-actions"
 import { Button } from "@/components/ui/button"
@@ -42,7 +42,6 @@ import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute } from "@tanstack/react-router"
 import { BookmarkPlus, Plus, StarOff, User, X } from "lucide-react"
-import type { ReactNode } from "react"
 import { useState } from "react"
 
 export const Route = createFileRoute("/_app/brews/")({ component: BrewsPage })
@@ -71,11 +70,6 @@ function BrewsPage() {
   const [mineOnly, setMineOnly] = useState(false)
   const [untastedOnly, setUntastedOnly] = useState(false)
   const [search, setSearch] = useState("")
-
-  const { data: recipesForBean, isPending: recipesPending } = useQuery({
-    ...recipesListRecipesOptions({ path: { bean_id: savingAsRecipe?.bean_id ?? 0 } }),
-    enabled: savingAsRecipe !== null,
-  })
 
   const remove = useMutation({
     ...brewsDeleteBrewMutation(),
@@ -367,13 +361,8 @@ function BrewsPage() {
         open={savingAsRecipe !== null}
         onOpenChange={(open) => !open && setSavingAsRecipe(null)}
         beanId={savingAsRecipe?.bean_id ?? 0}
-        suggestedName={
-          savingAsRecipe
-            ? `${beanName(savingAsRecipe.bean_id)}: recipe #${(recipesForBean?.length ?? 0) + 1}`
-            : ""
-        }
+        suggestedName={savingAsRecipe ? `${beanName(savingAsRecipe.bean_id)}: recipe` : ""}
         recipe={null}
-        isLoading={recipesPending}
         prefillFrom={savingAsRecipe ?? undefined}
       />
 
@@ -388,14 +377,5 @@ function BrewsPage() {
         }}
       />
     </>
-  )
-}
-
-function Metric({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="grid gap-1">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="font-medium tabular-nums">{value}</span>
-    </div>
   )
 }

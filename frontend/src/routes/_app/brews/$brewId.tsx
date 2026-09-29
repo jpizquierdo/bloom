@@ -5,7 +5,6 @@ import {
   equipmentListEquipmentOptions,
   lotsGetLotOptions,
   recipesGetRecipeOptions,
-  recipesListRecipesOptions,
   tastingsDeleteTastingMutation,
   tastingsListTastingsOptions,
 } from "@/client/@tanstack/react-query.gen"
@@ -15,6 +14,7 @@ import { BrewDialog } from "@/components/brews/brew-dialog"
 import { BrewDiagnostics } from "@/components/brews/diagnostics"
 import { TastingDialog } from "@/components/brews/tasting-dialog"
 import { DeleteAlert } from "@/components/data/delete-alert"
+import { Metric } from "@/components/data/metric"
 import { PageHeader } from "@/components/data/page-header"
 import { RowActions } from "@/components/data/row-actions"
 import { Badge } from "@/components/ui/badge"
@@ -36,7 +36,6 @@ import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute } from "@tanstack/react-router"
 import { ArrowLeft, BookmarkPlus, Copy, Pencil, Plus } from "lucide-react"
-import type { ReactNode } from "react"
 import { useState } from "react"
 
 export const Route = createFileRoute("/_app/brews/$brewId")({ component: BrewDetailPage })
@@ -70,10 +69,6 @@ function BrewDetailPage() {
   const [tastingDialogOpen, setTastingDialogOpen] = useState(false)
   const [editingTasting, setEditingTasting] = useState<TastingRead | null>(null)
   const [deletingTasting, setDeletingTasting] = useState<TastingRead | null>(null)
-  const { data: recipesForBean, isPending: recipesPending } = useQuery({
-    ...recipesListRecipesOptions({ path: { bean_id: brew?.bean_id ?? 0 } }),
-    enabled: recipeDialogOpen && brew !== undefined,
-  })
 
   const removeTasting = useMutation({
     ...tastingsDeleteTastingMutation(),
@@ -301,9 +296,8 @@ function BrewDetailPage() {
         open={recipeDialogOpen}
         onOpenChange={setRecipeDialogOpen}
         beanId={brew.bean_id}
-        suggestedName={`${bean?.name ?? "Bean"}: recipe #${(recipesForBean?.length ?? 0) + 1}`}
+        suggestedName={`${bean?.name ?? "Bean"}: recipe`}
         recipe={null}
-        isLoading={recipesPending}
         prefillFrom={brew}
       />
       <TastingDialog
@@ -325,14 +319,5 @@ function BrewDetailPage() {
         }}
       />
     </>
-  )
-}
-
-function Metric({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="grid gap-1">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="font-medium tabular-nums">{value}</span>
-    </div>
   )
 }

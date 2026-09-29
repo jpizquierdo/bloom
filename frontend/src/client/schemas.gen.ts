@@ -2865,7 +2865,8 @@ export const RecipeReadSchema = {
         is_favorite: {
             type: 'boolean',
             title: 'Is Favorite',
-            description: 'Whether the requesting user has favorited this recipe.'
+            description: 'Whether the requesting user has favorited this recipe.',
+            default: false
         },
         created_at: {
             type: 'string',
@@ -2885,7 +2886,6 @@ export const RecipeReadSchema = {
         'bean_id',
         'user_id',
         'owner',
-        'is_favorite',
         'created_at'
     ],
     title: 'RecipeRead'

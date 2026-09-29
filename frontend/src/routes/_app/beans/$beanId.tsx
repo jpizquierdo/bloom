@@ -58,7 +58,7 @@ function BeanDetailPage() {
   const [editingLot, setEditingLot] = useState<BeanLotRead | null>(null)
   const [deletingLot, setDeletingLot] = useState<BeanLotRead | null>(null)
   const [editingRecipe, setEditingRecipe] = useState<RecipeRead | null>(null)
-  const [viewingRecipe, setViewingRecipe] = useState<RecipeRead | null>(null)
+  const [viewingRecipeId, setViewingRecipeId] = useState<number | null>(null)
   const [deletingRecipe, setDeletingRecipe] = useState<RecipeRead | null>(null)
   const [brewingRecipe, setBrewingRecipe] = useState<RecipeRead | undefined>()
 
@@ -91,21 +91,13 @@ function BeanDetailPage() {
   const sortedRecipes = [...(recipes ?? [])].sort(
     (a, b) => Number(b.is_favorite) - Number(a.is_favorite) || a.id - b.id,
   )
+  const viewingRecipe = recipes?.find((recipe) => recipe.id === viewingRecipeId) ?? null
   const methodName = (methodId: number) =>
     methods?.find((method) => method.id === methodId)?.name ?? `#${methodId}`
 
   function toggleFavorite(recipe: RecipeRead) {
-    const options = { path: { recipe_id: recipe.id } }
-    const updateViewedRecipe = (isFavorite: boolean) => {
-      setViewingRecipe((current) =>
-        current?.id === recipe.id ? { ...current, is_favorite: isFavorite } : current,
-      )
-    }
-    if (recipe.is_favorite) {
-      unfavoriteRecipe.mutate(options, { onSuccess: () => updateViewedRecipe(false) })
-    } else {
-      favoriteRecipe.mutate(options, { onSuccess: () => updateViewedRecipe(true) })
-    }
+    const mutation = recipe.is_favorite ? unfavoriteRecipe : favoriteRecipe
+    mutation.mutate({ path: { recipe_id: recipe.id } })
   }
 
   const lotColumns: ColumnDef<BeanLotRead, unknown>[] = [
@@ -412,7 +404,7 @@ function BeanDetailPage() {
         columns={recipeColumns}
         data={sortedRecipes}
         emptyMessage="No recipes yet. Add a reusable starting point for this bean."
-        onRowClick={setViewingRecipe}
+        onRowClick={(recipe) => setViewingRecipeId(recipe.id)}
       />
 
       <div className="mt-8 mb-4 flex items-center justify-between">
@@ -474,7 +466,7 @@ function BeanDetailPage() {
       />
       <RecipeDetailsDialog
         recipe={viewingRecipe}
-        onOpenChange={(open) => !open && setViewingRecipe(null)}
+        onOpenChange={(open) => !open && setViewingRecipeId(null)}
         onToggleFavorite={toggleFavorite}
         favoritePending={favoriteRecipe.isPending || unfavoriteRecipe.isPending}
       />
