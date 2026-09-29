@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from bloom.db.models.bean_lot import BeanLot
     from bloom.db.models.brew_method import BrewMethod
     from bloom.db.models.equipment import Equipment
+    from bloom.db.models.recipe import Recipe
     from bloom.db.models.tasting import Tasting
     from bloom.db.models.user import User
 
@@ -52,6 +53,7 @@ class Brew(Base):
         Index("idx_brew_bean_id", "bean_id"),
         Index("idx_brew_lot_id", "lot_id"),
         Index("idx_brew_method_id", "method_id"),
+        Index("idx_brew_recipe_id", "recipe_id"),
         Index("idx_brew_user_id", "user_id"),
         Index("idx_brew_brewed_at", text("brewed_at DESC")),
     )
@@ -68,6 +70,8 @@ class Brew(Base):
         nullable=False,
     )
     grinder_id: Mapped[int | None] = mapped_column(ForeignKey("equipment.id", ondelete="SET NULL"))
+    # Optional provenance only. Recipe values are copied into this brew at creation.
+    recipe_id: Mapped[int | None] = mapped_column(ForeignKey("recipe.id", ondelete="SET NULL"))
     brewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     dose_grams: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
@@ -88,4 +92,5 @@ class Brew(Base):
     lot: Mapped[BeanLot | None] = relationship()
     method: Mapped[BrewMethod] = relationship()
     grinder: Mapped[Equipment | None] = relationship()
+    recipe: Mapped[Recipe | None] = relationship(back_populates="brews")
     tastings: Mapped[list[Tasting]] = relationship(back_populates="brew", cascade="all, delete-orphan", passive_deletes=True)

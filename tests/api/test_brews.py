@@ -2,6 +2,15 @@
 
 import pytest
 
+from bloom.schemas.common import (
+    MAX_BREW_TIME_SECONDS,
+    MAX_BREWING_MASS_GRAMS,
+    MAX_BREWING_NOTES_LENGTH,
+    MAX_GRIND_SETTING_LENGTH,
+    MAX_TDS_PERCENT,
+    MAX_WATER_TEMP_CELSIUS,
+)
+
 
 @pytest.fixture
 def bean_id(client, alice_headers):
@@ -155,6 +164,51 @@ def test_dose_zero_rejected(client, alice_headers, lookups, bean_id):
         json={"bean_id": bean_id, "method_id": lookups["filter"]["id"], "dose_grams": "0"},
     )
     assert resp.status_code == 422
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("dose_grams", str(MAX_BREWING_MASS_GRAMS + 1)),
+        ("yield_grams", str(MAX_BREWING_MASS_GRAMS + 1)),
+        ("water_grams", str(MAX_BREWING_MASS_GRAMS + 1)),
+        ("water_temp_celsius", str(MAX_WATER_TEMP_CELSIUS + 1)),
+        ("brew_time_seconds", MAX_BREW_TIME_SECONDS + 1),
+        ("tds_percent", str(MAX_TDS_PERCENT + 1)),
+        ("grind_setting", "x" * (MAX_GRIND_SETTING_LENGTH + 1)),
+        ("notes", "x" * (MAX_BREWING_NOTES_LENGTH + 1)),
+    ],
+)
+def test_brew_rejects_values_outside_safe_input_limits(client, alice_headers, lookups, bean_id, field, value):
+    response = client.post(
+        "/brews",
+        headers=alice_headers,
+        json={
+            "bean_id": bean_id,
+            "method_id": lookups["filter"]["id"],
+            "dose_grams": "15",
+            field: value,
+        },
+    )
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("dose_grams", str(MAX_BREWING_MASS_GRAMS + 1)),
+        ("tds_percent", str(MAX_TDS_PERCENT + 1)),
+        ("notes", "x" * (MAX_BREWING_NOTES_LENGTH + 1)),
+    ],
+)
+def test_brew_update_enforces_input_limits(client, alice_headers, lookups, bean_id, field, value):
+    brew = client.post(
+        "/brews",
+        headers=alice_headers,
+        json={"bean_id": bean_id, "method_id": lookups["filter"]["id"], "dose_grams": "15"},
+    ).json()
+    response = client.patch(f"/brews/{brew['id']}", headers=alice_headers, json={field: value})
+    assert response.status_code == 422
 
 
 def test_null_dose_rejected(client, alice_headers, lookups, bean_id):

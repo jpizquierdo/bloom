@@ -8,10 +8,12 @@ import {
   tastingsListAllTastingsOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { BrewRead } from "@/client/types.gen"
+import { RecipeDialog } from "@/components/beans/recipe-dialog"
 import { BrewDialog } from "@/components/brews/brew-dialog"
 import { BrewDiagnostics } from "@/components/brews/diagnostics"
 import { Combobox } from "@/components/data/combobox"
 import { DeleteAlert } from "@/components/data/delete-alert"
+import { Metric } from "@/components/data/metric"
 import { PageHeader } from "@/components/data/page-header"
 import { RowActions } from "@/components/data/row-actions"
 import { Button } from "@/components/ui/button"
@@ -39,8 +41,7 @@ import { formatDateTime, formatNumber, formatSeconds } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { Plus, StarOff, User, X } from "lucide-react"
-import type { ReactNode } from "react"
+import { BookmarkPlus, Plus, StarOff, User, X } from "lucide-react"
 import { useState } from "react"
 
 export const Route = createFileRoute("/_app/brews/")({ component: BrewsPage })
@@ -62,6 +63,7 @@ function BrewsPage() {
   const [duplicating, setDuplicating] = useState<BrewRead | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState<BrewRead | null>(null)
+  const [savingAsRecipe, setSavingAsRecipe] = useState<BrewRead | null>(null)
   const [roasterFilter, setRoasterFilter] = useState("all")
   const [beanFilter, setBeanFilter] = useState("all")
   const [methodFilter, setMethodFilter] = useState("all")
@@ -295,6 +297,13 @@ function BrewsPage() {
                         setDuplicating(brew)
                         setDialogOpen(true)
                       }}
+                      additionalActions={[
+                        {
+                          label: "Save as recipe",
+                          icon: <BookmarkPlus className="size-4" />,
+                          onSelect: () => setSavingAsRecipe(brew),
+                        },
+                      ]}
                       onDelete={() => setDeleting(brew)}
                     />
                   </CardAction>
@@ -348,6 +357,15 @@ function BrewsPage() {
         prefillFrom={duplicating ?? undefined}
       />
 
+      <RecipeDialog
+        open={savingAsRecipe !== null}
+        onOpenChange={(open) => !open && setSavingAsRecipe(null)}
+        beanId={savingAsRecipe?.bean_id ?? 0}
+        suggestedName={savingAsRecipe ? `${beanName(savingAsRecipe.bean_id)}: recipe` : ""}
+        recipe={null}
+        prefillFrom={savingAsRecipe ?? undefined}
+      />
+
       <DeleteAlert
         open={deleting !== null}
         onOpenChange={(open) => !open && setDeleting(null)}
@@ -359,14 +377,5 @@ function BrewsPage() {
         }}
       />
     </>
-  )
-}
-
-function Metric({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="grid gap-1">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="font-medium tabular-nums">{value}</span>
-    </div>
   )
 }

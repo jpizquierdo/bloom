@@ -23,6 +23,7 @@ from bloom.db.base import Base
 if TYPE_CHECKING:
     from bloom.db.models.bean_lot import BeanLot
     from bloom.db.models.brew import Brew
+    from bloom.db.models.recipe import Recipe
     from bloom.db.models.roaster import Roaster
     from bloom.db.models.user import User
 
@@ -85,3 +86,4 @@ class Bean(Base):
     roaster: Mapped[Roaster] = relationship(back_populates="beans")
     lots: Mapped[list[BeanLot]] = relationship(back_populates="bean", cascade="all, delete-orphan", passive_deletes=True)
     brews: Mapped[list[Brew]] = relationship(back_populates="bean", cascade="all, delete-orphan", passive_deletes=True)
+    recipes: Mapped[list[Recipe]] = relationship(back_populates="bean", cascade="all, delete-orphan", passive_deletes=True)

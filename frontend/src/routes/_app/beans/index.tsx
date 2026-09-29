@@ -222,7 +222,7 @@ function BeansPage() {
       <DeleteAlert
         open={deleting !== null}
         onOpenChange={(open) => !open && setDeleting(null)}
-        description={`Delete "${deleting?.name}"? Its lots, brews and tastings go with it.`}
+        description={`Delete "${deleting?.name}"? All lots, recipes, brews and tastings go with it, including entries from other users.`}
         isPending={remove.isPending}
         onConfirm={() => {
           if (deleting) remove.mutate({ path: { bean_id: deleting.id } })

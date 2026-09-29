@@ -6,16 +6,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Copy, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import type { ReactNode } from "react"
+
+interface AdditionalRowAction {
+  label: string
+  icon?: ReactNode
+  onSelect: () => void
+}
 
 interface RowActionsProps {
   onEdit: () => void
   onDelete: () => void
-  /** Rows you don't own are read-only (shared log): the menu is hidden entirely. */
+  /** Edit and delete are hidden for rows the current user does not own. */
   canEdit: boolean
   deleteLabel?: string
-  /** Optional duplicate action, rendered between Edit and Delete when provided. */
+  /** Optional create-from-existing action, available independently of edit ownership. */
   onDuplicate?: () => void
   duplicateLabel?: string
+  additionalActions?: AdditionalRowAction[]
 }
 
 export function RowActions({
@@ -25,8 +33,9 @@ export function RowActions({
   deleteLabel = "Delete",
   onDuplicate,
   duplicateLabel = "Duplicate",
+  additionalActions = [],
 }: RowActionsProps) {
-  if (!canEdit) return null
+  if (!canEdit && !onDuplicate && additionalActions.length === 0) return null
 
   return (
     <DropdownMenu>
@@ -42,20 +51,30 @@ export function RowActions({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(event) => event.stopPropagation()}>
-        <DropdownMenuItem onSelect={onEdit}>
-          <Pencil className="size-4" />
-          Edit
-        </DropdownMenuItem>
+        {canEdit ? (
+          <DropdownMenuItem onSelect={onEdit}>
+            <Pencil className="size-4" />
+            Edit
+          </DropdownMenuItem>
+        ) : null}
         {onDuplicate ? (
           <DropdownMenuItem onSelect={onDuplicate}>
             <Copy className="size-4" />
             {duplicateLabel}
           </DropdownMenuItem>
         ) : null}
-        <DropdownMenuItem variant="destructive" onSelect={onDelete}>
-          <Trash2 className="size-4" />
-          {deleteLabel}
-        </DropdownMenuItem>
+        {additionalActions.map((action) => (
+          <DropdownMenuItem key={action.label} onSelect={action.onSelect}>
+            {action.icon}
+            {action.label}
+          </DropdownMenuItem>
+        ))}
+        {canEdit ? (
+          <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+            <Trash2 className="size-4" />
+            {deleteLabel}
+          </DropdownMenuItem>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   )

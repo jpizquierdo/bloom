@@ -26,7 +26,7 @@ from bloom.main import create_app
 from bloom.services import users_service
 
 TEST_DB_NAME = "bloom_test"
-_ALL_TABLES = '"user", bean, bean_lot, brew, tasting, brew_method, equipment, roaster'
+_ALL_TABLES = '"user", bean, bean_lot, recipe, recipe_favorite, brew, tasting, brew_method, equipment, roaster'
 
 
 def _test_database_url() -> str:
@@ -129,6 +129,18 @@ def alice_headers(client, users) -> dict:
 @pytest.fixture
 def bob_headers(client, users) -> dict:
     return _headers(client, "bob@example.com", "bobpass123")
+
+
+@pytest.fixture
+def charlie_headers(client, db, users) -> dict:
+    users_service.create_user(
+        db,
+        email="charlie@example.com",
+        username="charlie",
+        password="charliepass1",
+        role="user",
+    )
+    return _headers(client, "charlie@example.com", "charliepass1")
 
 
 @pytest.fixture

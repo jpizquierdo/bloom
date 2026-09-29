@@ -1,10 +1,27 @@
 """Shared building blocks for the DTOs."""
 
+from decimal import Decimal
 from typing import Annotated, Any
 
 from pydantic import AfterValidator, BaseModel, Field, field_validator
 
 from bloom.domain.naming import normalize_name
+
+# Numeric caps match the PostgreSQL column capacity; text caps bound authenticated writes.
+MAX_BREWING_MASS_GRAMS = Decimal("9999.99")
+MAX_WATER_TEMP_CELSIUS = Decimal("999.9")
+MAX_TDS_PERCENT = Decimal("99.99")
+MAX_BREW_TIME_SECONDS = 2_147_483_647
+MAX_RECIPE_NAME_LENGTH = 200
+MAX_GRIND_SETTING_LENGTH = 100
+MAX_BREWING_NOTES_LENGTH = 10_000
+
+Grams = Annotated[Decimal, Field(gt=0, le=MAX_BREWING_MASS_GRAMS)]
+Celsius = Annotated[Decimal, Field(ge=0, le=MAX_WATER_TEMP_CELSIUS)]
+TdsPercent = Annotated[Decimal, Field(ge=0, le=MAX_TDS_PERCENT)]
+Seconds = Annotated[int, Field(gt=0, le=MAX_BREW_TIME_SECONDS)]
+GrindSetting = Annotated[str, Field(max_length=MAX_GRIND_SETTING_LENGTH)]
+Notes = Annotated[str, Field(max_length=MAX_BREWING_NOTES_LENGTH)]
 
 
 class Message(BaseModel):

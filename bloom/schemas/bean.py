@@ -80,6 +80,6 @@ class BeanRead(BeanBase):
 
 class BeanMerge(BaseModel):
     source_id: int = Field(
-        description="Bean to merge away: its brews and lots move to the target and it is deleted.",
+        description="Bean to merge away: its brews, lots and recipes move to the target and it is deleted.",
         examples=[7],
     )

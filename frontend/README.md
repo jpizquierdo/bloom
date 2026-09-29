@@ -55,8 +55,8 @@ src/
     ui/           shadcn primitives — yours to modify
     data/         DataTable, ResourceDialog, DeleteAlert, RowActions, Combobox… the CRUD kit
     layout/       sidebar, user menu, theme toggle
-    beans/        lot dialog
-    brews/        brew + tasting dialogs, extraction diagnostics
+    beans/        bean, lot and recipe dialogs
+    brews/        shared preparation fields, brew + tasting dialogs, diagnostics
   lib/            api client config, auth, formatting, domain constants
   routes/         file-based routes; everything under `_app` requires a login
 ```
@@ -72,6 +72,10 @@ For a **detail page**, add a `$id.tsx` route beside `index.tsx` and make the lis
 navigate to it (`onRowClick`); `roasters/$roasterId.tsx`, `beans/$beanId.tsx` and
 `brews/$brewId.tsx` are the examples. For a **long pick-list** (e.g. beans), use the
 searchable `Combobox` (`components/data/combobox.tsx`) instead of a plain `Select`.
+The brew list and detail page can create an independent recipe from reusable brew parameters;
+both flows reuse `components/beans/recipe-dialog.tsx` rather than duplicating form behavior.
+Recipe stars are personal to the current user; starred recipes sort first on the bean detail
+page but are not treated as defaults.
 
 Two API rules every page must respect:
 

@@ -1,12 +1,12 @@
 import {
   beansListBeansOptions,
-  brewMethodsListBrewMethodsOptions,
   brewsCreateBrewMutation,
   brewsUpdateBrewMutation,
-  equipmentListEquipmentOptions,
   lotsListLotsOptions,
+  recipesCreateBrewFromRecipeMutation,
 } from "@/client/@tanstack/react-query.gen"
-import type { BeanLotRead, BrewRead } from "@/client/types.gen"
+import type { BeanLotRead, BrewRead, RecipeRead } from "@/client/types.gen"
+import { PreparationFields } from "@/components/brews/preparation-fields"
 import { Combobox } from "@/components/data/combobox"
 import { ResourceDialog } from "@/components/data/resource-dialog"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -28,6 +28,13 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { beanLabel } from "@/lib/domain"
+import {
+  MAX_BREWING_NOTES_LENGTH,
+  MAX_TDS_PERCENT,
+  brewingNotesSchema,
+  preparationFieldSchema,
+  tdsSchema,
+} from "@/lib/brewing-validation"
 import { patchBody, stripEmpty, toDateTimeLocal } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -39,17 +46,10 @@ import { z } from "zod"
 const schema = z.object({
   bean_id: z.string().min(1, "Pick a bean"),
   lot_id: z.string(),
-  method_id: z.string().min(1, "Pick a method"),
-  grinder_id: z.string(),
-  dose_grams: z.string().min(1, "Dose is required"),
-  yield_grams: z.string(),
-  water_grams: z.string(),
-  grind_setting: z.string(),
-  water_temp_celsius: z.string(),
-  brew_time_seconds: z.string(),
-  tds_percent: z.string(),
+  ...preparationFieldSchema,
+  tds_percent: tdsSchema,
   brewed_at: z.string(),
-  notes: z.string(),
+  notes: brewingNotesSchema,
 })
 
 type FormValues = z.infer<typeof schema>
@@ -93,6 +93,8 @@ interface BrewDialogProps {
   defaultBeanId?: number
   /** Seed a create ("brew again") from an existing brew, minus brewed_at and TDS. */
   prefillFrom?: BrewRead
+  /** Seed a create from a recipe through the recipe snapshot endpoint. */
+  recipe?: RecipeRead
 }
 
 export function BrewDialog({
@@ -101,12 +103,10 @@ export function BrewDialog({
   brew,
   defaultBeanId,
   prefillFrom,
+  recipe,
 }: BrewDialogProps) {
   const feedback = useCrudFeedback()
   const { data: beans } = useQuery(beansListBeansOptions())
-  const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
-  const { data: equipment } = useQuery(equipmentListEquipmentOptions())
-  const grinders = (equipment ?? []).filter((item) => item.type === "grinder")
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY })
 
@@ -122,14 +122,14 @@ export function BrewDialog({
 
   useEffect(() => {
     if (!open) return
-    // "Brew again": reuse an existing brew's recipe, but brewed_at and TDS start blank
+    // "Brew again" reuses preparation values, but brewed_at and TDS start blank
     // (brewed_at defaults to now on create; TDS is always a fresh refractometer reading).
-    const source = brew ?? prefillFrom
+    const source = brew ?? prefillFrom ?? recipe
     form.reset(
       source
         ? {
             bean_id: String(source.bean_id),
-            lot_id: source.lot_id ? String(source.lot_id) : "",
+            lot_id: "lot_id" in source && source.lot_id ? String(source.lot_id) : "",
             method_id: String(source.method_id),
             grinder_id: source.grinder_id ? String(source.grinder_id) : "",
             dose_grams: source.dose_grams,
@@ -138,13 +138,13 @@ export function BrewDialog({
             grind_setting: source.grind_setting ?? "",
             water_temp_celsius: source.water_temp_celsius ?? "",
             brew_time_seconds: source.brew_time_seconds?.toString() ?? "",
-            tds_percent: brew ? (source.tds_percent ?? "") : "",
-            brewed_at: brew ? toDateTimeLocal(source.brewed_at) : "",
-            notes: source.notes ?? "",
+            tds_percent: brew && "tds_percent" in source ? (source.tds_percent ?? "") : "",
+            brewed_at: brew && "brewed_at" in source ? toDateTimeLocal(source.brewed_at) : "",
+            notes: recipe ? "" : (source.notes ?? ""),
           }
         : { ...EMPTY, bean_id: defaultBeanId ? String(defaultBeanId) : "" },
     )
-  }, [open, brew, prefillFrom, defaultBeanId, form])
+  }, [open, brew, prefillFrom, recipe, defaultBeanId, form])
 
   // Fresh dialog: hide finished lots. Allow auto-lot again on a blank create, but not when
   // prefilling — keep the copied lot for the source's bean (re-enabled if the bean changes).
@@ -175,6 +175,11 @@ export function BrewDialog({
     onSuccess: feedback.onSuccess("Brew updated"),
     onError: feedback.onError,
   })
+  const createFromRecipe = useMutation({
+    ...recipesCreateBrewFromRecipeMutation(),
+    onSuccess: feedback.onSuccess("Brew logged"),
+    onError: feedback.onError,
+  })
 
   function onSubmit(values: FormValues) {
     const measures = {
@@ -192,19 +197,20 @@ export function BrewDialog({
       notes: values.notes,
     }
 
+    // Brewing from a recipe patches its snapshot: a cleared field overrides the recipe with null.
+    const patch = { ...patchBody(measures, CLEARABLE), dose_grams: Number(values.dose_grams) }
     const request = brew
-      ? update.mutateAsync({
-          path: { brew_id: brew.id },
-          body: { ...patchBody(measures, CLEARABLE), dose_grams: Number(values.dose_grams) },
-        })
-      : create.mutateAsync({
-          body: {
-            ...stripEmpty(measures),
-            bean_id: Number(values.bean_id),
-            method_id: Number(values.method_id),
-            dose_grams: Number(values.dose_grams),
-          },
-        })
+      ? update.mutateAsync({ path: { brew_id: brew.id }, body: patch })
+      : recipe
+        ? createFromRecipe.mutateAsync({ path: { recipe_id: recipe.id }, body: patch })
+        : create.mutateAsync({
+            body: {
+              ...stripEmpty(measures),
+              bean_id: Number(values.bean_id),
+              method_id: Number(values.method_id),
+              dose_grams: Number(values.dose_grams),
+            },
+          })
     return submitAndClose(request, () => onOpenChange(false))
   }
 
@@ -212,14 +218,28 @@ export function BrewDialog({
     <ResourceDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={brew ? "Edit brew" : prefillFrom ? "Brew again" : "Log a brew"}
+      title={
+        brew
+          ? "Edit brew"
+          : recipe
+            ? `Brew from ${recipe.name}`
+            : prefillFrom
+              ? "Brew again"
+              : "Log a brew"
+      }
       description="Dose is the only required measure; fill in what you actually recorded."
       form={form}
       onSubmit={onSubmit}
-      isPending={create.isPending || update.isPending}
+      isPending={create.isPending || update.isPending || createFromRecipe.isPending}
       submitLabel={brew ? "Save" : "Log brew"}
       wide
     >
+      {recipe?.notes ? (
+        <div className="grid gap-1 rounded-md border bg-muted/40 p-3 sm:col-span-2">
+          <span className="text-xs font-medium text-muted-foreground">Recipe notes</span>
+          <p className="whitespace-pre-wrap text-sm">{recipe.notes}</p>
+        </div>
+      ) : null}
       <FormField
         control={form.control}
         name="bean_id"
@@ -236,10 +256,14 @@ export function BrewDialog({
                 }))}
                 placeholder="Select a bean"
                 searchPlaceholder="Search beans…"
-                disabled={brew !== null}
+                disabled={brew !== null || recipe !== undefined}
               />
             </FormControl>
-            {brew ? <FormDescription>The bean cannot be changed.</FormDescription> : null}
+            {brew ? (
+              <FormDescription>The bean cannot be changed.</FormDescription>
+            ) : recipe ? (
+              <FormDescription>The bean is set by the recipe.</FormDescription>
+            ) : null}
             <FormMessage />
           </FormItem>
         )}
@@ -290,134 +314,15 @@ export function BrewDialog({
           )}
         />
       ) : null}
-      <FormField
-        control={form.control}
-        name="method_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Method</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange} disabled={brew !== null}>
-              <FormControl>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a method" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {(methods ?? []).map((method) => (
-                  <SelectItem key={method.id} value={String(method.id)}>
-                    {method.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {brew ? <FormDescription>The method cannot be changed.</FormDescription> : null}
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="dose_grams"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Dose (g)</FormLabel>
-            <FormControl>
-              <Input type="number" min={0} step="0.1" placeholder="18.0" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="yield_grams"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Yield (g)</FormLabel>
-            <FormControl>
-              <Input type="number" min={0} step="0.1" placeholder="36.0" {...field} />
-            </FormControl>
-            <FormDescription>Beverage in the cup.</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="water_grams"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Water (g)</FormLabel>
-            <FormControl>
-              <Input type="number" min={0} step="0.1" placeholder="300" {...field} />
-            </FormControl>
-            <FormDescription>Filter and immersion brews.</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="grinder_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Grinder</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
-              <FormControl>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a grinder" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {grinders.map((grinder) => (
-                  <SelectItem key={grinder.id} value={String(grinder.id)}>
-                    {grinder.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="grind_setting"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Grind setting</FormLabel>
-            <FormControl>
-              <Input placeholder="2.5" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="water_temp_celsius"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Water temp (°C)</FormLabel>
-            <FormControl>
-              <Input type="number" step="0.1" placeholder="93.0" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="brew_time_seconds"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Brew time (s)</FormLabel>
-            <FormControl>
-              <Input type="number" min={0} placeholder="28" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+      <PreparationFields
+        methodDisabled={brew !== null || recipe !== undefined}
+        methodDescription={
+          brew
+            ? "The method cannot be changed."
+            : recipe
+              ? "The method is set by the recipe."
+              : undefined
+        }
       />
       <FormField
         control={form.control}
@@ -426,7 +331,14 @@ export function BrewDialog({
           <FormItem>
             <FormLabel>TDS (%)</FormLabel>
             <FormControl>
-              <Input type="number" step="0.01" placeholder="1.35" {...field} />
+              <Input
+                type="number"
+                min={0}
+                max={MAX_TDS_PERCENT}
+                step="0.01"
+                placeholder="1.35"
+                {...field}
+              />
             </FormControl>
             <FormDescription>From the refractometer.</FormDescription>
             <FormMessage />
@@ -454,7 +366,12 @@ export function BrewDialog({
           <FormItem className="sm:col-span-2">
             <FormLabel>Notes</FormLabel>
             <FormControl>
-              <Textarea rows={3} placeholder="Bloomed 45 s, gentle pours." {...field} />
+              <Textarea
+                rows={3}
+                maxLength={MAX_BREWING_NOTES_LENGTH}
+                placeholder="Bloomed 45 s, gentle pours."
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

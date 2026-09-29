@@ -32,7 +32,7 @@ The shared dashboard — coffees, brews and recent extractions at a glance:
 | :--: | :--: |
 | ![Beans list](docs/screenshots/beans.png) | ![Bean detail](docs/screenshots/bean-detail.png) |
 
-A brew with its recipe, extraction-yield diagnostics and a tasting:
+A brew with its preparation details, extraction-yield diagnostics and a tasting:
 
 ![Brew detail](docs/screenshots/brew-detail.png)
 
@@ -112,11 +112,13 @@ Everything is served under `/api/v1` (`/health` stays at the root, for container
 For the full list of endpoints and their schemas, use the **interactive Swagger docs at
 [`/docs`](http://localhost:8000/docs)** — the fastest way to explore the API.
 
-Bloom is a **shared log**: any authenticated user reads everything and can add beans, brew from
-any bean and taste any brew; only a row's creator (or an admin) may edit or delete it. A **bean
-is the coffee**, and each bag you buy is a **lot** under it — a brew names its bean and,
-optionally, the lot it came from. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the
-data model.
+Bloom is a **shared log**: any authenticated user reads everything and can add beans, create or
+use recipes for any bean, brew from any bean and taste any brew; only a row's creator (or an
+admin) may edit or delete it. A **bean is the coffee**, each bag you buy is a **lot**, and an
+optional **recipe** is reusable preparation intent. A brew stores its own values even when it
+starts from a recipe. The web UI can also save a brew's reusable preparation values as a new,
+independent recipe, and each user can star personal favorites without changing the shared recipe.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the data model.
 
 ## Development
 
@@ -163,9 +165,9 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the data model, the
 
 ## Status
 
-Backend API and data layer are implemented (users/auth, beans, lots, brews, tastings, lookups),
-and the web UI covers all of them. Password reset works over email; sign-up does not exist yet
-(the UI shows that screen but leaves it inert), and admins create accounts.
+Backend API and data layer are implemented (users/auth, beans, lots, recipes, brews, tastings,
+lookups), and the web UI covers all of them. Password reset works over email; sign-up does not
+exist yet (the UI shows that screen but leaves it inert), and admins create accounts.
 
 ## License
 

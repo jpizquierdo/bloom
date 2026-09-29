@@ -2,13 +2,19 @@ import {
   beansGetBeanOptions,
   brewMethodsListBrewMethodsOptions,
   brewsListBrewsOptions,
+  recipesDeleteRecipeMutation,
+  recipesFavoriteRecipeMutation,
+  recipesListRecipesOptions,
+  recipesUnfavoriteRecipeMutation,
   lotsDeleteLotMutation,
   lotsListLotsOptions,
 } from "@/client/@tanstack/react-query.gen"
-import type { BeanLotRead, BrewRead } from "@/client/types.gen"
+import type { BeanLotRead, BrewRead, RecipeRead } from "@/client/types.gen"
 import { BeanDialog } from "@/components/beans/bean-dialog"
 import { LotDialog } from "@/components/beans/lot-dialog"
 import { MergeBeanDialog } from "@/components/beans/merge-bean-dialog"
+import { RecipeDetailsDialog } from "@/components/beans/recipe-details-dialog"
+import { RecipeDialog } from "@/components/beans/recipe-dialog"
 import { BrewDialog } from "@/components/brews/brew-dialog"
 import { DataTable } from "@/components/data/data-table"
 import { DeleteAlert } from "@/components/data/delete-alert"
@@ -20,12 +26,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { StarRating } from "@/components/ui/star-rating"
 import { canEdit, useCurrentUser } from "@/lib/auth"
-import { formatDate, formatDateTime, formatNumber, humanize } from "@/lib/format"
+import { formatDate, formatDateTime, formatNumber, formatSeconds, humanize } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowLeft, Merge, Pencil, Plus } from "lucide-react"
+import { ArrowLeft, Coffee, Merge, Pencil, Plus, Star } from "lucide-react"
 import type { ReactNode } from "react"
 import { useState } from "react"
 
@@ -40,6 +46,7 @@ function BeanDetailPage() {
 
   const { data: bean, isLoading } = useQuery(beansGetBeanOptions({ path: { bean_id: id } }))
   const { data: lots } = useQuery(lotsListLotsOptions({ path: { bean_id: id } }))
+  const { data: recipes } = useQuery(recipesListRecipesOptions({ path: { bean_id: id } }))
   const { data: allBrews } = useQuery(brewsListBrewsOptions())
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
 
@@ -47,12 +54,32 @@ function BeanDetailPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [mergeDialogOpen, setMergeDialogOpen] = useState(false)
   const [lotDialogOpen, setLotDialogOpen] = useState(false)
+  const [recipeDialogOpen, setRecipeDialogOpen] = useState(false)
   const [editingLot, setEditingLot] = useState<BeanLotRead | null>(null)
   const [deletingLot, setDeletingLot] = useState<BeanLotRead | null>(null)
+  const [editingRecipe, setEditingRecipe] = useState<RecipeRead | null>(null)
+  const [viewingRecipeId, setViewingRecipeId] = useState<number | null>(null)
+  const [deletingRecipe, setDeletingRecipe] = useState<RecipeRead | null>(null)
+  const [brewingRecipe, setBrewingRecipe] = useState<RecipeRead | undefined>()
 
   const removeLot = useMutation({
     ...lotsDeleteLotMutation(),
     onSuccess: feedback.onSuccess("Lot deleted"),
+    onError: feedback.onError,
+  })
+  const removeRecipe = useMutation({
+    ...recipesDeleteRecipeMutation(),
+    onSuccess: feedback.onSuccess("Recipe deleted"),
+    onError: feedback.onError,
+  })
+  const favoriteRecipe = useMutation({
+    ...recipesFavoriteRecipeMutation(),
+    onSuccess: feedback.onSuccess("Recipe added to favorites"),
+    onError: feedback.onError,
+  })
+  const unfavoriteRecipe = useMutation({
+    ...recipesUnfavoriteRecipeMutation(),
+    onSuccess: feedback.onSuccess("Recipe removed from favorites"),
     onError: feedback.onError,
   })
 
@@ -61,8 +88,17 @@ function BeanDetailPage() {
   }
 
   const brews = allBrews?.filter((brew) => brew.bean_id === id) ?? []
+  const sortedRecipes = [...(recipes ?? [])].sort(
+    (a, b) => Number(b.is_favorite) - Number(a.is_favorite) || a.id - b.id,
+  )
+  const viewingRecipe = recipes?.find((recipe) => recipe.id === viewingRecipeId) ?? null
   const methodName = (methodId: number) =>
     methods?.find((method) => method.id === methodId)?.name ?? `#${methodId}`
+
+  function toggleFavorite(recipe: RecipeRead) {
+    const mutation = recipe.is_favorite ? unfavoriteRecipe : favoriteRecipe
+    mutation.mutate({ path: { recipe_id: recipe.id } })
+  }
 
   const lotColumns: ColumnDef<BeanLotRead, unknown>[] = [
     {
@@ -146,6 +182,107 @@ function BeanDetailPage() {
       header: "By",
       cell: ({ row }) => (
         <span className="text-muted-foreground">{row.original.author.username}</span>
+      ),
+    },
+  ]
+
+  const recipeColumns: ColumnDef<RecipeRead, unknown>[] = [
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => {
+        const recipe = row.original
+        const label = recipe.is_favorite ? "Remove from favorites" : "Add to favorites"
+        return (
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={label}
+              aria-pressed={recipe.is_favorite}
+              title={label}
+              disabled={favoriteRecipe.isPending || unfavoriteRecipe.isPending}
+              onClick={(event) => {
+                event.stopPropagation()
+                toggleFavorite(recipe)
+              }}
+            >
+              <Star
+                className={
+                  recipe.is_favorite
+                    ? "size-4 fill-amber-400 text-amber-500"
+                    : "size-4 text-muted-foreground"
+                }
+              />
+            </Button>
+            <span className="font-medium">{recipe.name}</span>
+          </div>
+        )
+      },
+    },
+    {
+      id: "method",
+      accessorFn: (recipe) => methodName(recipe.method_id),
+      header: "Method",
+    },
+    {
+      accessorKey: "dose_grams",
+      header: "Dose",
+      cell: ({ row }) => `${formatNumber(row.original.dose_grams)} g`,
+    },
+    {
+      id: "target",
+      header: "Target",
+      cell: ({ row }) => {
+        const recipe = row.original
+        if (recipe.yield_grams) return `${formatNumber(recipe.yield_grams)} g yield`
+        if (recipe.water_grams) return `${formatNumber(recipe.water_grams)} g water`
+        return "—"
+      },
+    },
+    {
+      id: "details",
+      header: "Grind · time",
+      cell: ({ row }) =>
+        [row.original.grind_setting, formatSeconds(row.original.brew_time_seconds)]
+          .filter((value) => value !== "—" && Boolean(value))
+          .join(" · ") || "—",
+    },
+    {
+      id: "owner",
+      accessorFn: (recipe) => recipe.owner.username,
+      header: "By",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.original.owner.username}</span>
+      ),
+    },
+    {
+      id: "actions",
+      header: "",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(event) => {
+              event.stopPropagation()
+              setBrewingRecipe(row.original)
+              setBrewDialogOpen(true)
+            }}
+          >
+            <Coffee className="size-4" />
+            Brew
+          </Button>
+          <RowActions
+            canEdit={canEdit(row.original, user)}
+            onEdit={() => {
+              setEditingRecipe(row.original)
+              setRecipeDialogOpen(true)
+            }}
+            onDelete={() => setDeletingRecipe(row.original)}
+          />
+        </div>
       ),
     },
   ]
@@ -249,6 +386,29 @@ function BeanDetailPage() {
 
       <div className="mt-8 mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">
+          Recipes <span className="text-muted-foreground">({recipes?.length ?? 0})</span>
+        </h2>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setEditingRecipe(null)
+            setRecipeDialogOpen(true)
+          }}
+        >
+          <Plus className="size-4" />
+          Add recipe
+        </Button>
+      </div>
+
+      <DataTable
+        columns={recipeColumns}
+        data={sortedRecipes}
+        emptyMessage="No recipes yet. Add a reusable starting point for this bean."
+        onRowClick={(recipe) => setViewingRecipeId(recipe.id)}
+      />
+
+      <div className="mt-8 mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold">
           Lots <span className="text-muted-foreground">({lots?.length ?? 0})</span>
         </h2>
         <Button
@@ -273,7 +433,13 @@ function BeanDetailPage() {
         <h2 className="text-lg font-semibold">
           Brews <span className="text-muted-foreground">({brews.length})</span>
         </h2>
-        <Button variant="outline" onClick={() => setBrewDialogOpen(true)}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setBrewingRecipe(undefined)
+            setBrewDialogOpen(true)
+          }}
+        >
           <Plus className="size-4" />
           Log brew
         </Button>
@@ -291,11 +457,38 @@ function BeanDetailPage() {
       <BeanDialog open={editDialogOpen} onOpenChange={setEditDialogOpen} bean={bean} />
       <MergeBeanDialog open={mergeDialogOpen} onOpenChange={setMergeDialogOpen} bean={bean} />
       <LotDialog open={lotDialogOpen} onOpenChange={setLotDialogOpen} beanId={bean.id} lot={editingLot} />
+      <RecipeDialog
+        open={recipeDialogOpen}
+        onOpenChange={setRecipeDialogOpen}
+        beanId={bean.id}
+        suggestedName={`${bean.name}: recipe #${(recipes?.length ?? 0) + 1}`}
+        recipe={editingRecipe}
+      />
+      <RecipeDetailsDialog
+        recipe={viewingRecipe}
+        onOpenChange={(open) => !open && setViewingRecipeId(null)}
+        onToggleFavorite={toggleFavorite}
+        favoritePending={favoriteRecipe.isPending || unfavoriteRecipe.isPending}
+      />
       <BrewDialog
         open={brewDialogOpen}
-        onOpenChange={setBrewDialogOpen}
+        onOpenChange={(open) => {
+          setBrewDialogOpen(open)
+          if (!open) setBrewingRecipe(undefined)
+        }}
         brew={null}
         defaultBeanId={bean.id}
+        recipe={brewingRecipe}
+      />
+      <DeleteAlert
+        open={deletingRecipe !== null}
+        onOpenChange={(open) => !open && setDeletingRecipe(null)}
+        description={`Delete "${deletingRecipe?.name}"? Existing brews keep their copied values.`}
+        isPending={removeRecipe.isPending}
+        onConfirm={() => {
+          if (deletingRecipe) removeRecipe.mutate({ path: { recipe_id: deletingRecipe.id } })
+          setDeletingRecipe(null)
+        }}
       />
       <DeleteAlert
         open={deletingLot !== null}
