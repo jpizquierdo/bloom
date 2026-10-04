@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { StarRating } from "@/components/ui/star-rating"
+import { Switch } from "@/components/ui/switch"
 import { canEdit, useCurrentUser } from "@/lib/auth"
 import { ROAST_TYPES } from "@/lib/domain"
 import { humanize } from "@/lib/format"
@@ -42,7 +44,8 @@ export const Route = createFileRoute("/_app/beans/")({ component: BeansPage })
 function BeansPage() {
   const { user } = useCurrentUser()
   const feedback = useCrudFeedback()
-  const { data, isLoading } = useQuery(beansListBeansOptions())
+  const [openOnly, setOpenOnly] = useState(true)
+  const { data, isLoading } = useQuery(beansListBeansOptions({ query: { open_lot: openOnly } }))
   const { data: roasters } = useQuery(roastersListRoastersOptions())
 
   const [editing, setEditing] = useState<BeanRead | null>(null)
@@ -158,6 +161,11 @@ function BeansPage() {
           </SelectContent>
         </Select>
 
+        <div className="flex items-center gap-2">
+          <Switch id="open-only" checked={openOnly} onCheckedChange={setOpenOnly} />
+          <Label htmlFor="open-only">Open lots only</Label>
+        </div>
+
         {hasFilters ? (
           <Button variant="ghost" size="sm" onClick={clearFilters}>
             <X className="size-4" />
@@ -174,7 +182,16 @@ function BeansPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No beans yet. Add the coffee you are drinking.
+          {openOnly ? (
+            <>
+              No beans with an open lot of yours.{" "}
+              <Button variant="link" className="h-auto p-0" onClick={() => setOpenOnly(false)}>
+                Show all beans
+              </Button>
+            </>
+          ) : (
+            "No beans yet. Add the coffee you are drinking."
+          )}
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

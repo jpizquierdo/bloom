@@ -2142,6 +2142,10 @@ export type BeansListBeansData = {
          * Mine
          */
         mine?: boolean;
+        /**
+         * Open Lot
+         */
+        open_lot?: boolean;
     };
     url: '/api/v1/beans';
 };

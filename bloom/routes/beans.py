@@ -27,9 +27,10 @@ def create_bean(data: BeanCreate, db: DbSession, user: CurrentUser, allow_duplic
 
 
 @router.get("", response_model=list[BeanRead])
-def list_beans(db: DbSession, user: CurrentUser, mine: bool = False) -> list[BeanRead]:
-    """List all beans (shared). Use `?mine=true` to return only the beans you own."""
-    return bean_service.list_beans(db, user, mine=mine)
+def list_beans(db: DbSession, user: CurrentUser, mine: bool = False, open_lot: bool = False) -> list[BeanRead]:
+    """List all beans (shared). Use `?mine=true` to return only the beans you own, and
+    `?open_lot=true` to return only beans where you have an unfinished lot."""
+    return bean_service.list_beans(db, user, mine=mine, open_lot=open_lot)
 
 
 @router.get("/{bean_id}", response_model=BeanRead)

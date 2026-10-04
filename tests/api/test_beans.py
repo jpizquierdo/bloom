@@ -80,6 +80,27 @@ def test_mine_filter_returns_only_own_beans(client, alice_headers, bob_headers):
     assert mine == {"Alice bean"}
 
 
+def test_open_lot_filter_returns_beans_with_my_unfinished_lots(client, alice_headers, bob_headers):
+    open_id = _make_bean(client, alice_headers, name="Open").json()["id"]
+    finished_id = _make_bean(client, alice_headers, name="Finished").json()["id"]
+    bobs_id = _make_bean(client, alice_headers, name="Bob's bag").json()["id"]
+    _make_bean(client, alice_headers, name="No lots")
+
+    client.post(f"/beans/{open_id}/lots", headers=alice_headers, json={})
+    client.post(f"/beans/{finished_id}/lots", headers=alice_headers, json={"is_finished": True})
+    # Bob's open bag on a bean Alice owns: counts for Bob, not for Alice.
+    client.post(f"/beans/{bobs_id}/lots", headers=bob_headers, json={})
+
+    def names(url, headers):
+        return {b["name"] for b in client.get(url, headers=headers).json()}
+
+    assert names("/beans?open_lot=true", alice_headers) == {"Open"}
+    assert names("/beans?open_lot=true", bob_headers) == {"Bob's bag"}
+    # Combined with mine: Bob owns none of these beans, so nothing is left.
+    assert names("/beans?open_lot=true&mine=true", bob_headers) == set()
+    assert names("/beans?open_lot=true&mine=true", alice_headers) == {"Open"}
+
+
 def test_non_owner_can_read_but_not_modify_bean(client, alice_headers, bob_headers):
     bean_id = _make_bean(client, alice_headers).json()["id"]
     # A non-owner can read a shared bean...
