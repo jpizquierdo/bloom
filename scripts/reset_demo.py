@@ -57,6 +57,21 @@ BEANS = [
     ("Finca Tamana", 2, "Colombia", "Huila", "washed", "medium", "espresso", 4, "Caramel, orange, almond"),
 ]
 
+# (bean index, method index, name, dose, yield, water, grind, temp, seconds, notes)
+RECIPES = [
+    (0, 0, "Bright washed V60", "15.0", None, "250.0", "22", "94.0", 165, "Rinse the filter, 45 s bloom, pour in 3 stages."),
+    (1, 0, "Floral natural, slightly cooler", "15.0", None, "250.0", "21", "93.0", 172, "Cooler water keeps the jasmine up front."),
+    (2, 4, "Sweet 1:2 espresso", "18.0", "38.0", None, "2.4", "93.0", 28, "Ease off the pressure after pre-infusion."),
+    (3, 4, "Milk-drink espresso", "18.5", "37.0", None, "2.2", "92.0", 26, "Lower temperature to tame bitterness in milk."),
+    (4, 2, "Inverted AeroPress", "14.0", None, "200.0", "18", "88.0", 120, None),
+]
+
+# Recipe indexes the demo user has favorited.
+FAVORITE_RECIPES = (0, 2)
+
+# brew index -> recipe index it was made from; the remaining brews have no recipe.
+BREW_RECIPES = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+
 # (bean index, method index, dose, yield, water, grind, temp, seconds, tds, days ago)
 BREWS = [
     (0, 0, "15.0", None, "250.0", "22", "94.0", 165, "1.38", 0),
@@ -138,15 +153,37 @@ def seed(db: Session) -> None:
     db.add_all(lots)
     db.flush()
 
+    recipes = [
+        models.Recipe(
+            user_id=demo.id,
+            bean_id=beans[bean].id,
+            method_id=methods[method].id,
+            grinder_id=equipment[0].id if methods[method].category == "espresso" else equipment[1].id,
+            name=name,
+            dose_grams=Decimal(dose),
+            yield_grams=Decimal(yield_g) if yield_g else None,
+            water_grams=Decimal(water) if water else None,
+            grind_setting=grind,
+            water_temp_celsius=Decimal(temp),
+            brew_time_seconds=seconds,
+            notes=notes,
+        )
+        for bean, method, name, dose, yield_g, water, grind, temp, seconds, notes in RECIPES
+    ]
+    db.add_all(recipes)
+    db.flush()
+    db.add_all(models.RecipeFavorite(user_id=demo.id, recipe_id=recipes[index].id) for index in FAVORITE_RECIPES)
+
     now = datetime.now(UTC)
     brews = []
-    for bean, method, dose, yield_g, water, grind, temp, seconds, tds, days_ago in BREWS:
+    for index, (bean, method, dose, yield_g, water, grind, temp, seconds, tds, days_ago) in enumerate(BREWS):
         brews.append(
             models.Brew(
                 user_id=demo.id,
                 bean_id=beans[bean].id,
                 method_id=methods[method].id,
                 grinder_id=equipment[0].id if methods[method].category == "espresso" else equipment[1].id,
+                recipe_id=recipes[BREW_RECIPES[index]].id if index in BREW_RECIPES else None,
                 brewed_at=now - timedelta(days=days_ago, hours=days_ago),
                 dose_grams=Decimal(dose),
                 yield_grams=Decimal(yield_g) if yield_g else None,
@@ -178,7 +215,10 @@ def seed(db: Session) -> None:
     )
     db.commit()
 
-    print(f"Seeded {len(beans)} beans, {len(lots)} lots, {len(brews)} brews and {len(TASTINGS)} tastings for {DEMO_USERNAME}.")
+    print(
+        f"Seeded {len(beans)} beans, {len(lots)} lots, {len(recipes)} recipes, {len(brews)} brews "
+        f"and {len(TASTINGS)} tastings for {DEMO_USERNAME}."
+    )
 
 
 def main() -> None:
