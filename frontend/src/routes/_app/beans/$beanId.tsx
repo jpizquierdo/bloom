@@ -8,6 +8,7 @@ import {
   recipesUnfavoriteRecipeMutation,
   lotsDeleteLotMutation,
   lotsListLotsOptions,
+  lotsUpdateLotMutation,
 } from "@/client/@tanstack/react-query.gen"
 import type { BeanLotRead, BrewRead, RecipeRead } from "@/client/types.gen"
 import { BeanDialog } from "@/components/beans/bean-dialog"
@@ -31,7 +32,7 @@ import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
-import { ArrowLeft, Coffee, Merge, Pencil, Plus, Star } from "lucide-react"
+import { ArrowLeft, CheckCheck, Coffee, Merge, Pencil, Plus, RotateCcw, Star } from "lucide-react"
 import type { ReactNode } from "react"
 import { useState } from "react"
 
@@ -65,6 +66,11 @@ function BeanDetailPage() {
   const removeLot = useMutation({
     ...lotsDeleteLotMutation(),
     onSuccess: feedback.onSuccess("Lot deleted"),
+    onError: feedback.onError,
+  })
+  const toggleLotFinished = useMutation({
+    ...lotsUpdateLotMutation(),
+    onSuccess: feedback.onSuccess("Lot updated"),
     onError: feedback.onError,
   })
   const removeRecipe = useMutation({
@@ -153,6 +159,25 @@ function BeanDetailPage() {
               setLotDialogOpen(true)
             }}
             onDelete={() => setDeletingLot(row.original)}
+            additionalActions={
+              canEdit(row.original, user)
+                ? [
+                    {
+                      label: row.original.is_finished ? "Reopen" : "Mark as finished",
+                      icon: row.original.is_finished ? (
+                        <RotateCcw className="size-4" />
+                      ) : (
+                        <CheckCheck className="size-4" />
+                      ),
+                      onSelect: () =>
+                        toggleLotFinished.mutate({
+                          path: { lot_id: row.original.id },
+                          body: { is_finished: !row.original.is_finished },
+                        }),
+                    },
+                  ]
+                : []
+            }
           />
         </div>
       ),
