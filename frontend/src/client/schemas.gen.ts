@@ -3547,22 +3547,6 @@ export const TastingCreateSchema = {
             examples: [
                 'Juicy, clean finish'
             ]
-        },
-        tasted_at: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date-time'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Tasted At',
-            description: 'When tasted (defaults to now).',
-            examples: [
-                '2026-07-12T08:10:00Z'
-            ]
         }
     },
     type: 'object',
@@ -3717,22 +3701,6 @@ export const TastingReadSchema = {
             description: 'Free-form notes.',
             examples: [
                 'Juicy, clean finish'
-            ]
-        },
-        tasted_at: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date-time'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Tasted At',
-            description: 'When tasted (defaults to now).',
-            examples: [
-                '2026-07-12T08:10:00Z'
             ]
         },
         id: {
@@ -3926,22 +3894,6 @@ export const TastingUpdateSchema = {
             description: 'Free-form notes.',
             examples: [
                 'Juicy, clean finish'
-            ]
-        },
-        tasted_at: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date-time'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Tasted At',
-            description: 'When tasted (defaults to now).',
-            examples: [
-                '2026-07-12T08:10:00Z'
             ]
         }
     },

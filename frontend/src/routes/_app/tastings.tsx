@@ -57,9 +57,8 @@ function TastingsPage() {
     onError: feedback.onError,
   })
 
-  const sorted = [...(tastings ?? [])].sort((a, b) =>
-    (b.tasted_at ?? "").localeCompare(a.tasted_at ?? ""),
-  )
+  // The API already returns newest first.
+  const sorted = tastings ?? []
 
   const brewOf = (id: number) => brews?.find((brew) => brew.id === id)
   const beanName = (beanId: number) => beans?.find((bean) => bean.id === beanId)?.name
@@ -121,10 +120,10 @@ function TastingsPage() {
                     {brew ? (
                       <>
                         {roasterName(brew.bean_id) ? `${roasterName(brew.bean_id)} · ` : ""}
-                        {methodName(brew.method_id) ?? "—"} ·{" "}
+                        {methodName(brew.method_id) ?? "—"} · {formatDateTime(brew.brewed_at)} ·{" "}
                       </>
                     ) : null}
-                    {formatDateTime(tasting.tasted_at)} · {tasting.author.username}
+                    {tasting.author.username}
                   </CardDescription>
                   <CardAction>
                     <RowActions

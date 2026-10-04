@@ -1,6 +1,5 @@
 """Pydantic DTOs for tastings (subjective evaluations of a brew)."""
 
-from datetime import datetime
 from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -26,11 +25,6 @@ class TastingBase(BaseModel):
         examples=[["peach", "jasmine"]],
     )
     notes: str | None = Field(default=None, description="Free-form notes.", examples=["Juicy, clean finish"])
-    tasted_at: datetime | None = Field(
-        default=None,
-        description="When tasted (defaults to now).",
-        examples=["2026-07-12T08:10:00Z"],
-    )
 
 
 class TastingCreate(TastingBase):
@@ -43,8 +37,8 @@ class TastingUpdate(TastingBase):
     descriptors: list[str] | None = Field(default=None, description="Flavor descriptors.", examples=[["peach"]])
 
     # Scores are nullable (an explicit null clears one). descriptors (send [] instead) and
-    # tasted_at (a NOT NULL column with a server default) reject an explicit null with a 422.
-    _no_null = reject_null("descriptors", "tasted_at")
+    # reject an explicit null with a 422.
+    _no_null = reject_null("descriptors")
 
 
 class TastingRead(TastingBase):

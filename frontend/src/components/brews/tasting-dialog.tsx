@@ -13,11 +13,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { StarRating } from "@/components/ui/star-rating"
 import { Textarea } from "@/components/ui/textarea"
 import { TASTING_SCORES, type TastingScore } from "@/lib/domain"
-import { humanize, patchBody, stripEmpty, toDateTimeLocal } from "@/lib/format"
+import { humanize, patchBody, stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { useMutation } from "@tanstack/react-query"
 import { useEffect } from "react"
@@ -34,7 +33,6 @@ type FormValues = {
   overall: number
   descriptors: string[]
   notes: string
-  tasted_at: string
 }
 
 const EMPTY: FormValues = {
@@ -47,7 +45,6 @@ const EMPTY: FormValues = {
   overall: 0,
   descriptors: [],
   notes: "",
-  tasted_at: "",
 }
 
 interface TastingDialogProps {
@@ -75,7 +72,6 @@ export function TastingDialog({ open, onOpenChange, brewId, tasting }: TastingDi
             overall: tasting.overall ?? 0,
             descriptors: tasting.descriptors ?? [],
             notes: tasting.notes ?? "",
-            tasted_at: toDateTimeLocal(tasting.tasted_at),
           }
         : EMPTY,
     )
@@ -100,7 +96,6 @@ export function TastingDialog({ open, onOpenChange, brewId, tasting }: TastingDi
     const normalized = {
       ...scores,
       notes: values.notes,
-      tasted_at: values.tasted_at === "" ? undefined : new Date(values.tasted_at).toISOString(),
       descriptors: values.descriptors, // NOT NULL: always sent ([] clears it)
     }
 
@@ -161,19 +156,6 @@ export function TastingDialog({ open, onOpenChange, brewId, tasting }: TastingDi
               />
             </FormControl>
             <FormDescription>Press Enter or comma to add each one.</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="tasted_at"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Tasted at</FormLabel>
-            <FormControl>
-              <Input type="datetime-local" {...field} />
-            </FormControl>
             <FormMessage />
           </FormItem>
         )}

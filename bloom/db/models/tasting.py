@@ -2,19 +2,16 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     CheckConstraint,
-    DateTime,
     ForeignKey,
     Index,
     Integer,
     SmallInteger,
     Text,
     UniqueConstraint,
-    func,
     text,
 )
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -63,7 +60,6 @@ class Tasting(Base):
     overall: Mapped[int | None] = mapped_column(SmallInteger)
     descriptors: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False, server_default=text("'{}'"), default=list)
     notes: Mapped[str | None] = mapped_column(Text)
-    tasted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     brew: Mapped[Brew] = relationship(back_populates="tastings")
     author: Mapped[User] = relationship()
