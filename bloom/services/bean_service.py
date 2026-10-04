@@ -42,11 +42,10 @@ MERGEABLE_FIELDS = (
 EMPTY_VALUES = (None, "unknown")
 
 
-def list_beans(db: Session, user: User, mine: bool = False) -> list[Bean]:
-    """List beans. By default all (shared); ``mine`` restricts to the user's own."""
-    if mine:
-        return beans_repo.list_for_owner(db, user.id)
-    return beans_repo.list_all(db)
+def list_beans(db: Session, user: User, mine: bool = False, open_lot: bool = False) -> list[Bean]:
+    """List beans. By default all (shared); ``mine`` restricts to the user's own, ``open_lot`` to
+    those where the user has an unfinished lot."""
+    return beans_repo.list_beans(db, owner_id=user.id if mine else None, open_lot_for=user.id if open_lot else None)
 
 
 def get_bean(db: Session, bean_id: int) -> Bean:

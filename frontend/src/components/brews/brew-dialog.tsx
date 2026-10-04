@@ -106,7 +106,13 @@ export function BrewDialog({
   recipe,
 }: BrewDialogProps) {
   const feedback = useCrudFeedback()
-  const { data: beans } = useQuery(beansListBeansOptions())
+  const [showAllBeans, setShowAllBeans] = useState(false)
+  // Only a blank create narrows to beans with an open lot of mine: otherwise the preselected bean
+  // might be missing from the list.
+  const blankCreate = !brew && !recipe && !prefillFrom && !defaultBeanId
+  const { data: beans } = useQuery(
+    beansListBeansOptions({ query: { open_lot: blankCreate && !showAllBeans } }),
+  )
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: EMPTY })
 
@@ -151,6 +157,7 @@ export function BrewDialog({
   useEffect(() => {
     if (open) {
       setShowFinished(false)
+      setShowAllBeans(false)
       autoLotBeanRef.current = prefillFrom ? String(prefillFrom.bean_id) : null
     }
   }, [open, prefillFrom])
@@ -259,6 +266,15 @@ export function BrewDialog({
                 disabled={brew !== null || recipe !== undefined}
               />
             </FormControl>
+            {blankCreate ? (
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Checkbox
+                  checked={showAllBeans}
+                  onCheckedChange={(checked) => setShowAllBeans(checked === true)}
+                />
+                Show beans without an open lot
+              </label>
+            ) : null}
             {brew ? (
               <FormDescription>The bean cannot be changed.</FormDescription>
             ) : recipe ? (

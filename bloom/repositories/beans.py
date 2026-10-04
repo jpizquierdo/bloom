@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from sqlalchemy import func, select, update
+from sqlalchemy import exists, func, select, update
 from sqlalchemy.orm import Session, joinedload
 
 from bloom.db.models.bean import Bean
@@ -28,15 +28,14 @@ def get_duplicate(db: Session, *, roaster_id: int, name: str, exclude_id: int | 
     return db.execute(stmt.order_by(Bean.id).limit(1)).scalars().first()
 
 
-def list_all(db: Session) -> list[Bean]:
-    """List every bean — beans are shared across the instance."""
+def list_beans(db: Session, *, owner_id: int | None = None, open_lot_for: int | None = None) -> list[Bean]:
+    """List beans (shared), optionally only those owned by ``owner_id`` and/or where
+    ``open_lot_for`` has an unfinished lot."""
     stmt = select(Bean).options(joinedload(Bean.roaster)).order_by(Bean.id)
-    return list(db.execute(stmt).scalars().all())
-
-
-def list_for_owner(db: Session, user_id: int) -> list[Bean]:
-    """List beans owned by ``user_id``."""
-    stmt = select(Bean).options(joinedload(Bean.roaster)).where(Bean.user_id == user_id).order_by(Bean.id)
+    if owner_id is not None:
+        stmt = stmt.where(Bean.user_id == owner_id)
+    if open_lot_for is not None:
+        stmt = stmt.where(exists().where(BeanLot.bean_id == Bean.id, BeanLot.user_id == open_lot_for, BeanLot.is_finished.is_(False)))
     return list(db.execute(stmt).scalars().all())
 
 

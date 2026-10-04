@@ -209,7 +209,8 @@ export const roastersMergeRoaster = <ThrowOnError extends boolean = false>(optio
 /**
  * List Beans
  *
- * List all beans (shared). Use `?mine=true` to return only the beans you own.
+ * List all beans (shared). Use `?mine=true` to return only the beans you own, and
+ * `?open_lot=true` to return only beans where you have an unfinished lot.
  */
 export const beansListBeans = <ThrowOnError extends boolean = false>(options?: Options<BeansListBeansData, ThrowOnError>): RequestResult<BeansListBeansResponses, BeansListBeansErrors, ThrowOnError> => (options?.client ?? client).get<BeansListBeansResponses, BeansListBeansErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

@@ -323,7 +323,8 @@ export const beansListBeansQueryKey = (options?: Options<BeansListBeansData>) =>
 /**
  * List Beans
  *
- * List all beans (shared). Use `?mine=true` to return only the beans you own.
+ * List all beans (shared). Use `?mine=true` to return only the beans you own, and
+ * `?open_lot=true` to return only beans where you have an unfinished lot.
  */
 export const beansListBeansOptions = (options?: Options<BeansListBeansData>) => queryOptions<BeansListBeansResponse, BeansListBeansError, BeansListBeansResponse, ReturnType<typeof beansListBeansQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
