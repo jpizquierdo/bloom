@@ -233,7 +233,7 @@ function BrewDetailPage() {
                   )}
                 </CardTitle>
                 <CardDescription>
-                  {tasting.author.username} · {formatDateTime(tasting.tasted_at)}
+                  {tasting.author.username}
                 </CardDescription>
                 <CardAction>
                   <RowActions

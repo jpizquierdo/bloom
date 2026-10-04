@@ -236,7 +236,9 @@ objective parameters clean from subjective scores. Each tasting records its tast
 on `(brew_id, user_id)`** caps it at one tasting per user per brew: a brew is a single
 extraction, so a user evaluates it once and **edits** that tasting to refine it — a second
 `POST /brews/{id}/tastings` returns `409` rather than stacking a duplicate. Different users
-still each get their own tasting.
+still each get their own tasting. A tasting has **no timestamp of its own**: it happens at the
+brew's moment, so `brew.brewed_at` is the only date (the downgrade of the migration that dropped
+`tasting.tasted_at` backfills it from there).
 
 ### 7 — `grind_setting` as `TEXT`, not numeric
 Every grinder has its own scale; a number would lose meaning across grinders.
@@ -393,8 +395,8 @@ silent:
 - **PATCH clears nullable fields with `null`, omits the rest** — `patchBody()`
   (`src/lib/format.ts`) sends an explicit `null` for a cleared *nullable* field (so it is
   actually blanked) and omits everything else, so it never nulls a NOT NULL-backed field —
-  which `reject_null` turns into a 422 (`brewed_at`/`tasted_at` are guarded this way too, as
-  they are NOT NULL with a server default). Create still uses `stripEmpty()` (omit empties,
+  which `reject_null` turns into a 422 (`brewed_at` is guarded this way too, as
+  it is NOT NULL with a server default). Create still uses `stripEmpty()` (omit empties,
   let defaults apply). Each dialog declares its `CLEARABLE` set = nullable columns not in
   `reject_null`.
 

@@ -93,7 +93,7 @@ All paths are relative to `BASE_URL`. Authenticated calls need the
 | Brew  | List   | `GET /brews` (`?mine=true`) | — |
 | Brew  | Update | `PATCH /brews/{id}` | any brew field (except `bean_id`/`method_id`) |
 | Brew  | Delete | `DELETE /brews/{id}` | — |
-| Tasting | Create | `POST /brews/{brew_id}/tastings` | scores 1–10: `aroma`, `acidity`, `sweetness`, `body`, `bitterness`, `aftertaste`, `overall`; `descriptors` (list of strings); `notes`; `tasted_at` |
+| Tasting | Create | `POST /brews/{brew_id}/tastings` | scores 1–10: `aroma`, `acidity`, `sweetness`, `body`, `bitterness`, `aftertaste`, `overall`; `descriptors` (list of strings); `notes` |
 | Tasting | List (of a brew) | `GET /brews/{brew_id}/tastings` | — |
 | Tasting | List (yours) | `GET /tastings?mine=true` | — |
 | Tasting | Update | `PATCH /tastings/{id}` | any tasting field |

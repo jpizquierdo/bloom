@@ -1497,12 +1497,6 @@ export type TastingCreate = {
      * Free-form notes.
      */
     notes?: string | null;
-    /**
-     * Tasted At
-     *
-     * When tasted (defaults to now).
-     */
-    tasted_at?: string | null;
 };
 
 /**
@@ -1563,12 +1557,6 @@ export type TastingRead = {
      * Free-form notes.
      */
     notes?: string | null;
-    /**
-     * Tasted At
-     *
-     * When tasted (defaults to now).
-     */
-    tasted_at?: string | null;
     /**
      * Id
      */
@@ -1649,12 +1637,6 @@ export type TastingUpdate = {
      * Free-form notes.
      */
     notes?: string | null;
-    /**
-     * Tasted At
-     *
-     * When tasted (defaults to now).
-     */
-    tasted_at?: string | null;
 };
 
 /**
