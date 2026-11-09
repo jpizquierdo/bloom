@@ -1,9 +1,11 @@
 import {
   tastingsCreateTastingMutation,
+  tastingsDeleteTastingMutation,
   tastingsUpdateTastingMutation,
 } from "@/client/@tanstack/react-query.gen"
 import type { TastingRead } from "@/client/types.gen"
 import { StarRating } from "@/components/ui/star-rating"
+import { TASTING_SCORES } from "@/lib/domain"
 import { useCrudFeedback } from "@/lib/mutations"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
@@ -34,8 +36,23 @@ export function QuickTasting({ brewId, tasting, size = 16 }: QuickTastingProps) 
     onError,
   })
 
+  const remove = useMutation({
+    ...tastingsDeleteTastingMutation(),
+    onSuccess: feedback.onSuccess("Rating removed"),
+    onError,
+  })
+
+  // Clearing the stars of a tasting that holds nothing else would leave an empty row behind.
+  const onlyOverall =
+    tasting !== undefined &&
+    TASTING_SCORES.every((score) => score === "overall" || tasting[score] === null) &&
+    !tasting.notes &&
+    (tasting.descriptors ?? []).length === 0
+
   function rate(stars: number) {
-    if (tasting) {
+    if (tasting && stars === 0 && onlyOverall) {
+      remove.mutate({ path: { tasting_id: tasting.id } })
+    } else if (tasting) {
       update.mutate({ path: { tasting_id: tasting.id }, body: { overall: stars || null } })
     } else if (stars > 0) {
       create.mutate({ path: { brew_id: brewId }, body: { overall: stars } })
@@ -47,7 +64,7 @@ export function QuickTasting({ brewId, tasting, size = 16 }: QuickTastingProps) 
       value={tasting?.overall ?? 0}
       onChange={rate}
       size={size}
-      disabled={create.isPending || update.isPending}
+      disabled={create.isPending || update.isPending || remove.isPending}
       aria-label="Overall rating"
     />
   )
