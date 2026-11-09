@@ -5,6 +5,7 @@ import {
 } from "@/client/@tanstack/react-query.gen"
 import type { BeanRead } from "@/client/types.gen"
 import { BeanDialog } from "@/components/beans/bean-dialog"
+import { QuickBeanRating } from "@/components/beans/quick-rating"
 import { DeleteAlert } from "@/components/data/delete-alert"
 import { PageHeader } from "@/components/data/page-header"
 import { RowActions } from "@/components/data/row-actions"
@@ -28,7 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { StarRating } from "@/components/ui/star-rating"
 import { Switch } from "@/components/ui/switch"
 import { canEdit, useCurrentUser } from "@/lib/auth"
 import { ROAST_TYPES } from "@/lib/domain"
@@ -225,9 +225,7 @@ function BeansPage() {
                     <Badge variant="secondary">{humanize(bean.roast_type)}</Badge>
                   ) : null}
                 </div>
-                {(bean.rating ?? 0) > 0 ? (
-                  <StarRating value={bean.rating ?? 0} readOnly size={16} />
-                ) : null}
+                <QuickBeanRating bean={bean} />
               </CardContent>
             </Card>
           ))}

@@ -7,6 +7,7 @@ interface StarRatingProps {
   value: number
   onChange?: (value: number) => void
   readOnly?: boolean
+  disabled?: boolean
   /** Star edge length in pixels. */
   size?: number
   className?: string
@@ -24,6 +25,7 @@ export function StarRating({
   value,
   onChange,
   readOnly = false,
+  disabled = false,
   size = 20,
   className,
   "aria-label": ariaLabel,
@@ -51,7 +53,8 @@ export function StarRating({
           <button
             key={star}
             type="button"
-            className="cursor-pointer rounded-sm transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
+            disabled={disabled}
+            className="cursor-pointer rounded-sm disabled:cursor-default disabled:opacity-60 transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden"
             aria-label={`${star} star${star > 1 ? "s" : ""}`}
             aria-pressed={star <= value}
             onMouseEnter={() => setHover(star)}
