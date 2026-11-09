@@ -21,7 +21,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v9.0.0
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Reset the demo data
         run: uv run --frozen python scripts/reset_demo.py
