@@ -12,6 +12,7 @@ import type { TastingRead } from "@/client/types.gen"
 import { RecipeDialog } from "@/components/beans/recipe-dialog"
 import { BrewDialog } from "@/components/brews/brew-dialog"
 import { BrewDiagnostics } from "@/components/brews/diagnostics"
+import { QuickTasting } from "@/components/brews/quick-tasting"
 import { TastingDialog } from "@/components/brews/tasting-dialog"
 import { DeleteAlert } from "@/components/data/delete-alert"
 import { Metric } from "@/components/data/metric"
@@ -207,16 +208,19 @@ function BrewDetailPage() {
 
       <div className="mt-8 mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Tastings</h2>
-        <Button
-          variant="outline"
-          onClick={() => {
-            setEditingTasting(myTasting ?? null)
-            setTastingDialogOpen(true)
-          }}
-        >
-          {myTasting ? <Pencil className="size-4" /> : <Plus className="size-4" />}
-          {myTasting ? "Edit your tasting" : "Add tasting"}
-        </Button>
+        <div className="flex items-center gap-3">
+          <QuickTasting brewId={id} tasting={myTasting} size={20} />
+          <Button
+            variant="outline"
+            onClick={() => {
+              setEditingTasting(myTasting ?? null)
+              setTastingDialogOpen(true)
+            }}
+          >
+            {myTasting ? <Pencil className="size-4" /> : <Plus className="size-4" />}
+            {myTasting ? "Edit your tasting" : "Add tasting"}
+          </Button>
+        </div>
       </div>
 
       {tastings && tastings.length > 0 ? (

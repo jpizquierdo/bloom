@@ -11,6 +11,7 @@ import type { BrewRead } from "@/client/types.gen"
 import { RecipeDialog } from "@/components/beans/recipe-dialog"
 import { BrewDialog } from "@/components/brews/brew-dialog"
 import { BrewDiagnostics } from "@/components/brews/diagnostics"
+import { QuickTasting } from "@/components/brews/quick-tasting"
 import { Combobox } from "@/components/data/combobox"
 import { DeleteAlert } from "@/components/data/delete-alert"
 import { Metric } from "@/components/data/metric"
@@ -34,7 +35,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { StarRating } from "@/components/ui/star-rating"
 import { canEdit, useCurrentUser } from "@/lib/auth"
 import { beanLabel } from "@/lib/domain"
 import { formatDateTime, formatNumber, formatSeconds } from "@/lib/format"
@@ -279,11 +279,12 @@ function BrewsPage() {
                       <span className="ml-1 font-normal text-muted-foreground">({roaster})</span>
                     ) : null}
                   </CardTitle>
-                  {myOverall ? (
-                    <StarRating value={myOverall} readOnly size={16} />
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Not tasted yet</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <QuickTasting brewId={brew.id} tasting={myTastingByBrew.get(brew.id)} />
+                    {myOverall ? null : (
+                      <span className="text-xs text-muted-foreground">Not tasted yet</span>
+                    )}
+                  </div>
                   <CardAction>
                     <RowActions
                       canEdit={canEdit(brew, user)}

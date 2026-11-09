@@ -14,6 +14,7 @@ import type { BeanLotRead, BrewRead, RecipeRead } from "@/client/types.gen"
 import { BeanDialog } from "@/components/beans/bean-dialog"
 import { LotDialog } from "@/components/beans/lot-dialog"
 import { MergeBeanDialog } from "@/components/beans/merge-bean-dialog"
+import { QuickBeanRating } from "@/components/beans/quick-rating"
 import { RecipeDetailsDialog } from "@/components/beans/recipe-details-dialog"
 import { RecipeDialog } from "@/components/beans/recipe-dialog"
 import { BrewDialog } from "@/components/brews/brew-dialog"
@@ -25,7 +26,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { StarRating } from "@/components/ui/star-rating"
 import { canEdit, useCurrentUser } from "@/lib/auth"
 import { formatDate, formatDateTime, formatNumber, formatSeconds, humanize } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
@@ -381,11 +381,7 @@ function BeanDetailPage() {
               <Field label="Blend" value={humanize(bean.blend)} />
               <Field
                 label="Rating"
-                value={
-                  (bean.rating ?? 0) > 0 ? (
-                    <StarRating value={bean.rating ?? 0} readOnly size={16} />
-                  ) : null
-                }
+                value={<QuickBeanRating bean={bean} />}
               />
             </div>
             <Field label="Tasting notes (label)" value={bean.tasting_notes_label} />

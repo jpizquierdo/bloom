@@ -5,10 +5,10 @@ import {
   tastingsListAllTastingsOptions,
 } from "@/client/@tanstack/react-query.gen"
 import { BrewDiagnostics } from "@/components/brews/diagnostics"
+import { QuickTasting } from "@/components/brews/quick-tasting"
 import { PageHeader } from "@/components/data/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { StarRating } from "@/components/ui/star-rating"
 import { useCurrentUser } from "@/lib/auth"
 import { formatDateTime, formatNumber } from "@/lib/format"
 import { useQuery } from "@tanstack/react-query"
@@ -70,31 +70,29 @@ function DashboardPage() {
             </p>
           ) : (
             recentBrews.map((brew) => (
-              <Link
+              <div
                 key={brew.id}
-                to="/brews/$brewId"
-                params={{ brewId: String(brew.id) }}
                 className="flex flex-wrap items-center gap-3 rounded-md px-2 py-2.5 hover:bg-muted/60"
               >
-                <div className="grid min-w-40 flex-1">
-                  <span className="font-medium">{beanName(brew.bean_id)}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {methodName(brew.method_id)} · {formatDateTime(brew.brewed_at)}
+                <Link
+                  to="/brews/$brewId"
+                  params={{ brewId: String(brew.id) }}
+                  className="flex min-w-40 flex-1 flex-wrap items-center gap-3"
+                >
+                  <div className="grid min-w-40 flex-1">
+                    <span className="font-medium">{beanName(brew.bean_id)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {methodName(brew.method_id)} · {formatDateTime(brew.brewed_at)}
+                    </span>
+                  </div>
+                  <span className="text-sm tabular-nums text-muted-foreground">
+                    {formatNumber(brew.dose_grams)} g
+                    {brew.ratio ? ` · 1:${formatNumber(brew.ratio, 2)}` : ""}
                   </span>
-                </div>
-                <span className="text-sm tabular-nums text-muted-foreground">
-                  {formatNumber(brew.dose_grams)} g
-                  {brew.ratio ? ` · 1:${formatNumber(brew.ratio, 2)}` : ""}
-                </span>
-                {myTastingByBrew.get(brew.id)?.overall ? (
-                  <StarRating
-                    value={myTastingByBrew.get(brew.id)?.overall ?? 0}
-                    readOnly
-                    size={16}
-                  />
-                ) : null}
+                </Link>
+                <QuickTasting brewId={brew.id} tasting={myTastingByBrew.get(brew.id)} />
                 <BrewDiagnostics brew={brew} />
-              </Link>
+              </div>
             ))
           )}
         </CardContent>
