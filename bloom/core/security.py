@@ -3,9 +3,9 @@
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
+import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import Argon2Error
-from jose import JWTError, jwt
 
 from bloom.core.config import get_settings
 
@@ -66,7 +66,7 @@ def decode_token(token: str, *, expected_type: TokenType) -> dict[str, Any] | No
     settings = get_settings()
     try:
         payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
-    except JWTError:
+    except jwt.PyJWTError:
         return None
     if payload.get("type") != expected_type:
         return None
