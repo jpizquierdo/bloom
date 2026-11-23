@@ -37,7 +37,7 @@
           "auth"
         ],
         "summary": "Login",
-        "description": "Exchange an email or username (``username`` field) + password for a JWT access token.",
+        "description": "Exchange an email or username (``username`` field) + password for a JWT access token.\n\nPublic. Repeated failures from one client return 429 with a ``Retry-After`` header.",
         "operationId": "auth-login",
         "requestBody": {
           "content": {
@@ -79,7 +79,7 @@
           "auth"
         ],
         "summary": "Recover Password",
-        "description": "Email a password-reset link. Public.\n\nAlways answers 202 with the same message, whether or not the address has an account,\nso it cannot be used to discover who is registered.",
+        "description": "Email a password-reset link. Public.\n\nAlways answers 202 with the same message, whether or not the address has an account,\nso it cannot be used to discover who is registered. Rate-limited per address and per\nclient (429 with ``Retry-After``) so it cannot be used to flood an inbox.",
         "operationId": "auth-recover_password",
         "requestBody": {
           "content": {

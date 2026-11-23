@@ -63,6 +63,8 @@ export const systemHealthOptions = (options?: Options<SystemHealthData>) => quer
  * Login
  *
  * Exchange an email or username (``username`` field) + password for a JWT access token.
+ *
+ * Public. Repeated failures from one client return 429 with a ``Retry-After`` header.
  */
 export const authLoginMutation = (options?: Partial<Options<AuthLoginData>>): UseMutationOptions<AuthLoginResponse, AuthLoginError, Options<AuthLoginData>> => {
     const mutationOptions: UseMutationOptions<AuthLoginResponse, AuthLoginError, Options<AuthLoginData>> = {
@@ -84,7 +86,8 @@ export const authLoginMutation = (options?: Partial<Options<AuthLoginData>>): Us
  * Email a password-reset link. Public.
  *
  * Always answers 202 with the same message, whether or not the address has an account,
- * so it cannot be used to discover who is registered.
+ * so it cannot be used to discover who is registered. Rate-limited per address and per
+ * client (429 with ``Retry-After``) so it cannot be used to flood an inbox.
  */
 export const authRecoverPasswordMutation = (options?: Partial<Options<AuthRecoverPasswordData>>): UseMutationOptions<AuthRecoverPasswordResponse, AuthRecoverPasswordError, Options<AuthRecoverPasswordData>> => {
     const mutationOptions: UseMutationOptions<AuthRecoverPasswordResponse, AuthRecoverPasswordError, Options<AuthRecoverPasswordData>> = {

@@ -129,7 +129,8 @@ Design points:
   always preserved.
 - Auth is JWT via the OAuth2 password flow (access token only). Passwords are hashed with
   **argon2id**, never stored in plain text. Users recover a forgotten password by email
-  (decision 21); admins can create an account without choosing a password at all.
+  (decision 21); admins can create an account without choosing a password at all. Login and
+  recovery are rate-limited (decision 24).
 - The app refuses to start unless `JWT_SECRET` is at least 32 characters: the token signing key
   has no usable default, so a forgotten setting cannot leave an instance with a publicly known key.
 
@@ -538,6 +539,20 @@ may favorite any shared recipe, multiple recipes may be favorited, and another u
 never exposed. `PUT /recipes/{id}/favorite` and `DELETE /recipes/{id}/favorite` are idempotent
 subresource operations. The bean detail UI marks favorites with a filled star and sorts them
 first for that user; favoriting never auto-selects a recipe or changes brewing behavior.
+
+### 24 — Login and recovery are throttled in memory
+
+`POST /auth/token` and `POST /auth/recover-password` are public, so they are rate-limited
+(`bloom/core/rate_limit.py`, a sliding window of 15 minutes) and answer `429` with `Retry-After`.
+Only **failed** logins count: five per account+client, twenty per client, and a success clears the
+account's counter. Every recovery request counts, known address or not, at three per address and
+ten per client, so the `429` reveals nothing about which accounts exist. Login also verifies
+against a dummy hash when the account is unknown, so response time does not either.
+
+State lives in process memory, which is the same single-instance assumption as startup
+migrations. It resets on restart and would multiply with worker count; scaling out needs a shared
+store. Behind a reverse proxy the client is the proxy's address unless uvicorn trusts its
+`X-Forwarded-For`, which would pool every user into one bucket.
 
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.

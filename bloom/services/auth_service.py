@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from bloom.core.config import get_settings
 from bloom.core.logger import get_logger
-from bloom.core.security import create_password_reset_token, decode_token, verify_password
+from bloom.core.security import create_password_reset_token, decode_token, hash_password, verify_password
 from bloom.db.models.user import User
 from bloom.repositories import users as users_repo
 from bloom.services import users_service
@@ -14,6 +14,9 @@ logger = get_logger(__name__)
 
 _INVALID_TOKEN = "Invalid or expired password-reset token"
 
+# Verified against when the account is unknown, so a miss costs as much as a wrong password.
+_DUMMY_HASH = hash_password("bloom-timing-equaliser")
+
 
 def authenticate(db: Session, identifier: str, password: str) -> User | None:
     """Return the user if credentials are valid and the account is active.
@@ -22,13 +25,14 @@ def authenticate(db: Session, identifier: str, password: str) -> User | None:
     a single "email or username" box, so we resolve it against both.
     """
     user = users_repo.get_by_email(db, identifier) or users_repo.get_by_username(db, identifier)
+    password_ok = verify_password(password, user.hashed_password if user else _DUMMY_HASH)
     if user is None:
         logger.warning("Failed login: unknown identifier %s", identifier)
         return None
     if not user.is_active:
         logger.warning("Failed login: inactive user %s (%s)", user.id, user.email)
         return None
-    if not verify_password(password, user.hashed_password):
+    if not password_ok:
         logger.warning("Failed login: wrong password for user %s (%s)", user.id, user.email)
         return None
     return user
