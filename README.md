@@ -42,7 +42,7 @@ Bloom ships as a **single container** (API + web UI) that runs alongside Postgre
 Compose — the only requirement is Docker:
 
 ```bash
-# 1. Configure — set BLOOM_ADMIN_EMAIL / BLOOM_ADMIN_PASSWORD and a strong JWT_SECRET
+# 1. Configure — set BLOOM_ADMIN_EMAIL / BLOOM_ADMIN_PASSWORD and a JWT_SECRET (`openssl rand -hex 32`)
 cp .env.example .env
 
 # 2. Start Postgres + Bloom
@@ -67,7 +67,7 @@ Settings come from environment variables or a local `.env` (copy `.env.example`)
 |----------|---------|
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` | Postgres credentials (default `bloom` / `bloom`). |
 | `POSTGRES_SERVER` / `POSTGRES_PORT` / `POSTGRES_DB` | Postgres host, port and database (default `localhost` / `5432` / `bloom`). |
-| `JWT_SECRET` | Access-token signing key — **set a strong value in production**. |
+| `JWT_SECRET` | Access-token signing key, at least 32 characters — **required**: the app refuses to start without it. Generate one with `openssl rand -hex 32`. |
 | `ACCESS_TOKEN_EXPIRE_HOURS` | Access-token lifetime in hours; generous by default for self-hosted use — set it lower for shorter sessions. |
 | `RESET_TOKEN_EXPIRE_MINUTES` | Lifetime of a password-reset link (default 30). |
 | `SMTP_HOST` / `SMTP_PORT` | Outgoing mail server (default port `587`). Leave the host blank to disable sending — links are written to the log instead. |
