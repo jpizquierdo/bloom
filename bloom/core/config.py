@@ -11,6 +11,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from bloom.domain import constants
 from bloom.domain.calculations import ControlChartRanges
 
+MIN_JWT_SECRET_LENGTH = 32
+
 
 def parse_cors(value: Any) -> list[str] | str:
     """Accept CORS origins as a comma-separated string as well as a JSON list."""
@@ -43,6 +45,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "bloom"
 
+    # The default is a placeholder that fails the startup check; there is deliberately no usable one.
     JWT_SECRET: str = "change-me-in-production"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_HOURS: int = 48  # generous default for self-hosted; override to tighten
@@ -79,6 +82,18 @@ class Settings(BaseSettings):
     # Leave empty to skip the first-admin bootstrap.
     BLOOM_ADMIN_EMAIL: str | None = None
     BLOOM_ADMIN_PASSWORD: str | None = None
+
+    def require_strong_jwt_secret(self) -> None:
+        """Refuse to run with a placeholder or short signing key.
+
+        Checked at startup rather than on construction, so tooling that only builds the app
+        (OpenAPI dump, tests) does not need a real secret.
+        """
+        if len(self.JWT_SECRET) < MIN_JWT_SECRET_LENGTH:
+            raise RuntimeError(
+                f"JWT_SECRET must be at least {MIN_JWT_SECRET_LENGTH} characters; "
+                "generate one with `openssl rand -hex 32` and set it in the environment or .env."
+            )
 
     @property
     def control_chart_ranges(self) -> ControlChartRanges:

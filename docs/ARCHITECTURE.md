@@ -130,6 +130,8 @@ Design points:
 - Auth is JWT via the OAuth2 password flow (access token only). Passwords are hashed with
   **argon2id**, never stored in plain text. Users recover a forgotten password by email
   (decision 21); admins can create an account without choosing a password at all.
+- The app refuses to start unless `JWT_SECRET` is at least 32 characters: the token signing key
+  has no usable default, so a forgotten setting cannot leave an instance with a publicly known key.
 
 ---
 

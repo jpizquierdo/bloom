@@ -22,11 +22,12 @@ from bloom.services.errors import ConflictError, ForbiddenError, NotFoundError, 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Run startup tasks: wait for the DB, migrate to head, bootstrap the admin.
+    """Run startup tasks: check the JWT secret, wait for the DB, migrate to head, bootstrap the admin.
 
     Single-instance deployment, so migrating in-process is safe; the
     ``db_is_at_head`` guard makes restarts cheap.
     """
+    get_settings().require_strong_jwt_secret()
     init_db.init_db()
     yield
 
