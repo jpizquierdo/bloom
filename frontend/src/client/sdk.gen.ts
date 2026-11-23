@@ -29,6 +29,8 @@ export const systemHealth = <ThrowOnError extends boolean = false>(options?: Opt
  * Login
  *
  * Exchange an email or username (``username`` field) + password for a JWT access token.
+ *
+ * Public. Repeated failures from one client return 429 with a ``Retry-After`` header.
  */
 export const authLogin = <ThrowOnError extends boolean = false>(options: Options<AuthLoginData, ThrowOnError>): RequestResult<AuthLoginResponses, AuthLoginErrors, ThrowOnError> => (options.client ?? client).post<AuthLoginResponses, AuthLoginErrors, ThrowOnError>({
     ...urlSearchParamsBodySerializer,
@@ -46,7 +48,8 @@ export const authLogin = <ThrowOnError extends boolean = false>(options: Options
  * Email a password-reset link. Public.
  *
  * Always answers 202 with the same message, whether or not the address has an account,
- * so it cannot be used to discover who is registered.
+ * so it cannot be used to discover who is registered. Rate-limited per address and per
+ * client (429 with ``Retry-After``) so it cannot be used to flood an inbox.
  */
 export const authRecoverPassword = <ThrowOnError extends boolean = false>(options: Options<AuthRecoverPasswordData, ThrowOnError>): RequestResult<AuthRecoverPasswordResponses, AuthRecoverPasswordErrors, ThrowOnError> => (options.client ?? client).post<AuthRecoverPasswordResponses, AuthRecoverPasswordErrors, ThrowOnError>({
     url: '/api/v1/auth/recover-password',

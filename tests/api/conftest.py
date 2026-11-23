@@ -19,6 +19,7 @@ os.environ.pop("BLOOM_ADMIN_EMAIL", None)
 os.environ.pop("BLOOM_ADMIN_PASSWORD", None)
 
 import bloom.db.models  # noqa: F401  (register all models on Base.metadata)
+from bloom.core import rate_limit
 from bloom.core.config import get_settings
 from bloom.core.dependencies import get_db
 from bloom.db.base import Base
@@ -67,6 +68,12 @@ def _clean_tables(engine):
     with engine.begin() as conn:
         conn.execute(text(f"TRUNCATE {_ALL_TABLES} RESTART IDENTITY CASCADE"))
     yield
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    """Failed-login and recovery counters are process-wide; start each test from zero."""
+    rate_limit.reset_all()
 
 
 @pytest.fixture
