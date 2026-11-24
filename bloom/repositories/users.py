@@ -19,8 +19,12 @@ def get_by_id(db: Session, user_id: int) -> User | None:
 
 
 def get_by_email(db: Session, email: str) -> User | None:
-    """Return the user with ``email`` or ``None``."""
-    return db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    """Return the user whose email matches ``email`` (case-insensitive) or ``None``.
+
+    Both sides are folded by ``lower()`` in the database, never in Python, so the lookup
+    agrees with the ``lower(email)`` unique index.
+    """
+    return db.execute(select(User).where(func.lower(User.email) == func.lower(email))).scalar_one_or_none()
 
 
 def get_by_username(db: Session, username: str) -> User | None:

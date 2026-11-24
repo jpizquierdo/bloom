@@ -27,6 +27,7 @@ class User(Base):
         CheckConstraint("role IN ('admin', 'user')", name="ck_user_role"),
         CheckConstraint("btrim(username) <> ''", name="ck_user_username_not_blank"),
         Index("uq_user_username_lower", text("lower(username)"), unique=True),
+        Index("uq_user_email_lower", text("lower(email)"), unique=True),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

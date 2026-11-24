@@ -170,3 +170,10 @@ def test_create_user_with_password_still_works_and_mails(client, admin_headers, 
     assert len(mailbox) == 1
     assert "daves-pass1" not in mailbox[0]["text"]
     assert "daves-pass1" not in mailbox[0]["html"]
+
+
+def test_recover_password_email_ignores_case(client, users, mailbox):
+    resp = client.post("/auth/recover-password", json={"email": "Alice@EXAMPLE.com"})
+    assert resp.status_code == 202
+    # Mail goes to the address as stored, not as typed.
+    assert [m["to"] for m in mailbox] == ["alice@example.com"]

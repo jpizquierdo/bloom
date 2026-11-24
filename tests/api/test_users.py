@@ -133,3 +133,20 @@ def test_failed_rename_leaves_the_user_unchanged(client, admin_headers, users):
 def test_admin_cannot_self_deactivate(client, admin_headers, users):
     resp = client.patch(f"/users/{users['admin'].id}", headers=admin_headers, json={"is_active": False})
     assert resp.status_code == 400
+
+
+def test_email_duplicate_ignores_case(client, admin_headers, users):
+    # "alice@example.com" is seeded; the same address in another case is the same account.
+    resp = client.post(
+        "/users",
+        headers=admin_headers,
+        json={"email": "Alice@Example.com", "username": "alice2", "password": "whatever1"},
+    )
+    assert resp.status_code == 409
+
+
+def test_email_unique_index_ignores_case(db, users):
+    # The database itself refuses the variant, so a race cannot slip it past the look-up.
+    from bloom.repositories import users as users_repo
+
+    assert users_repo.add_if_free(db, email="ALICE@example.com", username="other", hashed_password="x", role="user") is None
