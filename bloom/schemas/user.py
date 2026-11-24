@@ -95,3 +95,10 @@ class Token(BaseModel):
 
     access_token: str = Field(description="JWT access token.", examples=["eyJhbGciOiJIUzI1Ni..."])
     token_type: str = Field(default="bearer", examples=["bearer"])
+
+
+class AuthConfig(BaseModel):
+    """The login methods this server offers."""
+
+    local_auth_enabled: bool = Field(description="Email/username + password login is available.")
+    oidc_enabled: bool = Field(description="Single sign-on through the configured OIDC provider is available.")

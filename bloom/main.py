@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from starlette.middleware.sessions import SessionMiddleware
 
 from bloom.core.config import get_settings
 from bloom.core.dependencies import get_db
@@ -22,12 +23,14 @@ from bloom.services.errors import BadRequestError, ConflictError, ForbiddenError
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Run startup tasks: check the JWT secret, wait for the DB, migrate to head, bootstrap the admin.
+    """Run startup tasks: check the JWT secret and auth config, wait for the DB, migrate to head, bootstrap the admin.
 
     Several processes may start together: ``init_db`` serialises them with an advisory
     lock, and the ``db_is_at_head`` guard makes restarts cheap.
     """
-    get_settings().require_strong_jwt_secret()
+    settings = get_settings()
+    settings.require_strong_jwt_secret()
+    settings.require_valid_auth_config()
     init_db.init_db()
     yield
 
@@ -88,6 +91,17 @@ def create_app() -> FastAPI:
             # Auth is a bearer header, never a cookie, so credentialed requests are not needed.
             allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
             allow_headers=["Authorization", "Content-Type"],
+        )
+
+    if settings.oidc_enabled:
+        # Only carries OIDC state, nonce and PKCE verifier across the IdP round-trip; API auth stays bearer.
+        app.add_middleware(
+            SessionMiddleware,
+            secret_key=settings.JWT_SECRET,
+            session_cookie="bloom_oidc",
+            max_age=600,
+            same_site="lax",
+            https_only=settings.OIDC_REDIRECT_URI.startswith("https://"),
         )
 
     for error in DOMAIN_ERRORS:

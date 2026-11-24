@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, BackgroundTasks, status
 
+from bloom.core.config import get_settings
 from bloom.core.dependencies import AdminUser, DbSession
 from bloom.core.security import create_password_reset_token
 from bloom.schemas.user import UserCreate, UserRead, UserUpdate
@@ -15,9 +16,12 @@ def create_user(data: UserCreate, db: DbSession, background_tasks: BackgroundTas
     """Create a new user (role 'user'). Admin-only.
 
     Emails them a welcome message with a link to set their own password; omitting
-    ``password`` makes that link the only way in.
+    ``password`` makes that link the only way in. With ``DISABLE_LOCAL_AUTH`` no email is
+    sent: the account is linked by email on its first SSO login.
     """
     user = users_service.create_user(db, email=data.email, username=data.username, password=data.password)
+    if get_settings().DISABLE_LOCAL_AUTH:
+        return user
     token = create_password_reset_token(str(user.id))
     background_tasks.add_task(email_service.send_new_account_email, email=user.email, username=user.username, token=token)
     return user
