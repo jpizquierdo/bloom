@@ -30,7 +30,7 @@ services:
       - "127.0.0.1:1025:1025"
 
   bloom:
-    image: jpizquierdo/bloom:0.14.1
+    image: jpizquierdo/bloom:0.15.0
     container_name: bloom-core
     restart: unless-stopped
     depends_on:
