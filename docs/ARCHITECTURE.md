@@ -573,11 +573,11 @@ are already safe with several processes). Behind a reverse proxy the client is t
 
 ### 25 — OIDC single sign-on mints the same bearer token
 
-SSO is optional, enabled by the `OIDC_*` settings (named after meshmonitor's, so one provider
-setup serves both). The SPA navigates to `GET /auth/oidc/login`; Authlib runs the Authorization
-Code flow with PKCE and nonce, and checks the ID token against the provider's JWKS. State, nonce
-and verifier ride in a short-lived signed cookie (`SessionMiddleware`, added only when SSO is on);
-it is the only cookie, and API auth stays a bearer header (18).
+SSO is optional, enabled by the `OIDC_*` settings (configuration guide: `docs/SSO.md`). The SPA
+navigates to `GET /auth/oidc/login`; Authlib runs the Authorization Code flow with PKCE and
+nonce, and checks the ID token against the provider's JWKS. State, nonce and verifier ride in a
+short-lived signed cookie (`SessionMiddleware`, added only when SSO is on); it is the only cookie,
+and API auth stays a bearer header (18).
 
 The callback mints the **same access token** as the password flow and redirects to
 `/login#token=…`. A fragment, not a query string, because it never reaches the server or proxy
@@ -591,11 +591,11 @@ arbitrary email at the provider could take over an account. An account already l
 `sub` is refused, as is an inactive one (SSO never reactivates). Unknown identities get an
 account when `OIDC_AUTO_CREATE_USERS` is on (random password, no invite email).
 
-Roles follow meshmonitor: with `OIDC_ADMIN_GROUPS` set, the provider is authoritative and the
-role is synced at each login (an admin's edit is overwritten next time); without it the stored
-role is kept. `OIDC_ALLOWED_GROUPS` gates who gets in, admins exempt. Unlike meshmonitor, the first
-SSO user is **not** made admin — `BLOOM_ADMIN_EMAIL` already bootstraps one, and it links by email.
-Changes apply at the next login, since tokens are stateless.
+Roles: with `OIDC_ADMIN_GROUPS` set, the provider is authoritative and the role is synced at
+each login (an admin's edit is overwritten next time); without it the stored role is kept.
+`OIDC_ALLOWED_GROUPS` gates who gets in, admins exempt. The first SSO user is **not** made admin:
+`BLOOM_ADMIN_EMAIL` already bootstraps one, and it links by email. Changes apply at the next
+login, since tokens are stateless.
 
 `DISABLE_LOCAL_AUTH` turns `POST /auth/token`, `/auth/recover-password` and
 `/auth/reset-password` into `403` and skips the invite email. The app refuses to start with it

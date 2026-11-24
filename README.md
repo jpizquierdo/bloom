@@ -103,7 +103,7 @@ Settings come from environment variables or a local `.env` (copy `.env.example`)
 | `FRONTEND_HOST` | Origin of the Vite dev server, allowed by CORS (default `http://localhost:5173`). Also the base of the links in outgoing emails, so set it to your public URL in production. |
 | `BACKEND_CORS_ORIGINS` | Comma-separated list of extra browser origins allowed by CORS. |
 | `BLOOM_ADMIN_EMAIL` / `BLOOM_ADMIN_PASSWORD` | First admin, bootstrapped on startup if absent. |
-| `OIDC_*`, `DISABLE_LOCAL_AUTH` | Single sign-on — see [Single sign-on (OIDC)](#single-sign-on-oidc). |
+| `OIDC_*`, `DISABLE_LOCAL_AUTH` | Single sign-on — see [docs/SSO.md](docs/SSO.md). |
 
 ## Authentication
 
@@ -128,38 +128,10 @@ curl http://localhost:8000/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 ### Single sign-on (OIDC)
 
-Bloom can log people in through any OpenID Connect provider (Keycloak, Authentik, Entra ID,
-Google, Okta…), alongside or instead of passwords. It uses the Authorization Code flow with
-PKCE and verifies the ID token against the provider's keys. Register a confidential client
-whose redirect URI is `https://<your-host>/api/v1/auth/oidc/callback`, then set:
-
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `OIDC_ISSUER` | — | Issuer URL; discovery reads `<issuer>/.well-known/openid-configuration`. |
-| `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` | — | The client's credentials. |
-| `OIDC_REDIRECT_URI` | — | The callback above, exactly as registered with the provider. |
-| `OIDC_SCOPES` | `openid profile email` | Add `groups` (or your provider's equivalent) for group mapping. |
-| `OIDC_AUTO_CREATE_USERS` | `true` | Create an account on first SSO login. With `false` only existing accounts get in. |
-| `OIDC_GROUPS_CLAIM` | `groups` | ID-token claim with the groups; dot notation for nested claims. |
-| `OIDC_ADMIN_GROUPS` | empty | Comma-separated groups that grant admin. When set, the role is synced on **every** login — members are promoted, everyone else demoted. |
-| `OIDC_ALLOWED_GROUPS` | empty | Comma-separated groups allowed in. Empty lets everyone in; admins always pass. |
-| `OIDC_REQUIRE_EMAIL_VERIFIED` | `true` | Linking an existing account by email requires `email_verified=true`. Set `false` for providers that never send the claim (Entra ID); an explicit `false` is still refused. |
-| `DISABLE_LOCAL_AUTH` | `false` | Turn off passwords: the login page redirects straight to the provider, and the password login, recovery and reset endpoints answer `403`. |
-
-SSO is on once the first four are set; a partial set, or `DISABLE_LOCAL_AUTH=true` without SSO,
-stops the app at startup. On first login an account is matched by the provider's `sub`, then by
-email — so existing users keep their data — and is linked to that `sub` from then on. Group
-changes apply at the next login. Groups must be in the **ID token**, not only at the userinfo
-endpoint.
-
-| Provider | Hints |
-|----------|-------|
-| Keycloak | `OIDC_ISSUER=https://kc.example.com/realms/<realm>`, `OIDC_GROUPS_CLAIM=realm_access.roles` (add a realm-roles or group-membership mapper to the ID token). |
-| Authentik | `OIDC_ISSUER=https://auth.example.com/application/o/<slug>/`, `OIDC_SCOPES=openid profile email groups`. |
-| Entra ID | `OIDC_ISSUER=https://login.microsoftonline.com/<tenant-id>/v2.0`, `OIDC_REQUIRE_EMAIL_VERIFIED=false`. |
-
-Test SSO before setting `DISABLE_LOCAL_AUTH`, and if you set `OIDC_ADMIN_GROUPS` make sure you
-are in one of those groups — otherwise your next login demotes you.
+Bloom can also log people in through an OpenID Connect provider (Keycloak, Authentik, Entra ID…),
+alongside passwords or instead of them, with roles mapped from the provider's groups. Existing
+accounts are linked by email on their first SSO login. See [docs/SSO.md](docs/SSO.md) for the
+settings, provider notes and troubleshooting.
 
 ### Email in development
 
