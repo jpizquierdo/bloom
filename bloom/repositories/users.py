@@ -32,12 +32,17 @@ def get_by_username(db: Session, username: str) -> User | None:
     return db.execute(select(User).where(func.lower(User.username) == username.lower())).scalar_one_or_none()
 
 
+def get_by_oidc_subject(db: Session, subject: str) -> User | None:
+    """Return the user linked to the OIDC ``sub`` claim ``subject`` or ``None``."""
+    return db.execute(select(User).where(User.oidc_subject == subject)).scalar_one_or_none()
+
+
 def list_all(db: Session) -> list[User]:
     """Return all users ordered by id."""
     return list(db.execute(select(User).order_by(User.id)).scalars().all())
 
 
-def add_if_free(db: Session, *, email: str, username: str, hashed_password: str, role: str) -> User | None:
+def add_if_free(db: Session, *, email: str, username: str, hashed_password: str, role: str, oidc_subject: str | None = None) -> User | None:
     """Insert a user, or return ``None`` if the unique email / ``lower(username)`` index rejects it.
 
     Runs in a savepoint so losing a race against a concurrent insert leaves the caller's
@@ -45,7 +50,7 @@ def add_if_free(db: Session, *, email: str, username: str, hashed_password: str,
     """
     try:
         with db.begin_nested():
-            user = User(email=email, username=username, hashed_password=hashed_password, role=role)
+            user = User(email=email, username=username, hashed_password=hashed_password, role=role, oidc_subject=oidc_subject)
             db.add(user)
             db.flush()
             return user

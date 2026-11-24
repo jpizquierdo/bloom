@@ -28,3 +28,24 @@ def test_app_will_not_start_with_a_weak_secret(monkeypatch):
     monkeypatch.setattr(main.init_db, "init_db", lambda: pytest.fail("startup continued past the secret check"))
     with pytest.raises(RuntimeError, match="JWT_SECRET"), TestClient(main.create_app()):
         pass
+
+
+def test_partial_oidc_config_is_rejected():
+    with pytest.raises(RuntimeError, match="OIDC_ISSUER"):
+        Settings(OIDC_ISSUER="https://idp.example").require_valid_auth_config()
+
+
+def test_disabling_local_auth_without_oidc_is_rejected():
+    # Nobody could log in, so refuse to start.
+    with pytest.raises(RuntimeError, match="DISABLE_LOCAL_AUTH"):
+        Settings(DISABLE_LOCAL_AUTH=True).require_valid_auth_config()
+
+
+def test_full_oidc_config_with_local_auth_disabled_is_accepted():
+    Settings(
+        OIDC_ISSUER="https://idp.example",
+        OIDC_CLIENT_ID="bloom",
+        OIDC_CLIENT_SECRET="secret",
+        OIDC_REDIRECT_URI="https://bloom.example/api/v1/auth/oidc/callback",
+        DISABLE_LOCAL_AUTH=True,
+    ).require_valid_auth_config()

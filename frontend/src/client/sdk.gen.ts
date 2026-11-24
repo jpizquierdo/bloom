@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, type Options as Options2, type RequestResult, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthReadCurrentUserData, AuthReadCurrentUserResponses, AuthRecoverPasswordData, AuthRecoverPasswordErrors, AuthRecoverPasswordResponses, AuthResetPasswordData, AuthResetPasswordErrors, AuthResetPasswordResponses, BeansCreateBeanData, BeansCreateBeanErrors, BeansCreateBeanResponses, BeansDeleteBeanData, BeansDeleteBeanErrors, BeansDeleteBeanResponses, BeansGetBeanData, BeansGetBeanErrors, BeansGetBeanResponses, BeansListBeansData, BeansListBeansErrors, BeansListBeansResponses, BeansMergeBeanData, BeansMergeBeanErrors, BeansMergeBeanResponses, BeansUpdateBeanData, BeansUpdateBeanErrors, BeansUpdateBeanResponses, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodErrors, BrewMethodsCreateBrewMethodResponses, BrewMethodsDeleteBrewMethodData, BrewMethodsDeleteBrewMethodErrors, BrewMethodsDeleteBrewMethodResponses, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodErrors, BrewMethodsGetBrewMethodResponses, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponses, BrewMethodsUpdateBrewMethodData, BrewMethodsUpdateBrewMethodErrors, BrewMethodsUpdateBrewMethodResponses, BrewsCreateBrewData, BrewsCreateBrewErrors, BrewsCreateBrewResponses, BrewsDeleteBrewData, BrewsDeleteBrewErrors, BrewsDeleteBrewResponses, BrewsGetBrewData, BrewsGetBrewErrors, BrewsGetBrewResponses, BrewsListBrewsData, BrewsListBrewsErrors, BrewsListBrewsResponses, BrewsUpdateBrewData, BrewsUpdateBrewErrors, BrewsUpdateBrewResponses, EquipmentCreateEquipmentData, EquipmentCreateEquipmentErrors, EquipmentCreateEquipmentResponses, EquipmentDeleteEquipmentData, EquipmentDeleteEquipmentErrors, EquipmentDeleteEquipmentResponses, EquipmentGetEquipmentData, EquipmentGetEquipmentErrors, EquipmentGetEquipmentResponses, EquipmentListEquipmentData, EquipmentListEquipmentResponses, EquipmentUpdateEquipmentData, EquipmentUpdateEquipmentErrors, EquipmentUpdateEquipmentResponses, LotsCreateLotData, LotsCreateLotErrors, LotsCreateLotResponses, LotsDeleteLotData, LotsDeleteLotErrors, LotsDeleteLotResponses, LotsGetLotData, LotsGetLotErrors, LotsGetLotResponses, LotsListLotsData, LotsListLotsErrors, LotsListLotsResponses, LotsUpdateLotData, LotsUpdateLotErrors, LotsUpdateLotResponses, RecipesCreateBrewFromRecipeData, RecipesCreateBrewFromRecipeErrors, RecipesCreateBrewFromRecipeResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesFavoriteRecipeData, RecipesFavoriteRecipeErrors, RecipesFavoriteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesErrors, RecipesListRecipesResponses, RecipesUnfavoriteRecipeData, RecipesUnfavoriteRecipeErrors, RecipesUnfavoriteRecipeResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, RoastersCreateRoasterData, RoastersCreateRoasterErrors, RoastersCreateRoasterResponses, RoastersDeleteRoasterData, RoastersDeleteRoasterErrors, RoastersDeleteRoasterResponses, RoastersGetRoasterData, RoastersGetRoasterErrors, RoastersGetRoasterResponses, RoastersListRoastersData, RoastersListRoastersResponses, RoastersMergeRoasterData, RoastersMergeRoasterErrors, RoastersMergeRoasterResponses, RoastersUpdateRoasterData, RoastersUpdateRoasterErrors, RoastersUpdateRoasterResponses, SystemHealthData, SystemHealthResponses, TastingsCreateTastingData, TastingsCreateTastingErrors, TastingsCreateTastingResponses, TastingsDeleteTastingData, TastingsDeleteTastingErrors, TastingsDeleteTastingResponses, TastingsGetTastingData, TastingsGetTastingErrors, TastingsGetTastingResponses, TastingsListAllTastingsData, TastingsListAllTastingsErrors, TastingsListAllTastingsResponses, TastingsListTastingsData, TastingsListTastingsErrors, TastingsListTastingsResponses, TastingsUpdateTastingData, TastingsUpdateTastingErrors, TastingsUpdateTastingResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen';
+import type { AuthLoginData, AuthLoginErrors, AuthLoginResponses, AuthOidcCallbackData, AuthOidcLoginData, AuthReadAuthConfigData, AuthReadAuthConfigResponses, AuthReadCurrentUserData, AuthReadCurrentUserResponses, AuthRecoverPasswordData, AuthRecoverPasswordErrors, AuthRecoverPasswordResponses, AuthResetPasswordData, AuthResetPasswordErrors, AuthResetPasswordResponses, BeansCreateBeanData, BeansCreateBeanErrors, BeansCreateBeanResponses, BeansDeleteBeanData, BeansDeleteBeanErrors, BeansDeleteBeanResponses, BeansGetBeanData, BeansGetBeanErrors, BeansGetBeanResponses, BeansListBeansData, BeansListBeansErrors, BeansListBeansResponses, BeansMergeBeanData, BeansMergeBeanErrors, BeansMergeBeanResponses, BeansUpdateBeanData, BeansUpdateBeanErrors, BeansUpdateBeanResponses, BrewMethodsCreateBrewMethodData, BrewMethodsCreateBrewMethodErrors, BrewMethodsCreateBrewMethodResponses, BrewMethodsDeleteBrewMethodData, BrewMethodsDeleteBrewMethodErrors, BrewMethodsDeleteBrewMethodResponses, BrewMethodsGetBrewMethodData, BrewMethodsGetBrewMethodErrors, BrewMethodsGetBrewMethodResponses, BrewMethodsListBrewMethodsData, BrewMethodsListBrewMethodsResponses, BrewMethodsUpdateBrewMethodData, BrewMethodsUpdateBrewMethodErrors, BrewMethodsUpdateBrewMethodResponses, BrewsCreateBrewData, BrewsCreateBrewErrors, BrewsCreateBrewResponses, BrewsDeleteBrewData, BrewsDeleteBrewErrors, BrewsDeleteBrewResponses, BrewsGetBrewData, BrewsGetBrewErrors, BrewsGetBrewResponses, BrewsListBrewsData, BrewsListBrewsErrors, BrewsListBrewsResponses, BrewsUpdateBrewData, BrewsUpdateBrewErrors, BrewsUpdateBrewResponses, EquipmentCreateEquipmentData, EquipmentCreateEquipmentErrors, EquipmentCreateEquipmentResponses, EquipmentDeleteEquipmentData, EquipmentDeleteEquipmentErrors, EquipmentDeleteEquipmentResponses, EquipmentGetEquipmentData, EquipmentGetEquipmentErrors, EquipmentGetEquipmentResponses, EquipmentListEquipmentData, EquipmentListEquipmentResponses, EquipmentUpdateEquipmentData, EquipmentUpdateEquipmentErrors, EquipmentUpdateEquipmentResponses, LotsCreateLotData, LotsCreateLotErrors, LotsCreateLotResponses, LotsDeleteLotData, LotsDeleteLotErrors, LotsDeleteLotResponses, LotsGetLotData, LotsGetLotErrors, LotsGetLotResponses, LotsListLotsData, LotsListLotsErrors, LotsListLotsResponses, LotsUpdateLotData, LotsUpdateLotErrors, LotsUpdateLotResponses, RecipesCreateBrewFromRecipeData, RecipesCreateBrewFromRecipeErrors, RecipesCreateBrewFromRecipeResponses, RecipesCreateRecipeData, RecipesCreateRecipeErrors, RecipesCreateRecipeResponses, RecipesDeleteRecipeData, RecipesDeleteRecipeErrors, RecipesDeleteRecipeResponses, RecipesFavoriteRecipeData, RecipesFavoriteRecipeErrors, RecipesFavoriteRecipeResponses, RecipesGetRecipeData, RecipesGetRecipeErrors, RecipesGetRecipeResponses, RecipesListRecipesData, RecipesListRecipesErrors, RecipesListRecipesResponses, RecipesUnfavoriteRecipeData, RecipesUnfavoriteRecipeErrors, RecipesUnfavoriteRecipeResponses, RecipesUpdateRecipeData, RecipesUpdateRecipeErrors, RecipesUpdateRecipeResponses, RoastersCreateRoasterData, RoastersCreateRoasterErrors, RoastersCreateRoasterResponses, RoastersDeleteRoasterData, RoastersDeleteRoasterErrors, RoastersDeleteRoasterResponses, RoastersGetRoasterData, RoastersGetRoasterErrors, RoastersGetRoasterResponses, RoastersListRoastersData, RoastersListRoastersResponses, RoastersMergeRoasterData, RoastersMergeRoasterErrors, RoastersMergeRoasterResponses, RoastersUpdateRoasterData, RoastersUpdateRoasterErrors, RoastersUpdateRoasterResponses, SystemHealthData, SystemHealthResponses, TastingsCreateTastingData, TastingsCreateTastingErrors, TastingsCreateTastingResponses, TastingsDeleteTastingData, TastingsDeleteTastingErrors, TastingsDeleteTastingResponses, TastingsGetTastingData, TastingsGetTastingErrors, TastingsGetTastingResponses, TastingsListAllTastingsData, TastingsListAllTastingsErrors, TastingsListAllTastingsResponses, TastingsListTastingsData, TastingsListTastingsErrors, TastingsListTastingsResponses, TastingsUpdateTastingData, TastingsUpdateTastingErrors, TastingsUpdateTastingResponses, UsersCreateUserData, UsersCreateUserErrors, UsersCreateUserResponses, UsersListUsersData, UsersListUsersResponses, UsersUpdateUserData, UsersUpdateUserErrors, UsersUpdateUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -26,11 +26,36 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 export const systemHealth = <ThrowOnError extends boolean = false>(options?: Options<SystemHealthData, ThrowOnError>): RequestResult<SystemHealthResponses, unknown, ThrowOnError> => (options?.client ?? client).get<SystemHealthResponses, unknown, ThrowOnError>({ url: '/health', ...options });
 
 /**
+ * Read Auth Config
+ *
+ * Which login methods are available, so the UI can show the right ones. Public.
+ */
+export const authReadAuthConfig = <ThrowOnError extends boolean = false>(options?: Options<AuthReadAuthConfigData, ThrowOnError>): RequestResult<AuthReadAuthConfigResponses, unknown, ThrowOnError> => (options?.client ?? client).get<AuthReadAuthConfigResponses, unknown, ThrowOnError>({ url: '/api/v1/auth/config', ...options });
+
+/**
+ * Oidc Login
+ *
+ * Start single sign-on: redirect the browser to the identity provider. Public; 404 when OIDC is off.
+ */
+export const authOidcLogin = <ThrowOnError extends boolean = false>(options?: Options<AuthOidcLoginData, ThrowOnError>): RequestResult<unknown, unknown, ThrowOnError> => (options?.client ?? client).get<unknown, unknown, ThrowOnError>({ url: '/api/v1/auth/oidc/login', ...options });
+
+/**
+ * Oidc Callback
+ *
+ * Finish single sign-on and hand the web UI an access token. Public; 404 when OIDC is off.
+ *
+ * Redirects to ``/login#token=<jwt>`` (a fragment never reaches server or proxy logs), or to
+ * ``/login?error=oidc_denied|oidc_failed`` when the login is refused or the exchange fails.
+ */
+export const authOidcCallback = <ThrowOnError extends boolean = false>(options?: Options<AuthOidcCallbackData, ThrowOnError>): RequestResult<unknown, unknown, ThrowOnError> => (options?.client ?? client).get<unknown, unknown, ThrowOnError>({ url: '/api/v1/auth/oidc/callback', ...options });
+
+/**
  * Login
  *
  * Exchange an email or username (``username`` field) + password for a JWT access token.
  *
- * Public. Repeated failures from one client return 429 with a ``Retry-After`` header.
+ * Public; 403 when ``DISABLE_LOCAL_AUTH`` is on. Repeated failures from one client return 429
+ * with a ``Retry-After`` header.
  */
 export const authLogin = <ThrowOnError extends boolean = false>(options: Options<AuthLoginData, ThrowOnError>): RequestResult<AuthLoginResponses, AuthLoginErrors, ThrowOnError> => (options.client ?? client).post<AuthLoginResponses, AuthLoginErrors, ThrowOnError>({
     ...urlSearchParamsBodySerializer,
@@ -45,7 +70,7 @@ export const authLogin = <ThrowOnError extends boolean = false>(options: Options
 /**
  * Recover Password
  *
- * Email a password-reset link. Public.
+ * Email a password-reset link. Public; 403 when ``DISABLE_LOCAL_AUTH`` is on.
  *
  * Always answers 202 with the same message, whether or not the address has an account,
  * so it cannot be used to discover who is registered. Rate-limited per address and per
@@ -64,6 +89,8 @@ export const authRecoverPassword = <ThrowOnError extends boolean = false>(option
  * Reset Password
  *
  * Set a new password using a token from a reset email. Public; the token is single-use.
+ *
+ * 403 when ``DISABLE_LOCAL_AUTH`` is on.
  */
 export const authResetPassword = <ThrowOnError extends boolean = false>(options: Options<AuthResetPasswordData, ThrowOnError>): RequestResult<AuthResetPasswordResponses, AuthResetPasswordErrors, ThrowOnError> => (options.client ?? client).post<AuthResetPasswordResponses, AuthResetPasswordErrors, ThrowOnError>({
     url: '/api/v1/auth/reset-password',
@@ -102,7 +129,8 @@ export const usersListUsers = <ThrowOnError extends boolean = false>(options?: O
  * Create a new user (role 'user'). Admin-only.
  *
  * Emails them a welcome message with a link to set their own password; omitting
- * ``password`` makes that link the only way in.
+ * ``password`` makes that link the only way in. With ``DISABLE_LOCAL_AUTH`` no email is
+ * sent: the account is linked by email on its first SSO login.
  */
 export const usersCreateUser = <ThrowOnError extends boolean = false>(options: Options<UsersCreateUserData, ThrowOnError>): RequestResult<UsersCreateUserResponses, UsersCreateUserErrors, ThrowOnError> => (options.client ?? client).post<UsersCreateUserResponses, UsersCreateUserErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

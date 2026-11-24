@@ -103,6 +103,7 @@ Settings come from environment variables or a local `.env` (copy `.env.example`)
 | `FRONTEND_HOST` | Origin of the Vite dev server, allowed by CORS (default `http://localhost:5173`). Also the base of the links in outgoing emails, so set it to your public URL in production. |
 | `BACKEND_CORS_ORIGINS` | Comma-separated list of extra browser origins allowed by CORS. |
 | `BLOOM_ADMIN_EMAIL` / `BLOOM_ADMIN_PASSWORD` | First admin, bootstrapped on startup if absent. |
+| `OIDC_*`, `DISABLE_LOCAL_AUTH` | Single sign-on — see [docs/SSO.md](docs/SSO.md). |
 
 ## Authentication
 
@@ -124,6 +125,13 @@ curl -s -X POST http://localhost:8000/api/v1/auth/token \
 # Use it
 curl http://localhost:8000/api/v1/auth/me -H "Authorization: Bearer <token>"
 ```
+
+### Single sign-on (OIDC)
+
+Bloom can also log people in through an OpenID Connect provider (Keycloak, Authentik, Entra ID…),
+alongside passwords or instead of them, with roles mapped from the provider's groups. Existing
+accounts are linked by email on their first SSO login. See [docs/SSO.md](docs/SSO.md) for the
+settings, provider notes and troubleshooting.
 
 ### Email in development
 

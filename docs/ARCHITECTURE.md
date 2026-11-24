@@ -19,7 +19,7 @@ project, see [`README.md`](../README.md).
 | Migrations  | Alembic                                   |
 | Validation  | Pydantic v2                               |
 | Database    | PostgreSQL 16 (`psycopg` 3)               |
-| Auth        | JWT (OAuth2 password flow), **argon2id**  |
+| Auth        | JWT (OAuth2 password flow), **argon2id**; optional OIDC SSO (Authlib) |
 | Packaging   | `uv` + `pyproject.toml`                   |
 | Local dev   | Docker Compose                            |
 
@@ -116,8 +116,8 @@ Design points:
 - Each account has a unique **`username`** handle (unique on `lower(username)`) alongside its
   email, which is unique on `lower(email)` too: `Bob@x.com` and `bob@x.com` are one account, and
   login and password recovery match regardless of case. The login form's single field accepts
-  **either** an email or a handle. Handles are set by an admin today and will be supplied by the IdP (Keycloak/Authentik) once automated
-  provisioning lands. Beans, recipes, brews and tastings embed their creator as a nested
+  **either** an email or a handle. Handles are set by an admin, or derived from the IdP's
+  `preferred_username` / email when SSO creates the account (decision 25). Beans, recipes, brews and tastings embed their creator as a nested
   `{ id, username }` object (`owner`/`author`) so the UI can name who added, pulled or scored
   a cup without reading the admin-only user list.
 - **Everything is a shared log** (household/café model, 11). Any authenticated user can
@@ -132,7 +132,8 @@ Design points:
 - Auth is JWT via the OAuth2 password flow (access token only). Passwords are hashed with
   **argon2id**, never stored in plain text. Users recover a forgotten password by email
   (decision 21); admins can create an account without choosing a password at all. Login and
-  recovery are rate-limited (decision 24).
+  recovery are rate-limited (decision 24). Optionally, people sign in through an OIDC provider
+  instead, with roles mapped from its groups (decision 25).
 - The app refuses to start unless `JWT_SECRET` is at least 32 characters: the token signing key
   has no usable default, so a forgotten setting cannot leave an instance with a publicly known key.
 
@@ -480,9 +481,8 @@ two templates. With no SMTP host configured, links are logged instead of sent, s
 and the tests run with no mail config at all.
 
 `POST /auth/recover-password` always answers `202` with the same body, whether or not the
-address is registered, so it cannot be used to enumerate accounts. It is not rate-limited:
-real limiting needs shared state across workers, which is infrastructure this project does not
-otherwise have.
+address is registered, so it cannot be used to enumerate accounts. It is also rate-limited per
+address and per client, so it cannot be used to flood an inbox (decision 24).
 
 ### 22 — Duplicate beans are flagged, not forbidden
 
@@ -571,12 +571,45 @@ multiply with worker count; scaling out needs a shared store (startup migrations
 are already safe with several processes). Behind a reverse proxy the client is the proxy's address unless uvicorn trusts its
 `X-Forwarded-For`, which would pool every user into one bucket.
 
+### 25 — OIDC single sign-on mints the same bearer token
+
+SSO is optional, enabled by the `OIDC_*` settings (configuration guide: `docs/SSO.md`). The SPA
+navigates to `GET /auth/oidc/login`; Authlib runs the Authorization Code flow with PKCE and
+nonce, and checks the ID token against the provider's JWKS. State, nonce and verifier ride in a
+short-lived signed cookie (`SessionMiddleware`, added only when SSO is on); it is the only cookie,
+and API auth stays a bearer header (18).
+
+The callback mints the **same access token** as the password flow and redirects to
+`/login#token=…`. A fragment, not a query string, because it never reaches the server or proxy
+logs; the SPA stores it and clears the URL. Failures land on `/login?error=…` instead, which also
+stops the forced-SSO login page from bouncing straight back to the provider.
+
+Accounts are matched by the new nullable, unique `user.oidc_subject` (the `sub` claim), then by
+email for accounts not linked yet — so existing users keep their history. Email linking needs
+`email_verified=true` unless `OIDC_REQUIRE_EMAIL_VERIFIED=false`: otherwise anyone who can set an
+arbitrary email at the provider could take over an account. An account already linked to another
+`sub` is refused, as is an inactive one (SSO never reactivates). Unknown identities get an
+account when `OIDC_AUTO_CREATE_USERS` is on (random password, no invite email), under the same
+email rule: an unverified address could otherwise be claimed first, locking its real owner out.
+
+Roles: with `OIDC_ADMIN_GROUPS` set, the provider is authoritative and the role is synced at
+each login (an admin's edit is overwritten next time); without it the stored role is kept.
+`OIDC_ALLOWED_GROUPS` gates who gets in, admins exempt. The first SSO user is **not** made admin:
+`BLOOM_ADMIN_EMAIL` already bootstraps one, and it links by email. Changes apply at the next
+login, since tokens are stateless.
+
+`DISABLE_LOCAL_AUTH` turns `POST /auth/token`, `/auth/recover-password` and
+`/auth/reset-password` into `403` and skips the invite email. The app refuses to start with it
+on but SSO off, or with SSO half-configured. `GET /auth/config` tells the UI which methods exist.
+
 ### Users & auth
 - **Two roles only** (`admin` / `user`) as a column on `user`; no RBAC tables yet.
 - **First admin via env vars on startup**; further accounts are admin-created and default
   to `user` (no public registration), and are invited by email.
 - **JWT / OAuth2 password flow**, access token only; passwords hashed with argon2id.
 - **Password reset by emailed link**, stateless and single-use (decision 21).
+- **Optional OIDC SSO** linked by `sub` then verified email, group-mapped roles, and a switch
+  to disable passwords altogether (decision 25).
 - **Shared read across the instance**; **each row edited/deleted only by its creator** (or an
   admin), tracked by `bean.user_id` / `bean_lot.user_id` / `recipe.user_id` / `brew.user_id` /
   `tasting.user_id`.

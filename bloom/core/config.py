@@ -23,6 +23,10 @@ def parse_cors(value: Any) -> list[str] | str:
     raise ValueError(value)
 
 
+def _csv(value: str) -> set[str]:
+    return {item.strip() for item in value.split(",") if item.strip()}
+
+
 class Settings(BaseSettings):
     """Runtime configuration for the Bloom API.
 
@@ -83,6 +87,20 @@ class Settings(BaseSettings):
     BLOOM_ADMIN_EMAIL: str | None = None
     BLOOM_ADMIN_PASSWORD: str | None = None
 
+    # OpenID Connect single sign-on. Enabled once the issuer, client id/secret and redirect URI
+    # are all set. Group lists are comma-separated; names may contain spaces.
+    OIDC_ISSUER: str | None = None
+    OIDC_CLIENT_ID: str | None = None
+    OIDC_CLIENT_SECRET: str | None = None
+    OIDC_REDIRECT_URI: str | None = None
+    OIDC_SCOPES: str = "openid profile email"
+    OIDC_AUTO_CREATE_USERS: bool = True
+    OIDC_GROUPS_CLAIM: str = "groups"
+    OIDC_ADMIN_GROUPS: str = ""
+    OIDC_ALLOWED_GROUPS: str = ""
+    OIDC_REQUIRE_EMAIL_VERIFIED: bool = True
+    DISABLE_LOCAL_AUTH: bool = False
+
     def require_strong_jwt_secret(self) -> None:
         """Refuse to run with a placeholder or short signing key.
 
@@ -94,6 +112,32 @@ class Settings(BaseSettings):
                 f"JWT_SECRET must be at least {MIN_JWT_SECRET_LENGTH} characters; "
                 "generate one with `openssl rand -hex 32` and set it in the environment or .env."
             )
+
+    def require_valid_auth_config(self) -> None:
+        """Refuse a half-configured OIDC client, or disabling local login with no SSO to replace it."""
+        if any(self._oidc_vars) and not self.oidc_enabled:
+            raise RuntimeError("OIDC_ISSUER, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET and OIDC_REDIRECT_URI must all be set to enable OIDC.")
+        if self.DISABLE_LOCAL_AUTH and not self.oidc_enabled:
+            raise RuntimeError("DISABLE_LOCAL_AUTH=true needs OIDC configured, otherwise nobody can log in.")
+
+    @property
+    def oidc_enabled(self) -> bool:
+        """True when every required OIDC setting is present."""
+        return all(self._oidc_vars)
+
+    @property
+    def _oidc_vars(self) -> tuple[str | None, ...]:
+        return (self.OIDC_ISSUER, self.OIDC_CLIENT_ID, self.OIDC_CLIENT_SECRET, self.OIDC_REDIRECT_URI)
+
+    @property
+    def oidc_admin_groups(self) -> set[str]:
+        """IdP groups that grant the admin role."""
+        return _csv(self.OIDC_ADMIN_GROUPS)
+
+    @property
+    def oidc_allowed_groups(self) -> set[str]:
+        """IdP groups allowed to log in; empty allows everyone."""
+        return _csv(self.OIDC_ALLOWED_GROUPS)
 
     @property
     def control_chart_ranges(self) -> ControlChartRanges:

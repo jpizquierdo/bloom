@@ -1,4 +1,7 @@
-import { authReadCurrentUserOptions } from "@/client/@tanstack/react-query.gen"
+import {
+  authReadAuthConfigOptions,
+  authReadCurrentUserOptions,
+} from "@/client/@tanstack/react-query.gen"
 import { authLogin } from "@/client/sdk.gen"
 import type { UserRead } from "@/client/types.gen"
 import { errorMessage } from "@/lib/api"
@@ -15,6 +18,14 @@ export function useCurrentUser() {
     staleTime: Infinity,
   })
   return { user: data, isLoading }
+}
+
+/** A full-page navigation, not a fetch: the API answers with a redirect to the identity provider. */
+export const SSO_LOGIN_URL = "/api/v1/auth/oidc/login"
+
+/** Which login methods the server offers (password, SSO). Fixed for the life of the process. */
+export function useAuthConfig() {
+  return useQuery({ ...authReadAuthConfigOptions(), staleTime: Infinity })
 }
 
 export function useLogin() {

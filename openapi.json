@@ -31,13 +31,65 @@
         }
       }
     },
+    "/api/v1/auth/config": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Read Auth Config",
+        "description": "Which login methods are available, so the UI can show the right ones. Public.",
+        "operationId": "auth-read_auth_config",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/oidc/login": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Oidc Login",
+        "description": "Start single sign-on: redirect the browser to the identity provider. Public; 404 when OIDC is off.",
+        "operationId": "auth-oidc_login",
+        "responses": {
+          "302": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/oidc/callback": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Oidc Callback",
+        "description": "Finish single sign-on and hand the web UI an access token. Public; 404 when OIDC is off.\n\nRedirects to ``/login#token=<jwt>`` (a fragment never reaches server or proxy logs), or to\n``/login?error=oidc_denied|oidc_failed`` when the login is refused or the exchange fails.",
+        "operationId": "auth-oidc_callback",
+        "responses": {
+          "302": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
     "/api/v1/auth/token": {
       "post": {
         "tags": [
           "auth"
         ],
         "summary": "Login",
-        "description": "Exchange an email or username (``username`` field) + password for a JWT access token.\n\nPublic. Repeated failures from one client return 429 with a ``Retry-After`` header.",
+        "description": "Exchange an email or username (``username`` field) + password for a JWT access token.\n\nPublic; 403 when ``DISABLE_LOCAL_AUTH`` is on. Repeated failures from one client return 429\nwith a ``Retry-After`` header.",
         "operationId": "auth-login",
         "requestBody": {
           "content": {
@@ -79,7 +131,7 @@
           "auth"
         ],
         "summary": "Recover Password",
-        "description": "Email a password-reset link. Public.\n\nAlways answers 202 with the same message, whether or not the address has an account,\nso it cannot be used to discover who is registered. Rate-limited per address and per\nclient (429 with ``Retry-After``) so it cannot be used to flood an inbox.",
+        "description": "Email a password-reset link. Public; 403 when ``DISABLE_LOCAL_AUTH`` is on.\n\nAlways answers 202 with the same message, whether or not the address has an account,\nso it cannot be used to discover who is registered. Rate-limited per address and per\nclient (429 with ``Retry-After``) so it cannot be used to flood an inbox.",
         "operationId": "auth-recover_password",
         "requestBody": {
           "content": {
@@ -121,7 +173,7 @@
           "auth"
         ],
         "summary": "Reset Password",
-        "description": "Set a new password using a token from a reset email. Public; the token is single-use.",
+        "description": "Set a new password using a token from a reset email. Public; the token is single-use.\n\n403 when ``DISABLE_LOCAL_AUTH`` is on.",
         "operationId": "auth-reset_password",
         "requestBody": {
           "content": {
@@ -219,7 +271,7 @@
           "users"
         ],
         "summary": "Create User",
-        "description": "Create a new user (role 'user'). Admin-only.\n\nEmails them a welcome message with a link to set their own password; omitting\n``password`` makes that link the only way in.",
+        "description": "Create a new user (role 'user'). Admin-only.\n\nEmails them a welcome message with a link to set their own password; omitting\n``password`` makes that link the only way in. With ``DISABLE_LOCAL_AUTH`` no email is\nsent: the account is linked by email on its first SSO login.",
         "operationId": "users-create_user",
         "requestBody": {
           "content": {
@@ -2691,6 +2743,27 @@
   },
   "components": {
     "schemas": {
+      "AuthConfig": {
+        "properties": {
+          "local_auth_enabled": {
+            "type": "boolean",
+            "title": "Local Auth Enabled",
+            "description": "Email/username + password login is available."
+          },
+          "oidc_enabled": {
+            "type": "boolean",
+            "title": "Oidc Enabled",
+            "description": "Single sign-on through the configured OIDC provider is available."
+          }
+        },
+        "type": "object",
+        "required": [
+          "local_auth_enabled",
+          "oidc_enabled"
+        ],
+        "title": "AuthConfig",
+        "description": "The login methods this server offers."
+      },
       "AuthorRead": {
         "properties": {
           "id": {
