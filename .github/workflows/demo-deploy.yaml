@@ -1,7 +1,10 @@
 name: Deploy demo
 
 on:
-  push:
+  # Deploy only what CI has already passed, never a red main.
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -14,9 +17,19 @@ jobs:
   deploy:
     name: Deploy to FastAPI Cloud
     runs-on: ubuntu-latest
+    # workflow_run carries this repo's secrets, and `branches` matches a fork's branch named main
+    # too, so also require a successful run of a push to this repository.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          # The commit CI tested, not whatever main has moved on to since.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - uses: actions/setup-node@v7
         with:
