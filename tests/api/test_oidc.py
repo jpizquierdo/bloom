@@ -112,6 +112,16 @@ def test_unverified_email_does_not_link(client, idp, users, oidc_settings, monke
     assert _sso(client, idp, email="alice@example.com", email_verified=None)[0] == users["alice"].id
 
 
+def test_unverified_email_does_not_create(client, idp, oidc_settings, monkeypatch, db):
+    # Otherwise someone could claim an unverified address first and lock its owner out.
+    assert _sso(client, idp, email_verified=None) == (None, "oidc_denied")
+    assert _sso(client, idp, email_verified="false") == (None, "oidc_denied")
+    assert users_repo.get_by_email(db, "new@example.com") is None
+    # Same relaxation as linking: an absent claim is accepted when the check is off.
+    monkeypatch.setattr(oidc_settings, "OIDC_REQUIRE_EMAIL_VERIFIED", False)
+    assert _sso(client, idp, email_verified=None)[1] is None
+
+
 def test_email_already_linked_to_another_sub_is_refused(client, idp, users):
     _sso(client, idp, email="alice@example.com")
     assert _sso(client, idp, sub="someone-else", email="alice@example.com") == (None, "oidc_denied")

@@ -25,7 +25,7 @@ Then set:
 | `OIDC_GROUPS_CLAIM` | `groups` | ID-token claim with the groups. Use dot notation for nested claims (`realm_access.roles`). |
 | `OIDC_ADMIN_GROUPS` | empty | Comma-separated groups that grant admin. When set, the role is synced on **every** login: members are promoted, everyone else is demoted. |
 | `OIDC_ALLOWED_GROUPS` | empty | Comma-separated groups allowed in. Empty lets everyone in. Admins always pass. |
-| `OIDC_REQUIRE_EMAIL_VERIFIED` | `true` | Linking an existing account by email requires `email_verified=true`. Set it to `false` for providers that never send the claim (Entra ID). An explicit `false` is still refused. |
+| `OIDC_REQUIRE_EMAIL_VERIFIED` | `true` | Linking or creating an account by email requires `email_verified=true`. Set it to `false` for providers that never send the claim (Entra ID). An explicit `false` is still refused. |
 | `DISABLE_LOCAL_AUTH` | `false` | Turn off passwords. The login page redirects straight to the provider, and the password login, recovery and reset endpoints answer `403`. |
 
 SSO is on once the first four are set. The app refuses to start if only some of them are set, or
@@ -41,7 +41,8 @@ On each SSO login Bloom looks for the account:
 2. Otherwise by email, for accounts not linked yet. This is how existing users keep their beans,
    brews and tastings. The email must be verified (see `OIDC_REQUIRE_EMAIL_VERIFIED`); otherwise
    anyone who can set an arbitrary email at the provider could take over that account.
-3. Otherwise a new account is created (`role=user`, or `admin` through `OIDC_ADMIN_GROUPS`), if
+3. Otherwise a new account is created (`role=user`, or `admin` through `OIDC_ADMIN_GROUPS`), with
+   the same email rule — so nobody can claim an unverified address before its owner — if
    `OIDC_AUTO_CREATE_USERS` is on. Its username comes from `preferred_username`, or from the
    email before the `@`, with a `-2`, `-3`… suffix if it is taken.
 
@@ -145,7 +146,7 @@ Pocket ID's **Allowed User Groups** already decides who can sign in, so you can 
 reaches Bloom. Bloom must reach `OIDC_ISSUER` from its own container: the token exchange is
 server to server.
 
-Pocket ID sends `email_verified` with the email. If linking existing Bloom accounts fails with
+Pocket ID sends `email_verified` with the email. If linking or creating Bloom accounts fails with
 `unverified email` in the log, set `OIDC_REQUIRE_EMAIL_VERIFIED=false` — but only if your users
 cannot change their own email in Pocket ID; otherwise one could claim another's Bloom account.
 
@@ -173,7 +174,7 @@ traceback). The exchange with the provider failed:
 | Log reason | Fix |
 |------------|-----|
 | `subject not in OIDC_ALLOWED_GROUPS` | Add the user to an allowed group, or check that groups reach the ID token and that `OIDC_GROUPS_CLAIM` points at them. |
-| `unverified email for user …` | Mark the email verified at the provider, or set `OIDC_REQUIRE_EMAIL_VERIFIED=false` if it never sends the claim. |
+| `unverified email for …` | Mark the email verified at the provider, or set `OIDC_REQUIRE_EMAIL_VERIFIED=false` if it never sends the claim. |
 | `user … is linked to another identity` | That Bloom account is already linked to a different provider user. |
 | `inactive user …` | Reactivate the account in Bloom's **Users** page. |
 | `no account and OIDC_AUTO_CREATE_USERS is off` | Create the account in Bloom first, with the same email. |

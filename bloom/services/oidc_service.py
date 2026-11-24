@@ -74,6 +74,10 @@ def login_from_claims(db: Session, claims: dict[str, Any]) -> User:
         if not email:
             logger.warning("OIDC login refused: no email claim for a new account")
             raise ForbiddenError("The identity provider sent no email")
+        # Otherwise an unverified address could be claimed first, locking its real owner out.
+        if not _email_is_trusted(claims):
+            logger.warning("OIDC login refused: unverified email for a new account")
+            raise ForbiddenError("The identity provider has not verified this email")
         username = _free_username(db, username_from_claims(claims.get("preferred_username"), email))
         user = users_service.create_user(db, email=email, username=username, role=role, oidc_subject=subject)
         logger.info("OIDC created user %s", user.id)

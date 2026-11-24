@@ -589,7 +589,8 @@ email for accounts not linked yet — so existing users keep their history. Emai
 `email_verified=true` unless `OIDC_REQUIRE_EMAIL_VERIFIED=false`: otherwise anyone who can set an
 arbitrary email at the provider could take over an account. An account already linked to another
 `sub` is refused, as is an inactive one (SSO never reactivates). Unknown identities get an
-account when `OIDC_AUTO_CREATE_USERS` is on (random password, no invite email).
+account when `OIDC_AUTO_CREATE_USERS` is on (random password, no invite email), under the same
+email rule: an unverified address could otherwise be claimed first, locking its real owner out.
 
 Roles: with `OIDC_ADMIN_GROUPS` set, the provider is authoritative and the role is synced at
 each login (an admin's edit is overwritten next time); without it the stored role is kept.
