@@ -104,7 +104,9 @@ curl http://localhost:8000/api/v1/auth/me -H "Authorization: Bearer <token>"
 
 `docker/docker-compose.yml` ships [Mailpit](https://mailpit.axllent.org/): it accepts
 everything on port 1025 and delivers nothing, so you can read the real rendered mail at
-<http://localhost:8025>. The templates live in `bloom/templates/email/`.
+<http://localhost:8025>. The templates live in `bloom/templates/email/`. Mailpit and Postgres
+are published on `127.0.0.1` only (the inbox contains password-reset links); to reach them from
+another machine, use an SSH tunnel rather than opening the ports.
 
 ## API overview
 
