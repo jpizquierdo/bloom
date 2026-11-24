@@ -86,6 +86,7 @@ login back.
 | Authentik | `OIDC_ISSUER=https://auth.example.com/application/o/<slug>/`, `OIDC_SCOPES=openid profile email groups`. |
 | Entra ID | `OIDC_ISSUER=https://login.microsoftonline.com/<tenant-id>/v2.0`, `OIDC_REQUIRE_EMAIL_VERIFIED=false`. Groups arrive as object IDs, so list IDs in the group variables. |
 | Google | `OIDC_ISSUER=https://accounts.google.com`. Google sends no groups, so leave the group variables empty. |
+| Pocket ID | `OIDC_ISSUER=https://id.example.com` (its `APP_URL`), `OIDC_SCOPES=openid profile email groups`. See the guide below. |
 
 ### Keycloak step by step
 
@@ -111,6 +112,42 @@ login back.
 
 7. Users need an email in Keycloak with **Email verified** on, or they cannot be linked to
    existing Bloom accounts.
+
+### Pocket ID step by step
+
+[Pocket ID](https://pocket-id.org) is a self-hosted, passkey-only provider. Its issuer is its own
+`APP_URL`, and it puts the `groups` claim (group **names**) in the ID token when the `groups`
+scope is requested.
+
+1. In Pocket ID, go to **Administration → OIDC Clients → Add OIDC Client**. Give it a name
+   (`Bloom`), keep it **confidential** (not a public client), and set the callback URL to
+   `https://<your-host>/api/v1/auth/oidc/callback`.
+2. Click **Create** and copy the client ID and secret. The secret is shown **only once**; if you
+   lose it, add a new one under the client's **Credentials** tab.
+3. In the client's **Access** tab, under **Allowed User Groups**, tick the groups that may use
+   Bloom, or choose **All Users**. A client created in the admin UI starts with no group ticked,
+   so nobody can sign in until you choose.
+4. For admin by group: create a group under **Administration → User Groups** (for example
+   `bloom-admins`) and add your admins. Use the group's **name**, not its friendly name.
+5. Configure Bloom:
+
+   ```env
+   OIDC_ISSUER=https://id.example.com
+   OIDC_CLIENT_ID=<client id>
+   OIDC_CLIENT_SECRET=<secret>
+   OIDC_REDIRECT_URI=https://<your-host>/api/v1/auth/oidc/callback
+   OIDC_SCOPES=openid profile email groups
+   OIDC_ADMIN_GROUPS=bloom-admins
+   ```
+
+Pocket ID's **Allowed User Groups** already decides who can sign in, so you can leave
+`OIDC_ALLOWED_GROUPS` empty. A user outside those groups is stopped by Pocket ID itself and never
+reaches Bloom. Bloom must reach `OIDC_ISSUER` from its own container: the token exchange is
+server to server.
+
+Pocket ID sends `email_verified` with the email. If linking existing Bloom accounts fails with
+`unverified email` in the log, set `OIDC_REQUIRE_EMAIL_VERIFIED=false` — but only if your users
+cannot change their own email in Pocket ID; otherwise one could claim another's Bloom account.
 
 ## Troubleshooting
 
