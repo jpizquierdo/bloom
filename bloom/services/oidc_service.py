@@ -43,6 +43,7 @@ def login_from_claims(db: Session, claims: dict[str, Any]) -> User:
     subject = claims.get("sub")
     email = claims.get("email")
     if not subject:
+        logger.warning("OIDC login refused: no sub claim")
         raise ForbiddenError("The identity provider sent no subject")
 
     user = users_repo.get_by_oidc_subject(db, subject)
@@ -71,6 +72,7 @@ def login_from_claims(db: Session, claims: dict[str, Any]) -> User:
             logger.warning("OIDC login refused: no account and OIDC_AUTO_CREATE_USERS is off")
             raise ForbiddenError("No Bloom account exists for this identity")
         if not email:
+            logger.warning("OIDC login refused: no email claim for a new account")
             raise ForbiddenError("The identity provider sent no email")
         username = _free_username(db, username_from_claims(claims.get("preferred_username"), email))
         user = users_service.create_user(db, email=email, username=username, role=role, oidc_subject=subject)
