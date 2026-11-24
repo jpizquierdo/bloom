@@ -11,7 +11,7 @@ from bloom.core.logger import get_logger
 from bloom.db.models.tasting import Tasting
 from bloom.db.models.user import User
 from bloom.repositories import tastings as tastings_repo
-from bloom.schemas.tasting import TastingCreate, TastingUpdate
+from bloom.schemas.tasting import TastingCreate, TastingFilters, TastingUpdate
 from bloom.services import brew_service
 from bloom.services.access import owns_or_admin
 from bloom.services.errors import ConflictError, ForbiddenError, NotFoundError
@@ -25,12 +25,9 @@ def list_for_brew(db: Session, brew_id: int) -> list[Tasting]:
     return tastings_repo.list_for_brew(db, brew_id)
 
 
-def list_tastings(db: Session, user: User, mine: bool = False) -> list[Tasting]:
-    """List tastings. By default the whole shared log; ``mine`` restricts to
-    the user's own (tastings they made)."""
-    if mine:
-        return tastings_repo.list_for_user(db, user.id)
-    return tastings_repo.list_all(db)
+def list_tastings(db: Session, user: User, filters: TastingFilters) -> tuple[list[Tasting], int]:
+    """One page of the shared tasting log (or only ``user``'s with ``mine``), plus the total."""
+    return tastings_repo.list_page(db, limit=filters.limit, offset=filters.offset, author_id=user.id if filters.mine else None)
 
 
 def get_tasting(db: Session, tasting_id: int) -> Tasting:

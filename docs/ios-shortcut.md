@@ -90,12 +90,12 @@ All paths are relative to `BASE_URL`. Authenticated calls need the
 | Bean  | Update | `PATCH /beans/{id}` | any of the create fields |
 | Bean  | Delete | `DELETE /beans/{id}` | — |
 | Brew  | Create | `POST /brews` | `bean_id`*, `method_id`*, `dose_grams`*, optional: `grinder_id`, `brewed_at`, `yield_grams`, `water_grams`, `grind_setting`, `water_temp_celsius`, `brew_time_seconds`, `tds_percent`, `extraction_yield_percent`, `notes` |
-| Brew  | List   | `GET /brews` (`?mine=true`) | — |
+| Brew  | List   | `GET /brews` (`?mine=true`, `limit`, `offset`, filters) | returns `{ items, total }`, newest first |
 | Brew  | Update | `PATCH /brews/{id}` | any brew field (except `bean_id`/`method_id`) |
 | Brew  | Delete | `DELETE /brews/{id}` | — |
 | Tasting | Create | `POST /brews/{brew_id}/tastings` | scores 1–10: `aroma`, `acidity`, `sweetness`, `body`, `bitterness`, `aftertaste`, `overall`; `descriptors` (list of strings); `notes` |
 | Tasting | List (of a brew) | `GET /brews/{brew_id}/tastings` | — |
-| Tasting | List (yours) | `GET /tastings?mine=true` | — |
+| Tasting | List (yours) | `GET /tastings?mine=true` (`limit`, `offset`) | returns `{ items, total }`, newest first |
 | Tasting | Update | `PATCH /tastings/{id}` | any tasting field |
 | Tasting | Delete | `DELETE /tastings/{id}` | — |
 | Lookups | List methods / equipment | `GET /brew-methods`, `GET /equipment` | — |

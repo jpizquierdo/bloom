@@ -2,9 +2,9 @@
 
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from bloom.db.models.tasting import Tasting
 
@@ -18,15 +18,14 @@ def list_for_brew(db: Session, brew_id: int) -> list[Tasting]:
     return list(db.execute(stmt).scalars().all())
 
 
-def list_all(db: Session) -> list[Tasting]:
-    """List every tasting (most recent first) — tastings are a shared log."""
-    return list(db.execute(select(Tasting).order_by(Tasting.id.desc())).scalars().all())
-
-
-def list_for_user(db: Session, user_id: int) -> list[Tasting]:
-    """List tastings made by ``user_id`` (most recent first)."""
-    stmt = select(Tasting).where(Tasting.user_id == user_id).order_by(Tasting.id.desc())
-    return list(db.execute(stmt).scalars().all())
+def list_page(db: Session, *, limit: int, offset: int, author_id: int | None = None) -> tuple[list[Tasting], int]:
+    """One page of tastings (most recent first), optionally only ``author_id``'s, plus the total."""
+    stmt = select(Tasting)
+    if author_id is not None:
+        stmt = stmt.where(Tasting.user_id == author_id)
+    total = db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
+    page = stmt.options(joinedload(Tasting.brew), joinedload(Tasting.author)).order_by(Tasting.id.desc()).limit(limit).offset(offset)
+    return list(db.execute(page).scalars().all()), total
 
 
 def get_for_brew_user(db: Session, brew_id: int, user_id: int) -> Tasting | None:

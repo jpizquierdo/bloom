@@ -1,9 +1,11 @@
 """Tasting routes — owner-scoped, nested under brews for create/list."""
 
-from fastapi import APIRouter, Response, status
+from typing import Annotated
+
+from fastapi import APIRouter, Query, Response, status
 
 from bloom.core.dependencies import CurrentUser, DbSession
-from bloom.schemas.tasting import TastingCreate, TastingRead, TastingUpdate
+from bloom.schemas.tasting import TastingCreate, TastingFilters, TastingPage, TastingRead, TastingUpdate
 from bloom.services import tasting_service
 
 router = APIRouter(tags=["tastings"])
@@ -29,10 +31,11 @@ def list_tastings(brew_id: int, db: DbSession, _user: CurrentUser) -> list[Tasti
     return tasting_service.list_for_brew(db, brew_id)
 
 
-@router.get("/tastings", response_model=list[TastingRead])
-def list_all_tastings(db: DbSession, user: CurrentUser, mine: bool = False) -> list[TastingRead]:
-    """List the shared tasting log. Use `?mine=true` to return only your own tastings."""
-    return tasting_service.list_tastings(db, user, mine=mine)
+@router.get("/tastings", response_model=TastingPage)
+def list_all_tastings(filters: Annotated[TastingFilters, Query()], db: DbSession, user: CurrentUser) -> TastingPage:
+    """One page of the shared tasting log, newest first, with the total. Use `?mine=true` for only yours."""
+    tastings, total = tasting_service.list_tastings(db, user, filters)
+    return TastingPage(items=tastings, total=total)
 
 
 @router.get("/tastings/{tasting_id}", response_model=TastingRead)

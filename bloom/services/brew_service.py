@@ -11,8 +11,9 @@ from bloom.db.models.brew import Brew
 from bloom.db.models.user import User
 from bloom.domain.calculations import brew_ratio, classify_extraction, extraction_yield
 from bloom.repositories import brews as brews_repo
-from bloom.schemas.brew import BrewCreate, BrewRead, BrewUpdate, ExtractionDiagnosticsRead
+from bloom.schemas.brew import BrewCreate, BrewFilters, BrewRead, BrewUpdate, ExtractionDiagnosticsRead
 from bloom.schemas.recipe import BrewFromRecipeCreate, RecipeParameters
+from bloom.schemas.tasting import TastingRead
 from bloom.services import bean_lot_service, bean_service, lookups_service, recipe_service
 from bloom.services.access import owns_or_admin
 from bloom.services.errors import ForbiddenError, NotFoundError, UnprocessableError
@@ -22,8 +23,9 @@ logger = get_logger(__name__)
 _RECIPE_PARAMETER_FIELDS = (*RecipeParameters.model_fields, "dose_grams")
 
 
-def serialize(brew: Brew) -> BrewRead:
-    """Build a BrewRead, computing the (unstored) ratio, extraction yield and diagnostics."""
+def serialize(brew: Brew, viewer: User) -> BrewRead:
+    """Build a BrewRead for ``viewer``: the (unstored) ratio, extraction yield and diagnostics,
+    plus the viewer's own tasting of it, if any."""
     category = brew.method.category
     ratio = brew_ratio(brew.dose_grams, brew.yield_grams, brew.water_grams, category)
     if ratio is not None:
@@ -36,15 +38,25 @@ def serialize(brew: Brew) -> BrewRead:
     read.ratio = ratio
     read.extraction_yield_percent = ey
     read.diagnostics = ExtractionDiagnosticsRead(strength=diagnostics.strength, extraction=diagnostics.extraction)
+    mine = next((tasting for tasting in brew.tastings if tasting.user_id == viewer.id), None)
+    read.my_tasting = TastingRead.model_validate(mine) if mine is not None else None
     return read
 
 
-def list_brews(db: Session, user: User, mine: bool = False) -> list[Brew]:
-    """List brews. By default the whole shared log; ``mine`` restricts to the
-    user's own (authored) brews."""
-    if mine:
-        return brews_repo.list_for_author(db, user.id)
-    return brews_repo.list_all(db)
+def list_brews(db: Session, user: User, filters: BrewFilters) -> tuple[list[Brew], int]:
+    """One page of the shared brew log matching ``filters``, plus the total match count."""
+    return brews_repo.list_page(
+        db,
+        viewer_id=user.id,
+        limit=filters.limit,
+        offset=filters.offset,
+        author_id=user.id if filters.mine else None,
+        bean_id=filters.bean_id,
+        roaster_id=filters.roaster_id,
+        method_id=filters.method_id,
+        untasted=filters.untasted,
+        q=filters.q.strip() if filters.q else None,
+    )
 
 
 def get_brew(db: Session, brew_id: int) -> Brew:

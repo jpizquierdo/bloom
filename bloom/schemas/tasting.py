@@ -1,10 +1,11 @@
 """Pydantic DTOs for tastings (subjective evaluations of a brew)."""
 
+from datetime import datetime
 from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from bloom.schemas.common import reject_null
+from bloom.schemas.common import Page, PageParams, reject_null
 from bloom.schemas.user import AuthorRead
 
 # A 1-5 subjective score (nullable; null = unrated), matching the DB CHECK constraints.
@@ -41,10 +42,30 @@ class TastingUpdate(TastingBase):
     _no_null = reject_null("descriptors")
 
 
+class TastedBrewRead(BaseModel):
+    """The brew a tasting scores, enough to name it without fetching the brew log."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int = Field(examples=[1])
+    bean_id: int = Field(examples=[1])
+    method_id: int = Field(examples=[1])
+    brewed_at: datetime = Field(examples=["2026-07-12T08:00:00Z"])
+
+
 class TastingRead(TastingBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int = Field(examples=[1])
     brew_id: int = Field(examples=[1])
+    brew: TastedBrewRead = Field(description="The brew this tasting scores.")
     user_id: int = Field(description="Taster id (who scored the brew).", examples=[1])
     author: AuthorRead = Field(description="Taster (who scored the brew).")
+
+
+class TastingFilters(PageParams):
+    mine: bool = Field(default=False, description="Only tastings you made.")
+
+
+class TastingPage(Page[TastingRead]):
+    """One page of the tasting log, newest first."""
