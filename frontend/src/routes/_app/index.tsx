@@ -21,21 +21,13 @@ export const Route = createFileRoute("/_app/")({ component: DashboardPage })
 function DashboardPage() {
   const { user } = useCurrentUser()
   const { data: beans } = useQuery(beansListBeansOptions())
-  const { data: brews } = useQuery(brewsListBrewsOptions())
-  const { data: tastings } = useQuery(tastingsListAllTastingsOptions())
+  // limit=1: only the totals are wanted from these two, not the rows.
+  const { data: allBrews } = useQuery(brewsListBrewsOptions({ query: { limit: 1 } }))
+  const { data: allTastings } = useQuery(tastingsListAllTastingsOptions({ query: { limit: 1 } }))
+  const { data: myRecent } = useQuery(brewsListBrewsOptions({ query: { mine: true, limit: 5 } }))
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
 
-  const recentBrews = [...(brews ?? [])]
-    .filter((brew) => brew.user_id === user?.id)
-    .sort((a, b) => (b.brewed_at ?? "").localeCompare(a.brewed_at ?? ""))
-    .slice(0, 5)
-
-  // My tasting per brew (at most one, enforced by the API), for the star on each row.
-  const myTastingByBrew = new Map(
-    (tastings ?? [])
-      .filter((tasting) => tasting.user_id === user?.id)
-      .map((tasting) => [tasting.brew_id, tasting]),
-  )
+  const recentBrews = myRecent?.items ?? []
 
   const beanName = (id: number) => beans?.find((bean) => bean.id === id)?.name ?? `#${id}`
   const methodName = (id: number) =>
@@ -50,8 +42,8 @@ function DashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="Coffees" value={beans?.length ?? 0} icon={Bean} to="/beans" />
-        <Stat label="Brews" value={brews?.length ?? 0} icon={Coffee} to="/brews" />
-        <Stat label="Tastings" value={tastings?.length ?? 0} icon={NotebookPen} to="/tastings" />
+        <Stat label="Brews" value={allBrews?.total ?? 0} icon={Coffee} to="/brews" />
+        <Stat label="Tastings" value={allTastings?.total ?? 0} icon={NotebookPen} to="/tastings" />
       </div>
 
       <Card className="mt-6">
@@ -90,7 +82,7 @@ function DashboardPage() {
                     {brew.ratio ? ` · 1:${formatNumber(brew.ratio, 2)}` : ""}
                   </span>
                 </Link>
-                <QuickTasting brewId={brew.id} tasting={myTastingByBrew.get(brew.id)} />
+                <QuickTasting brewId={brew.id} tasting={brew.my_tasting ?? undefined} />
                 <BrewDiagnostics brew={brew} />
               </div>
             ))

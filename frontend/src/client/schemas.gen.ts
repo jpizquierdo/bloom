@@ -1756,6 +1756,33 @@ export const BrewMethodUpdateSchema = {
     description: 'Partial update; only provided fields are applied (PATCH semantics).'
 } as const;
 
+export const BrewPageSchema = {
+    properties: {
+        items: {
+            items: {
+                $ref: '#/components/schemas/BrewRead'
+            },
+            type: 'array',
+            title: 'Items'
+        },
+        total: {
+            type: 'integer',
+            title: 'Total',
+            description: 'Rows matching the filters, across all pages.',
+            examples: [
+                120
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'items',
+        'total'
+    ],
+    title: 'BrewPage',
+    description: 'One page of the brew log, most recent first.'
+} as const;
+
 export const BrewReadSchema = {
     properties: {
         lot_id: {
@@ -2014,6 +2041,17 @@ export const BrewReadSchema = {
                     type: 'null'
                 }
             ]
+        },
+        my_tasting: {
+            anyOf: [
+                {
+                    $ref: '#/components/schemas/TastingRead'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            description: 'Your own tasting of this brew, if you have scored it.'
         }
     },
     type: 'object',
@@ -3398,6 +3436,49 @@ export const RoasterUpdateSchema = {
     description: 'All fields optional; only provided fields are applied (PATCH semantics).'
 } as const;
 
+export const TastedBrewReadSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id',
+            examples: [
+                1
+            ]
+        },
+        bean_id: {
+            type: 'integer',
+            title: 'Bean Id',
+            examples: [
+                1
+            ]
+        },
+        method_id: {
+            type: 'integer',
+            title: 'Method Id',
+            examples: [
+                1
+            ]
+        },
+        brewed_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Brewed At',
+            examples: [
+                '2026-07-12T08:00:00Z'
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'bean_id',
+        'method_id',
+        'brewed_at'
+    ],
+    title: 'TastedBrewRead',
+    description: 'The brew a tasting scores, enough to name it without fetching the brew log.'
+} as const;
+
 export const TastingCreateSchema = {
     properties: {
         aroma: {
@@ -3551,6 +3632,33 @@ export const TastingCreateSchema = {
     },
     type: 'object',
     title: 'TastingCreate'
+} as const;
+
+export const TastingPageSchema = {
+    properties: {
+        items: {
+            items: {
+                $ref: '#/components/schemas/TastingRead'
+            },
+            type: 'array',
+            title: 'Items'
+        },
+        total: {
+            type: 'integer',
+            title: 'Total',
+            description: 'Rows matching the filters, across all pages.',
+            examples: [
+                120
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'items',
+        'total'
+    ],
+    title: 'TastingPage',
+    description: 'One page of the tasting log, newest first.'
 } as const;
 
 export const TastingReadSchema = {
@@ -3717,6 +3825,10 @@ export const TastingReadSchema = {
                 1
             ]
         },
+        brew: {
+            $ref: '#/components/schemas/TastedBrewRead',
+            description: 'The brew this tasting scores.'
+        },
         user_id: {
             type: 'integer',
             title: 'User Id',
@@ -3734,6 +3846,7 @@ export const TastingReadSchema = {
     required: [
         'id',
         'brew_id',
+        'brew',
         'user_id',
         'author'
     ],

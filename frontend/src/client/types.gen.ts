@@ -729,6 +729,24 @@ export type BrewMethodUpdate = {
 };
 
 /**
+ * BrewPage
+ *
+ * One page of the brew log, most recent first.
+ */
+export type BrewPage = {
+    /**
+     * Items
+     */
+    items: Array<BrewRead>;
+    /**
+     * Total
+     *
+     * Rows matching the filters, across all pages.
+     */
+    total: number;
+};
+
+/**
  * BrewRead
  */
 export type BrewRead = {
@@ -837,6 +855,10 @@ export type BrewRead = {
      */
     extraction_yield_percent?: string | null;
     diagnostics?: ExtractionDiagnosticsRead | null;
+    /**
+     * Your own tasting of this brew, if you have scored it.
+     */
+    my_tasting?: TastingRead | null;
 };
 
 /**
@@ -1440,6 +1462,30 @@ export type RoasterUpdate = {
 };
 
 /**
+ * TastedBrewRead
+ *
+ * The brew a tasting scores, enough to name it without fetching the brew log.
+ */
+export type TastedBrewRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Bean Id
+     */
+    bean_id: number;
+    /**
+     * Method Id
+     */
+    method_id: number;
+    /**
+     * Brewed At
+     */
+    brewed_at: string;
+};
+
+/**
  * TastingCreate
  */
 export type TastingCreate = {
@@ -1497,6 +1543,24 @@ export type TastingCreate = {
      * Free-form notes.
      */
     notes?: string | null;
+};
+
+/**
+ * TastingPage
+ *
+ * One page of the tasting log, newest first.
+ */
+export type TastingPage = {
+    /**
+     * Items
+     */
+    items: Array<TastingRead>;
+    /**
+     * Total
+     *
+     * Rows matching the filters, across all pages.
+     */
+    total: number;
 };
 
 /**
@@ -1565,6 +1629,10 @@ export type TastingRead = {
      * Brew Id
      */
     brew_id: number;
+    /**
+     * The brew this tasting scores.
+     */
+    brew: TastedBrewRead;
     /**
      * User Id
      *
@@ -2976,9 +3044,53 @@ export type BrewsListBrewsData = {
     path?: never;
     query?: {
         /**
+         * Limit
+         *
+         * Rows per page.
+         */
+        limit?: number;
+        /**
+         * Offset
+         *
+         * Rows to skip.
+         */
+        offset?: number;
+        /**
          * Mine
+         *
+         * Only brews you made.
          */
         mine?: boolean;
+        /**
+         * Bean Id
+         *
+         * Only brews of this bean.
+         */
+        bean_id?: number | null;
+        /**
+         * Roaster Id
+         *
+         * Only brews of this roaster's beans.
+         */
+        roaster_id?: number | null;
+        /**
+         * Method Id
+         *
+         * Only brews made with this method.
+         */
+        method_id?: number | null;
+        /**
+         * Untasted
+         *
+         * Only brews you have not tasted yet.
+         */
+        untasted?: boolean;
+        /**
+         * Q
+         *
+         * Case-insensitive search over bean, roaster, method and author names.
+         */
+        q?: string | null;
     };
     url: '/api/v1/brews';
 };
@@ -2994,11 +3106,9 @@ export type BrewsListBrewsError = BrewsListBrewsErrors[keyof BrewsListBrewsError
 
 export type BrewsListBrewsResponses = {
     /**
-     * Response Brews-List Brews
-     *
      * Successful Response
      */
-    200: Array<BrewRead>;
+    200: BrewPage;
 };
 
 export type BrewsListBrewsResponse = BrewsListBrewsResponses[keyof BrewsListBrewsResponses];
@@ -3185,7 +3295,21 @@ export type TastingsListAllTastingsData = {
     path?: never;
     query?: {
         /**
+         * Limit
+         *
+         * Rows per page.
+         */
+        limit?: number;
+        /**
+         * Offset
+         *
+         * Rows to skip.
+         */
+        offset?: number;
+        /**
          * Mine
+         *
+         * Only tastings you made.
          */
         mine?: boolean;
     };
@@ -3203,11 +3327,9 @@ export type TastingsListAllTastingsError = TastingsListAllTastingsErrors[keyof T
 
 export type TastingsListAllTastingsResponses = {
     /**
-     * Response Tastings-List All Tastings
-     *
      * Successful Response
      */
-    200: Array<TastingRead>;
+    200: TastingPage;
 };
 
 export type TastingsListAllTastingsResponse = TastingsListAllTastingsResponses[keyof TastingsListAllTastingsResponses];

@@ -1,13 +1,13 @@
 import {
   beansListBeansOptions,
   brewMethodsListBrewMethodsOptions,
-  brewsListBrewsOptions,
   tastingsDeleteTastingMutation,
-  tastingsListAllTastingsOptions,
+  tastingsListAllTastingsInfiniteOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { TastingRead } from "@/client/types.gen"
 import { TastingDialog } from "@/components/brews/tasting-dialog"
 import { DeleteAlert } from "@/components/data/delete-alert"
+import { LoadMore } from "@/components/data/load-more"
 import { PageHeader } from "@/components/data/page-header"
 import { RowActions } from "@/components/data/row-actions"
 import { Badge } from "@/components/ui/badge"
@@ -26,7 +26,8 @@ import { canEdit, useCurrentUser } from "@/lib/auth"
 import { TASTING_SCORES } from "@/lib/domain"
 import { formatDateTime, humanize } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { PAGE_SIZE, loadedItems, nextOffset, totalOf } from "@/lib/paging"
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
@@ -42,12 +43,15 @@ function TastingsPage() {
   const [deleting, setDeleting] = useState<TastingRead | null>(null)
 
   // mine=true returns only my tastings; without it the whole shared log comes back.
-  const { data: tastings, isLoading } = useQuery(
-    tastingsListAllTastingsOptions({ query: { mine: !showEveryone } }),
-  )
-  // A tasting only carries its brew_id, so join client-side (like the dashboard does) to
-  // name the coffee and method behind each one.
-  const { data: brews } = useQuery(brewsListBrewsOptions())
+  const tastingsQuery = useInfiniteQuery({
+    ...tastingsListAllTastingsInfiniteOptions({
+      query: { limit: PAGE_SIZE, mine: !showEveryone },
+    }),
+    initialPageParam: 0,
+    getNextPageParam: nextOffset,
+  })
+  const { isLoading } = tastingsQuery
+  // Each tasting carries a summary of its brew; beans and methods name it.
   const { data: beans } = useQuery(beansListBeansOptions())
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
 
@@ -58,9 +62,8 @@ function TastingsPage() {
   })
 
   // The API already returns newest first.
-  const sorted = tastings ?? []
+  const sorted = loadedItems(tastingsQuery.data)
 
-  const brewOf = (id: number) => brews?.find((brew) => brew.id === id)
   const beanName = (beanId: number) => beans?.find((bean) => bean.id === beanId)?.name
   const roasterName = (beanId: number) => beans?.find((bean) => bean.id === beanId)?.roaster.name
   const methodName = (methodId: number) => methods?.find((method) => method.id === methodId)?.name
@@ -98,31 +101,23 @@ function TastingsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {sorted.map((tasting) => {
-            const brew = brewOf(tasting.brew_id)
+            const { brew } = tasting
             const scored = TASTING_SCORES.filter((score) => tasting[score] !== null)
             return (
               <Card key={tasting.id}>
                 <CardHeader>
                   <CardTitle className="text-base">
-                    {brew ? (
-                      <Link
-                        to="/brews/$brewId"
-                        params={{ brewId: String(brew.id) }}
-                        className="hover:underline"
-                      >
-                        {beanName(brew.bean_id) ?? "Coffee"}
-                      </Link>
-                    ) : (
-                      (beanName(tasting.brew_id) ?? "Tasting")
-                    )}
+                    <Link
+                      to="/brews/$brewId"
+                      params={{ brewId: String(brew.id) }}
+                      className="hover:underline"
+                    >
+                      {beanName(brew.bean_id) ?? "Coffee"}
+                    </Link>
                   </CardTitle>
                   <CardDescription>
-                    {brew ? (
-                      <>
-                        {roasterName(brew.bean_id) ? `${roasterName(brew.bean_id)} · ` : ""}
-                        {methodName(brew.method_id) ?? "—"} · {formatDateTime(brew.brewed_at)} ·{" "}
-                      </>
-                    ) : null}
+                    {roasterName(brew.bean_id) ? `${roasterName(brew.bean_id)} · ` : ""}
+                    {methodName(brew.method_id) ?? "—"} · {formatDateTime(brew.brewed_at)} ·{" "}
                     {tasting.author.username}
                   </CardDescription>
                   <CardAction>
@@ -171,6 +166,14 @@ function TastingsPage() {
           })}
         </div>
       )}
+
+      <LoadMore
+        shown={sorted.length}
+        total={totalOf(tastingsQuery.data)}
+        hasNextPage={tastingsQuery.hasNextPage}
+        isFetchingNextPage={tastingsQuery.isFetchingNextPage}
+        onLoadMore={() => tastingsQuery.fetchNextPage()}
+      />
 
       {editing ? (
         <TastingDialog
