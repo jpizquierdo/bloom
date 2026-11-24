@@ -67,4 +67,4 @@ def create_brew_from_recipe(
 ) -> BrewRead:
     """Create a brew from a recipe snapshot; any authenticated user may use it."""
     brew = brew_service.create_brew_from_recipe(db, recipe_id, data, user)
-    return brew_service.serialize(brew)
+    return brew_service.serialize(brew, user)

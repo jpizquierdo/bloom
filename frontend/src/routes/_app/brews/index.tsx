@@ -2,10 +2,9 @@ import {
   beansListBeansOptions,
   brewMethodsListBrewMethodsOptions,
   brewsDeleteBrewMutation,
-  brewsListBrewsOptions,
+  brewsListBrewsInfiniteOptions,
   equipmentListEquipmentOptions,
   roastersListRoastersOptions,
-  tastingsListAllTastingsOptions,
 } from "@/client/@tanstack/react-query.gen"
 import type { BrewRead } from "@/client/types.gen"
 import { RecipeDialog } from "@/components/beans/recipe-dialog"
@@ -14,6 +13,7 @@ import { BrewDiagnostics } from "@/components/brews/diagnostics"
 import { QuickTasting } from "@/components/brews/quick-tasting"
 import { Combobox } from "@/components/data/combobox"
 import { DeleteAlert } from "@/components/data/delete-alert"
+import { LoadMore } from "@/components/data/load-more"
 import { Metric } from "@/components/data/metric"
 import { PageHeader } from "@/components/data/page-header"
 import { RowActions } from "@/components/data/row-actions"
@@ -35,11 +35,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { canEdit, useCurrentUser } from "@/lib/auth"
 import { beanLabel } from "@/lib/domain"
 import { formatDateTime, formatNumber, formatSeconds } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { PAGE_SIZE, loadedItems, nextOffset, totalOf } from "@/lib/paging"
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute } from "@tanstack/react-router"
 import { BookmarkPlus, Plus, StarOff, User, X } from "lucide-react"
 import { useState } from "react"
@@ -50,14 +52,10 @@ function BrewsPage() {
   const { user } = useCurrentUser()
   const feedback = useCrudFeedback()
 
-  const { data, isLoading } = useQuery(brewsListBrewsOptions())
   const { data: beans } = useQuery(beansListBeansOptions())
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
   const { data: equipment } = useQuery(equipmentListEquipmentOptions())
   const { data: roasters } = useQuery(roastersListRoastersOptions())
-  const { data: myTastings } = useQuery(
-    tastingsListAllTastingsOptions({ query: { mine: true } }),
-  )
 
   const [editing, setEditing] = useState<BrewRead | null>(null)
   const [duplicating, setDuplicating] = useState<BrewRead | null>(null)
@@ -70,6 +68,27 @@ function BrewsPage() {
   const [mineOnly, setMineOnly] = useState(false)
   const [untastedOnly, setUntastedOnly] = useState(false)
   const [search, setSearch] = useState("")
+  const query = useDebouncedValue(search.trim())
+
+  // Filtering, search and order all happen on the server; the log is fetched a page at a time.
+  const asId = (value: string) => (value === "all" ? undefined : Number(value))
+  const brewsQuery = useInfiniteQuery({
+    ...brewsListBrewsInfiniteOptions({
+      query: {
+        limit: PAGE_SIZE,
+        roaster_id: asId(roasterFilter),
+        bean_id: asId(beanFilter),
+        method_id: asId(methodFilter),
+        mine: mineOnly || undefined,
+        untasted: untastedOnly || undefined,
+        q: query || undefined,
+      },
+    }),
+    initialPageParam: 0,
+    getNextPageParam: nextOffset,
+  })
+  const brews = loadedItems(brewsQuery.data)
+  const { isLoading } = brewsQuery
 
   const remove = useMutation({
     ...brewsDeleteBrewMutation(),
@@ -84,48 +103,21 @@ function BrewsPage() {
   const methodName = (id: number) => methodOf(id)?.name ?? `#${id}`
   const grinderName = (id: number | null | undefined) =>
     equipment?.find((item) => item.id === id)?.name ?? "—"
-  const roasterIdForBean = (beanId: number) => beanOf(beanId)?.roaster.id
 
-  // At most one tasting per brew for the current user (enforced by the API).
-  const myTastingByBrew = new Map((myTastings ?? []).map((tasting) => [tasting.brew_id, tasting]))
 
   // When a roaster is picked, the bean dropdown only offers that roaster's beans.
   const beanOptions = (beans ?? []).filter(
     (bean) => roasterFilter === "all" || String(bean.roaster.id) === roasterFilter,
   )
 
-  const query = search.trim().toLowerCase()
-  const filtered = (data ?? [])
-    .filter((brew) => {
-      if (roasterFilter !== "all" && String(roasterIdForBean(brew.bean_id)) !== roasterFilter) {
-        return false
-      }
-      if (beanFilter !== "all" && String(brew.bean_id) !== beanFilter) return false
-      if (methodFilter !== "all" && String(brew.method_id) !== methodFilter) return false
-      if (mineOnly && brew.user_id !== user?.id) return false
-      if (untastedOnly && myTastingByBrew.has(brew.id)) return false
-      if (query !== "") {
-        const haystack = [
-          beanName(brew.bean_id),
-          roasterName(brew.bean_id),
-          methodName(brew.method_id),
-          brew.author.username,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase()
-        if (!haystack.includes(query)) return false
-      }
-      return true
-    })
-    .sort((a, b) => (b.brewed_at ?? "").localeCompare(a.brewed_at ?? ""))
 
   const hasFilters =
     roasterFilter !== "all" ||
     beanFilter !== "all" ||
     methodFilter !== "all" ||
     mineOnly ||
-    untastedOnly
+    untastedOnly ||
+    query !== ""
 
   function pickRoaster(value: string) {
     setRoasterFilter(value)
@@ -138,6 +130,7 @@ function BrewsPage() {
     setMethodFilter("all")
     setMineOnly(false)
     setUntastedOnly(false)
+    setSearch("")
   }
 
   return (
@@ -240,16 +233,16 @@ function BrewsPage() {
             <Skeleton key={i} className="h-56 w-full" />
           ))}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : brews.length === 0 ? (
         <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No brews yet. Log the last coffee you made.
+          {hasFilters ? "No brews match these filters." : "No brews yet. Log the last coffee you made."}
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((brew) => {
+          {brews.map((brew) => {
             const method = methodOf(brew.method_id)
             const roaster = roasterName(brew.bean_id)
-            const myOverall = myTastingByBrew.get(brew.id)?.overall
+            const myOverall = brew.my_tasting?.overall
             // Espresso's meaningful "out" is the beverage yield; for filter/immersion the
             // recipe is defined by the water you pour, so show that instead.
             const out =
@@ -280,7 +273,7 @@ function BrewsPage() {
                     ) : null}
                   </CardTitle>
                   <div className="flex items-center gap-2">
-                    <QuickTasting brewId={brew.id} tasting={myTastingByBrew.get(brew.id)} />
+                    <QuickTasting brewId={brew.id} tasting={brew.my_tasting ?? undefined} />
                     {myOverall ? null : (
                       <span className="text-xs text-muted-foreground">Not tasted yet</span>
                     )}
@@ -347,6 +340,14 @@ function BrewsPage() {
           })}
         </div>
       )}
+
+      <LoadMore
+        shown={brews.length}
+        total={totalOf(brewsQuery.data)}
+        hasNextPage={brewsQuery.hasNextPage}
+        isFetchingNextPage={brewsQuery.isFetchingNextPage}
+        onLoadMore={() => brewsQuery.fetchNextPage()}
+      />
 
       <BrewDialog
         open={dialogOpen}

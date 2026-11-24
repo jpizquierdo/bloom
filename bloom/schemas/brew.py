@@ -5,7 +5,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from bloom.schemas.common import Celsius, Grams, GrindSetting, Notes, Seconds, TdsPercent, reject_null
+from bloom.schemas.common import Celsius, Grams, GrindSetting, Notes, Page, PageParams, Seconds, TdsPercent, reject_null
+from bloom.schemas.tasting import TastingRead
 from bloom.schemas.user import AuthorRead
 
 
@@ -71,3 +72,21 @@ class BrewRead(BrewBase):
         examples=["22.50"],
     )
     diagnostics: ExtractionDiagnosticsRead | None = None
+    my_tasting: TastingRead | None = Field(default=None, description="Your own tasting of this brew, if you have scored it.")
+
+
+class BrewFilters(PageParams):
+    mine: bool = Field(default=False, description="Only brews you made.")
+    bean_id: int | None = Field(default=None, description="Only brews of this bean.")
+    roaster_id: int | None = Field(default=None, description="Only brews of this roaster's beans.")
+    method_id: int | None = Field(default=None, description="Only brews made with this method.")
+    untasted: bool = Field(default=False, description="Only brews you have not tasted yet.")
+    q: str | None = Field(
+        default=None,
+        max_length=100,
+        description="Case-insensitive search over bean, roaster, method and author names.",
+    )
+
+
+class BrewPage(Page[BrewRead]):
+    """One page of the brew log, most recent first."""

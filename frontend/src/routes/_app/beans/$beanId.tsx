@@ -1,7 +1,7 @@
 import {
   beansGetBeanOptions,
   brewMethodsListBrewMethodsOptions,
-  brewsListBrewsOptions,
+  brewsListBrewsInfiniteOptions,
   recipesDeleteRecipeMutation,
   recipesFavoriteRecipeMutation,
   recipesListRecipesOptions,
@@ -20,6 +20,7 @@ import { RecipeDialog } from "@/components/beans/recipe-dialog"
 import { BrewDialog } from "@/components/brews/brew-dialog"
 import { DataTable } from "@/components/data/data-table"
 import { DeleteAlert } from "@/components/data/delete-alert"
+import { LoadMore } from "@/components/data/load-more"
 import { PageHeader } from "@/components/data/page-header"
 import { RowActions } from "@/components/data/row-actions"
 import { Badge } from "@/components/ui/badge"
@@ -29,7 +30,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { canEdit, useCurrentUser } from "@/lib/auth"
 import { formatDate, formatDateTime, formatNumber, formatSeconds, humanize } from "@/lib/format"
 import { useCrudFeedback } from "@/lib/mutations"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { PAGE_SIZE, loadedItems, nextOffset, totalOf } from "@/lib/paging"
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 import { ArrowLeft, CheckCheck, Coffee, Merge, Pencil, Plus, RotateCcw, Star } from "lucide-react"
@@ -48,7 +50,11 @@ function BeanDetailPage() {
   const { data: bean, isLoading } = useQuery(beansGetBeanOptions({ path: { bean_id: id } }))
   const { data: lots } = useQuery(lotsListLotsOptions({ path: { bean_id: id } }))
   const { data: recipes } = useQuery(recipesListRecipesOptions({ path: { bean_id: id } }))
-  const { data: allBrews } = useQuery(brewsListBrewsOptions())
+  const brewsQuery = useInfiniteQuery({
+    ...brewsListBrewsInfiniteOptions({ query: { bean_id: id, limit: PAGE_SIZE } }),
+    initialPageParam: 0,
+    getNextPageParam: nextOffset,
+  })
   const { data: methods } = useQuery(brewMethodsListBrewMethodsOptions())
 
   const [brewDialogOpen, setBrewDialogOpen] = useState(false)
@@ -93,7 +99,7 @@ function BeanDetailPage() {
     return <Skeleton className="h-64 w-full" />
   }
 
-  const brews = allBrews?.filter((brew) => brew.bean_id === id) ?? []
+  const brews = loadedItems(brewsQuery.data)
   const sortedRecipes = [...(recipes ?? [])].sort(
     (a, b) => Number(b.is_favorite) - Number(a.is_favorite) || a.id - b.id,
   )
@@ -452,7 +458,7 @@ function BeanDetailPage() {
 
       <div className="mt-8 mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">
-          Brews <span className="text-muted-foreground">({brews.length})</span>
+          Brews <span className="text-muted-foreground">({totalOf(brewsQuery.data)})</span>
         </h2>
         <Button
           variant="outline"
@@ -474,6 +480,15 @@ function BeanDetailPage() {
           navigate({ to: "/brews/$brewId", params: { brewId: String(brew.id) } })
         }
       />
+      {brewsQuery.hasNextPage ? (
+        <LoadMore
+          shown={brews.length}
+          total={totalOf(brewsQuery.data)}
+          hasNextPage
+          isFetchingNextPage={brewsQuery.isFetchingNextPage}
+          onLoadMore={() => brewsQuery.fetchNextPage()}
+        />
+      ) : null}
 
       <BeanDialog open={editDialogOpen} onOpenChange={setEditDialogOpen} bean={bean} />
       <MergeBeanDialog open={mergeDialogOpen} onOpenChange={setMergeDialogOpen} bean={bean} />

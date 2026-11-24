@@ -589,7 +589,9 @@ export const recipesCreateBrewFromRecipe = <ThrowOnError extends boolean = false
 /**
  * List Brews
  *
- * List the shared brew log. Use `?mine=true` to return only your own brews.
+ * One page of the shared brew log, most recent first, with the total matching the filters.
+ *
+ * Any authenticated user. Each brew carries your own tasting of it (`my_tasting`), if any.
  */
 export const brewsListBrews = <ThrowOnError extends boolean = false>(options?: Options<BrewsListBrewsData, ThrowOnError>): RequestResult<BrewsListBrewsResponses, BrewsListBrewsErrors, ThrowOnError> => (options?.client ?? client).get<BrewsListBrewsResponses, BrewsListBrewsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -684,7 +686,7 @@ export const tastingsCreateTasting = <ThrowOnError extends boolean = false>(opti
 /**
  * List All Tastings
  *
- * List the shared tasting log. Use `?mine=true` to return only your own tastings.
+ * One page of the shared tasting log, newest first, with the total. Use `?mine=true` for only yours.
  */
 export const tastingsListAllTastings = <ThrowOnError extends boolean = false>(options?: Options<TastingsListAllTastingsData, ThrowOnError>): RequestResult<TastingsListAllTastingsResponses, TastingsListAllTastingsErrors, ThrowOnError> => (options?.client ?? client).get<TastingsListAllTastingsResponses, TastingsListAllTastingsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

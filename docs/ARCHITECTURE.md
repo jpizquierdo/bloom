@@ -427,14 +427,29 @@ change, not a UI one.
 
 Deletes cascade server-side (a bean takes its brews and its tastings with it) and rows
 cross-reference each other, so a blanket `invalidateQueries()` after any write is both the
-simplest and the most correct refresh. It is affordable precisely because the lists are small
-and unpaginated — see 20. Revisit together with pagination, not before.
+simplest and the most correct refresh. It stays affordable with pagination (20): a paged list
+refetches only the pages already loaded, and the lists that are fetched whole are the small ones.
 
-### 20 — Sorting and filtering are client-side
+### 20 — The logs are paged on the server; the catalog is fetched whole
 
-The API returns whole tables (no `limit`/`offset` anywhere), so the UI sorts and filters what it
-already has. This is honest for a household-sized log and wrong at scale; the day a list gets
-long, pagination is a backend change first and the tables follow.
+Two kinds of list grow at different rates:
+
+- **Logs grow with every cup**: `GET /brews` and `GET /tastings` return one page,
+  `{ items, total }`, most recent first (`brewed_at DESC, id DESC` for brews, so equal timestamps
+  never swap places between pages). `limit` (1–200, default 50) and `offset` select the page. The
+  brew list's filters are server-side too (`mine`, `bean_id`, `roaster_id`, `method_id`,
+  `untasted` for the caller, and `q`, a case-insensitive search over bean, roaster, method and
+  author names), and `total` counts every match, not just the page. The UI pages with
+  "Load more" (`useInfiniteQuery`) rather than numbered pages: it reads like the card grid it is.
+- **The catalog grows slowly** (beans, roasters, methods, equipment, users): it is returned
+  whole and sorted or filtered in the browser. These lists feed dropdowns and name the rows of the
+  logs, and they stay small next to the logs.
+
+So the logs never have to be joined client-side against each other, each brew carries the
+caller's own tasting (`my_tasting`) and each tasting a summary of its brew (`brew`: id, bean,
+method, date). Measured before this change, on the whole-table design: `GET /brews` took about
+140 ms and 0.9 MiB with 2 000 brews and 0.8 s and 4.5 MiB with 10 000; a page now costs the same
+whatever the log's size.
 
 ### 21 — Password resets are stateless tokens, not a table
 

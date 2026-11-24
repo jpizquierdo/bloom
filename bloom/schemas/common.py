@@ -24,6 +24,21 @@ GrindSetting = Annotated[str, Field(max_length=MAX_GRIND_SETTING_LENGTH)]
 Notes = Annotated[str, Field(max_length=MAX_BREWING_NOTES_LENGTH)]
 
 
+MAX_PAGE_SIZE = 200
+
+
+class PageParams(BaseModel):
+    """Offset pagination for the logs that grow with every cup (brews, tastings)."""
+
+    limit: int = Field(default=50, ge=1, le=MAX_PAGE_SIZE, description="Rows per page.")
+    offset: int = Field(default=0, ge=0, description="Rows to skip.")
+
+
+class Page[T](BaseModel):
+    items: list[T]
+    total: int = Field(description="Rows matching the filters, across all pages.", examples=[120])
+
+
 class Message(BaseModel):
     """A human-readable outcome, for endpoints with nothing else to return."""
 

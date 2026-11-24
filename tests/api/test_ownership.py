@@ -53,8 +53,8 @@ def test_brew_log_is_shared(client, alice_headers, bob_headers, alice_stack, loo
         },
     ).json()["id"]
 
-    alice_view = {b["id"] for b in client.get("/brews", headers=alice_headers).json()}
-    bob_view = {b["id"] for b in client.get("/brews", headers=bob_headers).json()}
+    alice_view = {b["id"] for b in client.get("/brews", headers=alice_headers).json()["items"]}
+    bob_view = {b["id"] for b in client.get("/brews", headers=bob_headers).json()["items"]}
 
     # Everyone sees the whole shared brew log.
     assert alice_view == bob_view == {alice_stack["brew"], bob_brew_id}
@@ -72,10 +72,10 @@ def test_mine_filter_returns_only_own_brews(client, alice_headers, bob_headers, 
     ).json()["id"]
 
     # Default: the whole shared log.
-    assert len(client.get("/brews", headers=alice_headers).json()) == 2
+    assert len(client.get("/brews", headers=alice_headers).json()["items"]) == 2
     # ?mine=true: only the caller's own brews.
-    alice_mine = {b["id"] for b in client.get("/brews?mine=true", headers=alice_headers).json()}
-    bob_mine = {b["id"] for b in client.get("/brews?mine=true", headers=bob_headers).json()}
+    alice_mine = {b["id"] for b in client.get("/brews?mine=true", headers=alice_headers).json()["items"]}
+    bob_mine = {b["id"] for b in client.get("/brews?mine=true", headers=bob_headers).json()["items"]}
     assert alice_mine == {alice_stack["brew"]}
     assert bob_mine == {bob_brew_id}
 
@@ -101,10 +101,10 @@ def test_mine_filter_returns_only_own_tastings(client, alice_headers, bob_header
     bob_tasting_id = client.post(f"/brews/{alice_stack['brew']}/tastings", headers=bob_headers, json={"overall": 5}).json()["id"]
 
     # Default: the whole shared tasting log.
-    assert len(client.get("/tastings", headers=alice_headers).json()) == 2
+    assert len(client.get("/tastings", headers=alice_headers).json()["items"]) == 2
     # ?mine=true: only the caller's own tastings.
-    alice_mine = {t["id"] for t in client.get("/tastings?mine=true", headers=alice_headers).json()}
-    bob_mine = {t["id"] for t in client.get("/tastings?mine=true", headers=bob_headers).json()}
+    alice_mine = {t["id"] for t in client.get("/tastings?mine=true", headers=alice_headers).json()["items"]}
+    bob_mine = {t["id"] for t in client.get("/tastings?mine=true", headers=bob_headers).json()["items"]}
     assert alice_mine == {alice_stack["tasting"]}
     assert bob_mine == {bob_tasting_id}
 
@@ -117,7 +117,7 @@ def test_non_author_cannot_edit_or_delete_tasting(client, bob_headers, alice_sta
 
 def test_admin_sees_all(client, admin_headers, alice_stack):
     assert client.get(f"/brews/{alice_stack['brew']}", headers=admin_headers).status_code == 200
-    assert len(client.get("/brews", headers=admin_headers).json()) == 1
+    assert len(client.get("/brews", headers=admin_headers).json()["items"]) == 1
 
 
 def test_delete_bean_cascades(client, alice_headers, alice_stack):

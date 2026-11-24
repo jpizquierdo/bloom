@@ -2059,7 +2059,7 @@
           "brews"
         ],
         "summary": "List Brews",
-        "description": "List the shared brew log. Use `?mine=true` to return only your own brews.",
+        "description": "One page of the shared brew log, most recent first, with the total matching the filters.\n\nAny authenticated user. Each brew carries your own tasting of it (`my_tasting`), if any.",
         "operationId": "brews-list_brews",
         "security": [
           {
@@ -2068,14 +2068,128 @@
         ],
         "parameters": [
           {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Rows per page.",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Rows per page."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Rows to skip.",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Rows to skip."
+          },
+          {
             "name": "mine",
             "in": "query",
             "required": false,
             "schema": {
               "type": "boolean",
+              "description": "Only brews you made.",
               "default": false,
               "title": "Mine"
-            }
+            },
+            "description": "Only brews you made."
+          },
+          {
+            "name": "bean_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only brews of this bean.",
+              "title": "Bean Id"
+            },
+            "description": "Only brews of this bean."
+          },
+          {
+            "name": "roaster_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only brews of this roaster's beans.",
+              "title": "Roaster Id"
+            },
+            "description": "Only brews of this roaster's beans."
+          },
+          {
+            "name": "method_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only brews made with this method.",
+              "title": "Method Id"
+            },
+            "description": "Only brews made with this method."
+          },
+          {
+            "name": "untasted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Only brews you have not tasted yet.",
+              "default": false,
+              "title": "Untasted"
+            },
+            "description": "Only brews you have not tasted yet."
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Case-insensitive search over bean, roaster, method and author names.",
+              "title": "Q"
+            },
+            "description": "Case-insensitive search over bean, roaster, method and author names."
           }
         ],
         "responses": {
@@ -2084,11 +2198,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BrewRead"
-                  },
-                  "title": "Response Brews-List Brews"
+                  "$ref": "#/components/schemas/BrewPage"
                 }
               }
             }
@@ -2363,7 +2473,7 @@
           "tastings"
         ],
         "summary": "List All Tastings",
-        "description": "List the shared tasting log. Use `?mine=true` to return only your own tastings.",
+        "description": "One page of the shared tasting log, newest first, with the total. Use `?mine=true` for only yours.",
         "operationId": "tastings-list_all_tastings",
         "security": [
           {
@@ -2372,14 +2482,43 @@
         ],
         "parameters": [
           {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Rows per page.",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Rows per page."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Rows to skip.",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Rows to skip."
+          },
+          {
             "name": "mine",
             "in": "query",
             "required": false,
             "schema": {
               "type": "boolean",
+              "description": "Only tastings you made.",
               "default": false,
               "title": "Mine"
-            }
+            },
+            "description": "Only tastings you made."
           }
         ],
         "responses": {
@@ -2388,11 +2527,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TastingRead"
-                  },
-                  "title": "Response Tastings-List All Tastings"
+                  "$ref": "#/components/schemas/TastingPage"
                 }
               }
             }
@@ -4298,6 +4433,32 @@
         "title": "BrewMethodUpdate",
         "description": "Partial update; only provided fields are applied (PATCH semantics)."
       },
+      "BrewPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BrewRead"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Rows matching the filters, across all pages.",
+            "examples": [
+              120
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "BrewPage",
+        "description": "One page of the brew log, most recent first."
+      },
       "BrewRead": {
         "properties": {
           "lot_id": {
@@ -4556,6 +4717,17 @@
                 "type": "null"
               }
             ]
+          },
+          "my_tasting": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TastingRead"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Your own tasting of this brew, if you have scored it."
           }
         },
         "type": "object",
@@ -5923,6 +6095,48 @@
         "title": "RoasterUpdate",
         "description": "All fields optional; only provided fields are applied (PATCH semantics)."
       },
+      "TastedBrewRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "bean_id": {
+            "type": "integer",
+            "title": "Bean Id",
+            "examples": [
+              1
+            ]
+          },
+          "method_id": {
+            "type": "integer",
+            "title": "Method Id",
+            "examples": [
+              1
+            ]
+          },
+          "brewed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Brewed At",
+            "examples": [
+              "2026-07-12T08:00:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "bean_id",
+          "method_id",
+          "brewed_at"
+        ],
+        "title": "TastedBrewRead",
+        "description": "The brew a tasting scores, enough to name it without fetching the brew log."
+      },
       "TastingCreate": {
         "properties": {
           "aroma": {
@@ -6076,6 +6290,32 @@
         },
         "type": "object",
         "title": "TastingCreate"
+      },
+      "TastingPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TastingRead"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Rows matching the filters, across all pages.",
+            "examples": [
+              120
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "TastingPage",
+        "description": "One page of the tasting log, newest first."
       },
       "TastingRead": {
         "properties": {
@@ -6241,6 +6481,10 @@
               1
             ]
           },
+          "brew": {
+            "$ref": "#/components/schemas/TastedBrewRead",
+            "description": "The brew this tasting scores."
+          },
           "user_id": {
             "type": "integer",
             "title": "User Id",
@@ -6258,6 +6502,7 @@
         "required": [
           "id",
           "brew_id",
+          "brew",
           "user_id",
           "author"
         ],
