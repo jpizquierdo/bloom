@@ -115,8 +115,7 @@ class Settings(BaseSettings):
 
     def require_valid_auth_config(self) -> None:
         """Refuse a half-configured OIDC client, or disabling local login with no SSO to replace it."""
-        oidc_vars = (self.OIDC_ISSUER, self.OIDC_CLIENT_ID, self.OIDC_CLIENT_SECRET, self.OIDC_REDIRECT_URI)
-        if any(oidc_vars) and not all(oidc_vars):
+        if any(self._oidc_vars) and not self.oidc_enabled:
             raise RuntimeError("OIDC_ISSUER, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET and OIDC_REDIRECT_URI must all be set to enable OIDC.")
         if self.DISABLE_LOCAL_AUTH and not self.oidc_enabled:
             raise RuntimeError("DISABLE_LOCAL_AUTH=true needs OIDC configured, otherwise nobody can log in.")
@@ -124,7 +123,11 @@ class Settings(BaseSettings):
     @property
     def oidc_enabled(self) -> bool:
         """True when every required OIDC setting is present."""
-        return all((self.OIDC_ISSUER, self.OIDC_CLIENT_ID, self.OIDC_CLIENT_SECRET, self.OIDC_REDIRECT_URI))
+        return all(self._oidc_vars)
+
+    @property
+    def _oidc_vars(self) -> tuple[str | None, ...]:
+        return (self.OIDC_ISSUER, self.OIDC_CLIENT_ID, self.OIDC_CLIENT_SECRET, self.OIDC_REDIRECT_URI)
 
     @property
     def oidc_admin_groups(self) -> set[str]:
