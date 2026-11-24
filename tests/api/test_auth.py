@@ -66,3 +66,8 @@ def test_password_change_invalidates_existing_access_tokens(client, db, users):
     db.commit()
 
     assert client.get("/auth/me", headers=headers).status_code == 401
+
+
+def test_login_email_ignores_case(client, users):
+    resp = client.post("/auth/token", data={"username": "Alice@EXAMPLE.com", "password": "alicepass1"})
+    assert resp.status_code == 200

@@ -113,8 +113,9 @@ Design points:
   `BLOOM_ADMIN_PASSWORD`), created only if it does not exist. There is **no public sign-up**:
   admins create further accounts, which default to `user`.
 - Each account has a unique **`username`** handle (unique on `lower(username)`) alongside its
-  email; the login form's single field accepts **either** an email or a handle. Handles are
-  set by an admin today and will be supplied by the IdP (Keycloak/Authentik) once automated
+  email, which is unique on `lower(email)` too: `Bob@x.com` and `bob@x.com` are one account, and
+  login and password recovery match regardless of case. The login form's single field accepts
+  **either** an email or a handle. Handles are set by an admin today and will be supplied by the IdP (Keycloak/Authentik) once automated
   provisioning lands. Beans, recipes, brews and tastings embed their creator as a nested
   `{ id, username }` object (`owner`/`author`) so the UI can name who added, pulled or scored
   a cup without reading the admin-only user list.
