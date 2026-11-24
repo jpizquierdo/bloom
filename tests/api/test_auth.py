@@ -120,3 +120,10 @@ def test_token_signed_with_another_key_is_refused(client, users):
     payload = {"sub": str(users["alice"].id), "type": "access", "iat_ms": 9_999_999_999_999}
     token = jwt.encode(payload, "x" * 32, algorithm=settings.JWT_ALGORITHM)
     assert client.get("/auth/me", headers={"Authorization": f"Bearer {token}"}).status_code == 401
+
+
+def test_failed_login_does_not_log_what_was_typed(client, users, caplog):
+    # People sometimes type their password into the username box; it must not reach the logs.
+    client.post("/auth/token", data={"username": "hunter2-my-password", "password": "x"})
+    assert "Failed login" in caplog.text
+    assert "hunter2-my-password" not in caplog.text
