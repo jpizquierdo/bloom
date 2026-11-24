@@ -73,7 +73,7 @@ FAVORITE_RECIPES = (0, 2)
 BREW_RECIPES = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
 
 # (bean index, method index, dose, yield, water, grind, temp, seconds, tds, days ago)
-BREWS = [
+RECENT_BREWS = [
     (0, 0, "15.0", None, "250.0", "22", "94.0", 165, "1.38", 0),
     (1, 0, "15.0", None, "250.0", "21", "93.0", 172, "1.41", 1),
     (2, 4, "18.0", "38.0", None, "2.4", "93.0", 28, "9.20", 1),
@@ -83,6 +83,34 @@ BREWS = [
     (0, 1, "30.0", None, "500.0", "24", "94.0", 240, None, 6),
     (4, 3, "30.0", None, "450.0", "28", "95.0", 480, None, 8),
 ]
+
+# (bean index, method index, dose, yield, water, grind, temp, seconds, tds): the regular setups.
+HABITS = [
+    (0, 0, "15.0", None, "250.0", "22", "94.0", 165, "1.38"),
+    (1, 0, "15.0", None, "250.0", "21", "93.0", 172, "1.41"),
+    (2, 4, "18.0", "38.0", None, "2.4", "93.0", 28, "9.20"),
+    (3, 4, "18.5", "37.0", None, "2.2", "92.0", 26, "10.10"),
+    (4, 2, "14.0", None, "200.0", "18", "88.0", 120, "1.32"),
+    (5, 4, "18.0", "36.0", None, "2.3", "93.5", 30, "9.80"),
+    (0, 1, "30.0", None, "500.0", "24", "94.0", 240, "1.36"),
+    (4, 3, "30.0", None, "450.0", "28", "95.0", 480, "1.48"),
+]
+# Enough older brews to push the log past one page of the UI (24), so "Load more" has work to do.
+HISTORY_LENGTH = 24
+
+
+def history(count: int = HISTORY_LENGTH) -> list[tuple]:
+    """Older brews: the same habits, nudged so no two cups are identical, one every ~2 days."""
+    brews = []
+    for i in range(count):
+        bean, method, dose, yield_g, water, grind, temp, seconds, tds = HABITS[i % len(HABITS)]
+        nudge = (i * 7) % 5 - 2  # -2..2, steady across runs
+        tds_nudged = str(Decimal(tds) + Decimal(nudge) * Decimal("0.04" if Decimal(tds) < 5 else "0.2"))
+        brews.append((bean, method, dose, yield_g, water, grind, temp, seconds + nudge * 3, tds_nudged, 10 + i * 2 + i % 2))
+    return brews
+
+
+BREWS = [*RECENT_BREWS, *history()]
 
 # Scores are 1-5. Deliberately partial: the last brews stay untasted, so the
 # "Not tasted" filter has something to show.
