@@ -481,9 +481,8 @@ two templates. With no SMTP host configured, links are logged instead of sent, s
 and the tests run with no mail config at all.
 
 `POST /auth/recover-password` always answers `202` with the same body, whether or not the
-address is registered, so it cannot be used to enumerate accounts. It is not rate-limited:
-real limiting needs shared state across workers, which is infrastructure this project does not
-otherwise have.
+address is registered, so it cannot be used to enumerate accounts. It is also rate-limited per
+address and per client, so it cannot be used to flood an inbox (decision 24).
 
 ### 22 — Duplicate beans are flagged, not forbidden
 
