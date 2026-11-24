@@ -35,3 +35,11 @@ class UnprocessableError(Exception):
     Used for cross-field constraints only checkable against the database — e.g. a
     brew that names a lot belonging to a different bean. Maps to a 422.
     """
+
+
+class BadRequestError(Exception):
+    """The request is valid in form but refused because of who is asking.
+
+    Used for the admin self-lockout guard: an admin may not demote or deactivate their own
+    account. Maps to a 400.
+    """

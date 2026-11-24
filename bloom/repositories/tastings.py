@@ -3,6 +3,7 @@
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from bloom.db.models.tasting import Tasting
@@ -34,11 +35,20 @@ def get_for_brew_user(db: Session, brew_id: int, user_id: int) -> Tasting | None
     return db.execute(stmt).scalars().first()
 
 
-def add(db: Session, *, brew_id: int, user_id: int, **fields: Any) -> Tasting:
-    tasting = Tasting(brew_id=brew_id, user_id=user_id, **fields)
-    db.add(tasting)
-    db.flush()
-    return tasting
+def add_if_absent(db: Session, *, brew_id: int, user_id: int, **fields: Any) -> Tasting | None:
+    """Insert a tasting, or return ``None`` if ``(brew_id, user_id)`` already has one.
+
+    Runs in a savepoint so losing a race against a concurrent insert leaves the caller's
+    transaction usable.
+    """
+    try:
+        with db.begin_nested():
+            tasting = Tasting(brew_id=brew_id, user_id=user_id, **fields)
+            db.add(tasting)
+            db.flush()
+            return tasting
+    except IntegrityError:
+        return None
 
 
 def delete(db: Session, tasting: Tasting) -> None:
