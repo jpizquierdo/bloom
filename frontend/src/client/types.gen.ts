@@ -5,6 +5,26 @@ export type ClientOptions = {
 };
 
 /**
+ * AuthConfig
+ *
+ * The login methods this server offers.
+ */
+export type AuthConfig = {
+    /**
+     * Local Auth Enabled
+     *
+     * Email/username + password login is available.
+     */
+    local_auth_enabled: boolean;
+    /**
+     * Oidc Enabled
+     *
+     * Single sign-on through the configured OIDC provider is available.
+     */
+    oidc_enabled: boolean;
+};
+
+/**
  * AuthorRead
  *
  * Minimal public projection of a user, embedded as the author of a brew or tasting.
@@ -1856,6 +1876,36 @@ export type SystemHealthResponses = {
 };
 
 export type SystemHealthResponse = SystemHealthResponses[keyof SystemHealthResponses];
+
+export type AuthReadAuthConfigData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/config';
+};
+
+export type AuthReadAuthConfigResponses = {
+    /**
+     * Successful Response
+     */
+    200: AuthConfig;
+};
+
+export type AuthReadAuthConfigResponse = AuthReadAuthConfigResponses[keyof AuthReadAuthConfigResponses];
+
+export type AuthOidcLoginData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/oidc/login';
+};
+
+export type AuthOidcCallbackData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/oidc/callback';
+};
 
 export type AuthLoginData = {
     body: BodyAuthLogin;

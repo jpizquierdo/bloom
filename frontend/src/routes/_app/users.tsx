@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { isAdmin, useCurrentUser } from "@/lib/auth"
+import { isAdmin, useAuthConfig, useCurrentUser } from "@/lib/auth"
 import { formatDate, stripEmpty } from "@/lib/format"
 import { submitAndClose, useCrudFeedback } from "@/lib/mutations"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -85,6 +85,8 @@ function UsersPage() {
     defaultValues: { username: "", role: "user", is_active: true },
   })
 
+  const { data: authConfig } = useAuthConfig()
+  const ssoOnly = authConfig ? !authConfig.local_auth_enabled : false
   const create = useMutation({
     ...usersCreateUserMutation(),
     onSuccess: feedback.onSuccess("User created"),
@@ -184,7 +186,11 @@ function UsersPage() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         title="New user"
-        description="They get a welcome email with a link to set their own password."
+        description={
+          ssoOnly
+            ? "They sign in with SSO; the account is linked by this email on their first login."
+            : "They get a welcome email with a link to set their own password."
+        }
         form={createForm}
         onSubmit={(values) =>
           submitAndClose(create.mutateAsync({ body: stripEmpty(values) as CreateValues }), () =>
@@ -221,23 +227,25 @@ function UsersPage() {
             </FormItem>
           )}
         />
-        <FormField
-          control={createForm.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password (optional)</FormLabel>
-              <FormControl>
-                <Input type="password" autoComplete="new-password" {...field} />
-              </FormControl>
-              <FormDescription>
-                Leave blank to let them choose their own from the welcome email. At least 8
-                characters otherwise.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {ssoOnly ? null : (
+          <FormField
+            control={createForm.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password (optional)</FormLabel>
+                <FormControl>
+                  <Input type="password" autoComplete="new-password" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Leave blank to let them choose their own from the welcome email. At least 8
+                  characters otherwise.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
       </ResourceDialog>
 
       <ResourceDialog
