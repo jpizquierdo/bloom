@@ -24,8 +24,8 @@ from bloom.services.errors import BadRequestError, ConflictError, ForbiddenError
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Run startup tasks: check the JWT secret, wait for the DB, migrate to head, bootstrap the admin.
 
-    Single-instance deployment, so migrating in-process is safe; the
-    ``db_is_at_head`` guard makes restarts cheap.
+    Several processes may start together: ``init_db`` serialises them with an advisory
+    lock, and the ``db_is_at_head`` guard makes restarts cheap.
     """
     get_settings().require_strong_jwt_secret()
     init_db.init_db()

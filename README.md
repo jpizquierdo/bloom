@@ -53,8 +53,8 @@ Open **http://localhost:8000** — the web UI, with the API under `/api/v1` and 
 Swagger docs at **`/docs`**.
 
 On startup Bloom waits for the database, applies any pending migrations, and bootstraps the
-first admin — there is no separate migration step. It runs as a **single instance**, which
-keeps migrating in-process simple and safe.
+first admin — there is no separate migration step. If several processes start at once they
+take turns on a database lock, so only the first one migrates.
 
 > Compose pulls the published `jpizquierdo/bloom` image. To build it yourself, run the app from
 > source, or hack on it, see [Development](#development).

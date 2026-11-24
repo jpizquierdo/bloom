@@ -107,8 +107,9 @@ Design points:
   separate permissions table — two roles don't justify RBAC machinery yet.
 - **On startup** (FastAPI lifespan, see `bloom/db/init_db.py`) the app waits for the DB,
   applies pending migrations (`alembic upgrade head`, guarded by a `db_is_at_head` check so
-  restarts are cheap), and bootstraps the admin. Bloom is deployed as a **single instance**,
-  so migrating in-process is simple and race-free — no separate migration Job needed.
+  restarts are cheap), and bootstraps the admin. Migrating and bootstrapping run under a
+  Postgres **advisory lock**, so several workers or replicas starting at once take turns
+  instead of racing — no separate migration Job needed.
 - The **first admin is bootstrapped from env vars** (`BLOOM_ADMIN_EMAIL` /
   `BLOOM_ADMIN_PASSWORD`), created only if it does not exist. There is **no public sign-up**:
   admins create further accounts, which default to `user`.
@@ -565,9 +566,9 @@ account's counter. Every recovery request counts, known address or not, at three
 ten per client, so the `429` reveals nothing about which accounts exist. Login also verifies
 against a dummy hash when the account is unknown, so response time does not either.
 
-State lives in process memory, which is the same single-instance assumption as startup
-migrations. It resets on restart and would multiply with worker count; scaling out needs a shared
-store. Behind a reverse proxy the client is the proxy's address unless uvicorn trusts its
+State lives in process memory, so it assumes a single process. It resets on restart and would
+multiply with worker count; scaling out needs a shared store (startup migrations, by contrast,
+are already safe with several processes). Behind a reverse proxy the client is the proxy's address unless uvicorn trusts its
 `X-Forwarded-For`, which would pool every user into one bucket.
 
 ### Users & auth
