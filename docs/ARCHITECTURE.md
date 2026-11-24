@@ -407,8 +407,8 @@ silent:
 
 ### 18 — Bearer token in `localStorage`, no refresh flow
 
-The API issues a single JWT access token (lifetime `ACCESS_TOKEN_EXPIRE_HOURS`, defaulting to a
-**generous 48h** for self-hosted convenience — lower it via env if you want shorter sessions) and
+The API issues a single JWT access token (lifetime `ACCESS_TOKEN_EXPIRE_HOURS`, defaulting to
+**12h**, so a leaked token is useful for at most half a day — raise or lower it via env) and
 has no refresh endpoint, so the UI stores the token in `localStorage`, attaches it on every
 request, and on a `401` clears it and returns to `/login`. An expired session means logging in
 again.
