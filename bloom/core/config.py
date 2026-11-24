@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     # The default is a placeholder that fails the startup check; there is deliberately no usable one.
     JWT_SECRET: str = "change-me-in-production"
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_HOURS: int = 48  # generous default for self-hosted; override to tighten
+    ACCESS_TOKEN_EXPIRE_HOURS: int = 12
     RESET_TOKEN_EXPIRE_MINUTES: int = 30
 
     LOG_LEVEL: str = "INFO"

@@ -53,8 +53,8 @@ Open **http://localhost:8000** — the web UI, with the API under `/api/v1` and 
 Swagger docs at **`/docs`**.
 
 On startup Bloom waits for the database, applies any pending migrations, and bootstraps the
-first admin — there is no separate migration step. It runs as a **single instance**, which
-keeps migrating in-process simple and safe.
+first admin — there is no separate migration step. If several processes start at once they
+take turns on a database lock, so only the first one migrates.
 
 > Compose pulls the published `jpizquierdo/bloom` image. To build it yourself, run the app from
 > source, or hack on it, see [Development](#development).
@@ -68,7 +68,7 @@ Settings come from environment variables or a local `.env` (copy `.env.example`)
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` | Postgres credentials (default `bloom` / `bloom`). |
 | `POSTGRES_SERVER` / `POSTGRES_PORT` / `POSTGRES_DB` | Postgres host, port and database (default `localhost` / `5432` / `bloom`). |
 | `JWT_SECRET` | Access-token signing key, at least 32 characters — **required**: the app refuses to start without it. Generate one with `openssl rand -hex 32`. |
-| `ACCESS_TOKEN_EXPIRE_HOURS` | Access-token lifetime in hours; generous by default for self-hosted use — set it lower for shorter sessions. |
+| `ACCESS_TOKEN_EXPIRE_HOURS` | Access-token lifetime in hours (default 12): how often people sign in again, since there is no refresh flow. |
 | `RESET_TOKEN_EXPIRE_MINUTES` | Lifetime of a password-reset link (default 30). |
 | `SMTP_HOST` / `SMTP_PORT` | Outgoing mail server (default port `587`). Leave the host blank to disable sending — links are written to the log instead. |
 | `SMTP_USER` / `SMTP_PASSWORD` | SMTP credentials, if the server needs them. |

@@ -1,9 +1,9 @@
 """Startup database tasks: wait for the DB, apply migrations, bootstrap the admin.
 
-Run from the FastAPI lifespan. Bloom is deployed as a single instance, so doing
-this in-process is simple and safe — there is no second worker to race with. The
-``db_is_at_head`` guard keeps restarts cheap: migrations run only when the schema
-is actually behind.
+Run from the FastAPI lifespan. Migrating and bootstrapping run under a Postgres advisory
+lock, so several workers or replicas starting together take turns: the first migrates and
+creates the admin, the rest find both done. The ``db_is_at_head`` guard keeps restarts
+cheap: migrations run only when the schema is actually behind.
 """
 
 from __future__ import annotations
@@ -24,6 +24,8 @@ from bloom.services import auth_service
 logger = get_logger(__name__)
 
 ALEMBIC_INI = "alembic.ini"
+# Any constant shared by every Bloom process; this one spells "bloom".
+STARTUP_LOCK_ID = 0x626C6F6F6D
 
 
 def wait_for_db(max_attempts: int = 10, delay_seconds: float = 1.0) -> None:
@@ -73,7 +75,12 @@ def bootstrap_admin() -> None:
 
 
 def init_db() -> None:
-    """Run all startup DB tasks in order."""
+    """Run all startup DB tasks in order, one process at a time."""
     wait_for_db()
-    migrate_to_head()
-    bootstrap_admin()
+    with engine.connect() as lock_conn:
+        lock_conn.execute(text("SELECT pg_advisory_lock(:id)"), {"id": STARTUP_LOCK_ID})
+        try:
+            migrate_to_head()
+            bootstrap_admin()
+        finally:
+            lock_conn.execute(text("SELECT pg_advisory_unlock(:id)"), {"id": STARTUP_LOCK_ID})

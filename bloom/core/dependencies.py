@@ -46,7 +46,7 @@ def get_current_user(
         raise credentials_exception
     try:
         user_id = int(subject)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         raise credentials_exception
 
     user = users_repo.get_by_id(db, user_id)

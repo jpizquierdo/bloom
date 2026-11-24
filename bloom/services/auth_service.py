@@ -27,7 +27,8 @@ def authenticate(db: Session, identifier: str, password: str) -> User | None:
     user = users_repo.get_by_email(db, identifier) or users_repo.get_by_username(db, identifier)
     password_ok = verify_password(password, user.hashed_password if user else _DUMMY_HASH)
     if user is None:
-        logger.warning("Failed login: unknown identifier %s", identifier)
+        # Not the identifier itself: people sometimes type their password into that box.
+        logger.warning("Failed login: unknown identifier")
         return None
     if not user.is_active:
         logger.warning("Failed login: inactive user %s (%s)", user.id, user.email)
@@ -62,7 +63,7 @@ def reset_password(db: Session, token: str, new_password: str) -> User:
 
     try:
         user_id = int(payload.get("sub"))  # type: ignore[arg-type]
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         raise UnprocessableError(_INVALID_TOKEN) from None
 
     user = users_repo.get_by_id(db, user_id)

@@ -53,7 +53,7 @@ def send_email(*, to: str, subject: str, html: str, text: str) -> None:
             if settings.SMTP_USER and settings.SMTP_PASSWORD:
                 smtp.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
             smtp.send_message(message)
-    except (OSError, smtplib.SMTPException):
+    except OSError, smtplib.SMTPException:
         # Sending runs in a background task, so raising here would only produce an
         # unhandled error after the response has already gone out.
         logger.exception("Failed to send email to %s (subject: %s)", to, subject)

@@ -5,7 +5,7 @@ description = "Self-hosted specialty coffee tracking API"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
 license-files = ["LICENSE"]
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "fastapi[standard]>=0.162.2",
     "sqlalchemy>=2.0.51",
@@ -42,7 +42,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 140
-target-version = "py312"
+target-version = "py314"
 extend-exclude = ["alembic/versions"]
 
 [tool.ruff.lint]
