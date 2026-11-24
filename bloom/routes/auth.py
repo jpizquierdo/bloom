@@ -16,7 +16,7 @@ from bloom.core.security import create_access_token
 from bloom.schemas.common import Message
 from bloom.schemas.user import AuthConfig, RecoverPassword, ResetPassword, Token, UserRead
 from bloom.services import auth_service, email_service, oidc_service
-from bloom.services.errors import ForbiddenError, NotFoundError
+from bloom.services.errors import ConflictError, ForbiddenError, NotFoundError
 
 logger = get_logger(__name__)
 
@@ -69,6 +69,9 @@ async def oidc_callback(request: Request, db: DbSession) -> RedirectResponse:
         user = await run_in_threadpool(oidc_service.login_from_claims, db, dict(claims))
     except ForbiddenError:
         return RedirectResponse("/login?error=oidc_denied", status_code=status.HTTP_302_FOUND)
+    except ConflictError:
+        # A concurrent first login took the username or sub; a retry matches the new account.
+        return RedirectResponse("/login?error=oidc_failed", status_code=status.HTTP_302_FOUND)
     return RedirectResponse(f"/login#token={create_access_token(str(user.id))}", status_code=status.HTTP_302_FOUND)
 
 

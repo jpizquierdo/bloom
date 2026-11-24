@@ -167,6 +167,14 @@ def test_idp_failure_redirects_with_error(client, idp, monkeypatch):
     assert resp.headers["location"] == "/login?error=oidc_failed"
 
 
+def test_conflict_on_create_redirects_with_error(client, idp, monkeypatch):
+    # A concurrent first login won the insert: the browser gets the login page, not a JSON 409.
+    from bloom.repositories import users as repo
+
+    monkeypatch.setattr(repo, "add_if_free", lambda db, **kw: None)
+    assert _sso(client, idp) == (None, "oidc_failed")
+
+
 def test_disable_local_auth_blocks_password_endpoints(client, users, oidc_settings, monkeypatch):
     monkeypatch.setattr(oidc_settings, "DISABLE_LOCAL_AUTH", True)
     assert client.post("/auth/token", data={"username": "alice", "password": "alicepass1"}).status_code == 403
