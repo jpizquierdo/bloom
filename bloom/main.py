@@ -32,6 +32,21 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
 
 
+# Service errors stay framework-agnostic; this is where each becomes an HTTP status.
+DOMAIN_ERRORS: dict[type[Exception], tuple[int, str]] = {
+    BadRequestError: (400, "Bad request"),
+    ForbiddenError: (403, "Forbidden"),
+    NotFoundError: (404, "Not found"),
+    ConflictError: (409, "Conflict"),
+    UnprocessableError: (422, "Unprocessable"),
+}
+
+
+async def _domain_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    status_code, default_detail = next(mapping for error, mapping in DOMAIN_ERRORS.items() if isinstance(exc, error))
+    return JSONResponse(status_code=status_code, content={"detail": str(exc) or default_detail})
+
+
 def custom_generate_unique_id(route: APIRoute) -> str:
     """Name operations ``<tag>-<handler>`` so generated clients get readable method names."""
     return f"{route.tags[0]}-{route.name}"
@@ -75,25 +90,8 @@ def create_app() -> FastAPI:
             allow_headers=["Authorization", "Content-Type"],
         )
 
-    @app.exception_handler(BadRequestError)
-    async def _bad_request_handler(request: Request, exc: BadRequestError) -> JSONResponse:
-        return JSONResponse(status_code=400, content={"detail": str(exc) or "Bad request"})
-
-    @app.exception_handler(NotFoundError)
-    async def _not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:
-        return JSONResponse(status_code=404, content={"detail": str(exc) or "Not found"})
-
-    @app.exception_handler(ForbiddenError)
-    async def _forbidden_handler(request: Request, exc: ForbiddenError) -> JSONResponse:
-        return JSONResponse(status_code=403, content={"detail": str(exc) or "Forbidden"})
-
-    @app.exception_handler(ConflictError)
-    async def _conflict_handler(request: Request, exc: ConflictError) -> JSONResponse:
-        return JSONResponse(status_code=409, content={"detail": str(exc) or "Conflict"})
-
-    @app.exception_handler(UnprocessableError)
-    async def _unprocessable_handler(request: Request, exc: UnprocessableError) -> JSONResponse:
-        return JSONResponse(status_code=422, content={"detail": str(exc) or "Unprocessable"})
+    for error in DOMAIN_ERRORS:
+        app.add_exception_handler(error, _domain_error_handler)
 
     # Deliberately outside the API prefix: container healthchecks probe /health.
     @app.get("/health", tags=["system"])
