@@ -23,6 +23,7 @@ bloom/static/
 .claude/settings.local.json
 # Agent skills are regenerated per-machine (uvx library-skills); symlinks point into .venv.
 .claude/skills/
+.agents/
 
 # One-off bootstrap prompt (not part of the project)
 CLAUDE_CODE_PROMPT.md
