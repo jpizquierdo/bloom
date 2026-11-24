@@ -8,7 +8,10 @@ services:
       POSTGRES_USER: bloom
       POSTGRES_PASSWORD: bloom
     ports:
-      - "5432:5432"
+      # Loopback only: the app reaches the database over the compose network, and the
+      # credentials are the well-known defaults. Remove this mapping entirely if you do not
+      # run the tests or psql from the host.
+      - "127.0.0.1:5432:5432"
     volumes:
       - bloom_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -21,9 +24,10 @@ services:
     container_name: bloom-mailpit
     restart: unless-stopped
     ports:
-      # Web UI at http://localhost:8025 — every email the app sends lands here.
-      - "8025:8025"
-      - "1025:1025"
+      # Web UI at http://localhost:8025 — every email the app sends lands here, password-reset
+      # links included, so it must not be reachable from other machines.
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
 
   bloom:
     image: jpizquierdo/bloom:0.14.1
