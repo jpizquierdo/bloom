@@ -24,17 +24,42 @@ treat it as a playground, not as storage.
 
 ## Screenshots
 
-The shared dashboard — coffees, brews and recent extractions at a glance:
+Each screenshot follows your GitHub theme, light or dark, like the app itself.
 
-![Bloom dashboard](docs/screenshots/dashboard.png)
+Your dashboard: totals for the shared log and your most recent brews, with your own star
+rating and the control-chart verdict on each:
 
-| Beans, filterable by roaster | A coffee: its lots and its brews |
-| :--: | :--: |
-| ![Beans list](docs/screenshots/beans.png) | ![Bean detail](docs/screenshots/bean-detail.png) |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/dashboard-dark.png">
+  <img alt="Bloom dashboard" src="docs/screenshots/dashboard.png">
+</picture>
+
+The coffee catalog, filterable by roaster, roast type and origin, and a single coffee with
+its recipes, lots and brews:
+
+<table>
+  <tr>
+    <td>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/beans-dark.png">
+        <img alt="Beans list" src="docs/screenshots/beans.png">
+      </picture>
+    </td>
+    <td>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/bean-detail-dark.png">
+        <img alt="Bean detail" src="docs/screenshots/bean-detail.png">
+      </picture>
+    </td>
+  </tr>
+</table>
 
 A brew with its preparation details, extraction-yield diagnostics and a tasting:
 
-![Brew detail](docs/screenshots/brew-detail.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/brew-detail-dark.png">
+  <img alt="Brew detail" src="docs/screenshots/brew-detail.png">
+</picture>
 
 ## Quick start
 
