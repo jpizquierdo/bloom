@@ -45,7 +45,7 @@ const schema = z.object({
 
 function LoginPage() {
   const { error: ssoError } = Route.useSearch()
-  const { data: config } = useAuthConfig()
+  const { data: config, isPending: configPending } = useAuthConfig()
   const forceSso = config ? !config.local_auth_enabled : false
 
   useEffect(() => {
@@ -53,9 +53,13 @@ function LoginPage() {
     if (forceSso && !ssoError) window.location.assign(SSO_LOGIN_URL)
   }, [forceSso, ssoError])
 
-  if (forceSso && !ssoError) {
+  // Wait for the config, or the password form flashes before an SSO-only redirect.
+  if (configPending || (forceSso && !ssoError)) {
     return (
-      <AuthShell title="Welcome back" description="Redirecting to single sign-on…">
+      <AuthShell
+        title="Welcome back"
+        description={configPending ? "Loading…" : "Redirecting to single sign-on…"}
+      >
         <Loader2 className="mx-auto animate-spin text-muted-foreground" />
       </AuthShell>
     )
