@@ -17,7 +17,7 @@ from bloom.core.dependencies import get_db
 from bloom.core.logger import configure_logging
 from bloom.db import init_db
 from bloom.routes import auth, bean_lots, beans, brew_methods, brews, equipment, recipes, roasters, tastings, users
-from bloom.services.errors import ConflictError, ForbiddenError, NotFoundError, UnprocessableError
+from bloom.services.errors import BadRequestError, ConflictError, ForbiddenError, NotFoundError, UnprocessableError
 
 
 @asynccontextmanager
@@ -74,6 +74,10 @@ def create_app() -> FastAPI:
             allow_methods=["*"],
             allow_headers=["*"],
         )
+
+    @app.exception_handler(BadRequestError)
+    async def _bad_request_handler(request: Request, exc: BadRequestError) -> JSONResponse:
+        return JSONResponse(status_code=400, content={"detail": str(exc) or "Bad request"})
 
     @app.exception_handler(NotFoundError)
     async def _not_found_handler(request: Request, exc: NotFoundError) -> JSONResponse:

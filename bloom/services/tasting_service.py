@@ -56,9 +56,11 @@ def create_tasting(db: Session, brew_id: int, data: TastingCreate, user: User) -
     ``ConflictError`` (409) — the existing tasting should be edited instead.
     """
     brew_service.get_brew(db, brew_id)  # 404 if the brew does not exist
-    if tastings_repo.get_for_brew_user(db, brew_id, user.id) is not None:
+    tasting = None
+    if tastings_repo.get_for_brew_user(db, brew_id, user.id) is None:
+        tasting = tastings_repo.add_if_absent(db, brew_id=brew_id, user_id=user.id, **data.model_dump(exclude_none=True))
+    if tasting is None:
         raise ConflictError("You have already tasted this brew; edit your existing tasting")
-    tasting = tastings_repo.add(db, brew_id=brew_id, user_id=user.id, **data.model_dump(exclude_none=True))
     db.commit()
     db.refresh(tasting)
     logger.info("Tasting %s created by user %s (brew %s)", tasting.id, user.id, brew_id)

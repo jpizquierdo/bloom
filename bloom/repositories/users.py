@@ -4,7 +4,10 @@ Functions here mutate the session (add/flush) but do not commit; committing is
 the service layer's responsibility so it can own the transaction boundary.
 """
 
+from typing import Any
+
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from bloom.db.models.user import User
@@ -30,9 +33,29 @@ def list_all(db: Session) -> list[User]:
     return list(db.execute(select(User).order_by(User.id)).scalars().all())
 
 
-def add(db: Session, *, email: str, username: str, hashed_password: str, role: str) -> User:
-    """Add a new user to the session and flush to assign its id."""
-    user = User(email=email, username=username, hashed_password=hashed_password, role=role)
-    db.add(user)
-    db.flush()
-    return user
+def add_if_free(db: Session, *, email: str, username: str, hashed_password: str, role: str) -> User | None:
+    """Insert a user, or return ``None`` if the unique email / ``lower(username)`` index rejects it.
+
+    Runs in a savepoint so losing a race against a concurrent insert leaves the caller's
+    transaction usable.
+    """
+    try:
+        with db.begin_nested():
+            user = User(email=email, username=username, hashed_password=hashed_password, role=role)
+            db.add(user)
+            db.flush()
+            return user
+    except IntegrityError:
+        return None
+
+
+def try_update(db: Session, user: User, changes: dict[str, Any]) -> bool:
+    """Apply ``changes``; return ``False`` if the new username collides (unique index)."""
+    try:
+        with db.begin_nested():
+            for field, value in changes.items():
+                setattr(user, field, value)
+            db.flush()
+    except IntegrityError:
+        return False
+    return True

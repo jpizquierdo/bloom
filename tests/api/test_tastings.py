@@ -89,3 +89,14 @@ def test_tasting_notes_cleared_with_null(client, alice_headers, brew_id):
 
 def test_tasting_on_unknown_brew_404(client, alice_headers):
     assert client.post("/brews/9999/tastings", headers=alice_headers, json={"overall": 4}).status_code == 404
+
+
+def test_double_tap_race_is_409_not_500(client, alice_headers, brew_id, monkeypatch):
+    # A double-tap on the quick-rating UI sends two requests that both pass the "already
+    # tasted?" look-up; the unique (brew, user) index must still answer 409, not 500.
+    from bloom.repositories import tastings as tastings_repo
+
+    assert client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 4}).status_code == 201
+
+    monkeypatch.setattr(tastings_repo, "get_for_brew_user", lambda *a, **k: None)
+    assert client.post(f"/brews/{brew_id}/tastings", headers=alice_headers, json={"overall": 5}).status_code == 409

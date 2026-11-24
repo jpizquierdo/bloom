@@ -99,3 +99,37 @@ def test_null_role_or_is_active_rejected(client, admin_headers, users):
 
 def test_patch_missing_user_404(client, admin_headers):
     assert client.patch("/users/9999", headers=admin_headers, json={"is_active": False}).status_code == 404
+
+
+def test_create_user_race_is_409_not_500(client, admin_headers, monkeypatch):
+    # Two admins submit the same new user at once. Both pass the "is it free?" look-ups,
+    # and the loser is stopped by the unique index. Simulate that by blinding the look-ups.
+    from bloom.repositories import users as users_repo
+
+    payload = {"email": "carol@example.com", "username": "carol", "password": "carolpass1"}
+    assert client.post("/users", headers=admin_headers, json=payload).status_code == 201
+
+    monkeypatch.setattr(users_repo, "get_by_email", lambda *a, **k: None)
+    monkeypatch.setattr(users_repo, "get_by_username", lambda *a, **k: None)
+    assert client.post("/users", headers=admin_headers, json={**payload, "email": "carol2@example.com"}).status_code == 409
+    assert client.post("/users", headers=admin_headers, json={**payload, "username": "carol2"}).status_code == 409
+
+
+def test_rename_race_is_409_not_500(client, admin_headers, users, monkeypatch):
+    from bloom.repositories import users as users_repo
+
+    monkeypatch.setattr(users_repo, "get_by_username", lambda *a, **k: None)
+    resp = client.patch(f"/users/{users['alice'].id}", headers=admin_headers, json={"username": "bob"})
+    assert resp.status_code == 409
+
+
+def test_failed_rename_leaves_the_user_unchanged(client, admin_headers, users):
+    alice_id = users["alice"].id
+    assert client.patch(f"/users/{alice_id}", headers=admin_headers, json={"username": "bob", "role": "admin"}).status_code == 409
+    alice = next(u for u in client.get("/users", headers=admin_headers).json() if u["id"] == alice_id)
+    assert (alice["username"], alice["role"]) == ("alice", "user")
+
+
+def test_admin_cannot_self_deactivate(client, admin_headers, users):
+    resp = client.patch(f"/users/{users['admin'].id}", headers=admin_headers, json={"is_active": False})
+    assert resp.status_code == 400

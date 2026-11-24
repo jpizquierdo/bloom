@@ -62,7 +62,7 @@ bloom/
 │   │   ├── email_service.py   # composes the emails; delivery lives in core/email.py
 │   │   ├── recipe_service.py  brew_service.py  tasting_service.py  lookups_service.py
 │   │   ├── access.py          # ownership helper (owns_or_admin)
-│   │   └── errors.py          # NotFoundError (framework-agnostic)
+│   │   └── errors.py          # NotFound/Forbidden/Conflict/Unprocessable/BadRequest (framework-agnostic)
 │   └── routes/                # FastAPI routers (thin — validate, delegate, return)
 │       ├── auth.py  users.py  beans.py  recipes.py  brews.py
 │       ├── tastings.py  brew_methods.py  equipment.py
@@ -309,7 +309,7 @@ Postgres' collation, and `str.lower()` does not always agree with it (Turkish `�
 one side in Python would let a lookup miss a row the index still rejects as a duplicate.
 
 **Every write that can collide with the unique index is savepoint-guarded** (`add_if_absent`,
-`try_update`, `try_delete` in the repository): losing a race against a concurrent insert or
+`add_if_free`, `try_update`, `try_delete` in the repository, for roasters, users and tastings alike): losing a race against a concurrent insert or
 rename is a `409`, never an `IntegrityError` escaping as a `500`. The same applies to the FK:
 `bean.roaster_id` is `RESTRICT` and `Roaster.beans` is `passive_deletes`, so the database — not
 a check-then-delete in the service, which can go stale — is what refuses to strand a bean.
