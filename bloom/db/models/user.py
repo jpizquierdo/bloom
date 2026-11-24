@@ -32,8 +32,8 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
-    # Login handle, unique case-insensitively. Set by an admin today; will be
-    # supplied by the IdP (Keycloak/Authentik) once automated provisioning lands.
+    # Login handle, unique case-insensitively. Set by an admin, or derived from the IdP's
+    # claims when OIDC creates the account.
     username: Mapped[str] = mapped_column(Text, nullable=False)
     hashed_password: Mapped[str] = mapped_column(Text, nullable=False)
     # Bumped on every password change; a reset token issued before it is refused, which is
@@ -42,6 +42,8 @@ class User(Base):
     password_changed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC), server_default=func.now()
     )
+    # The OIDC ``sub`` this account is linked to; set on its first SSO login.
+    oidc_subject: Mapped[str | None] = mapped_column(Text, nullable=True, unique=True)
     role: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("'user'"))
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())

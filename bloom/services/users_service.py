@@ -25,7 +25,15 @@ def _ensure_username_free(db: Session, username: str, *, owner_id: int | None = 
         raise ConflictError("Username already taken")
 
 
-def create_user(db: Session, *, email: str, username: str, password: str | None = None, role: str = "user") -> User:
+def create_user(
+    db: Session,
+    *,
+    email: str,
+    username: str,
+    password: str | None = None,
+    role: str = "user",
+    oidc_subject: str | None = None,
+) -> User:
     """Create a user with a hashed password and commit.
 
     Without a ``password`` the account gets an unguessable random one nobody holds, so the
@@ -36,7 +44,9 @@ def create_user(db: Session, *, email: str, username: str, password: str | None 
         raise ConflictError("Email already registered")
     _ensure_username_free(db, username)
     secret = password if password is not None else secrets.token_urlsafe(32)
-    user = users_repo.add_if_free(db, email=email, username=username, hashed_password=hash_password(secret), role=role)
+    user = users_repo.add_if_free(
+        db, email=email, username=username, hashed_password=hash_password(secret), role=role, oidc_subject=oidc_subject
+    )
     if user is None:
         raise ConflictError("Email or username already in use")
     db.commit()
