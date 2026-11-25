@@ -81,7 +81,8 @@ On startup Bloom waits for the database, applies any pending migrations, and boo
 first admin — there is no separate migration step. If several processes start at once they
 take turns on a database lock, so only the first one migrates.
 
-> Compose pulls the published `jpizquierdo/bloom` image. To build it yourself, run the app from
+> Compose pulls the published `jpizquierdo/bloom` image from Docker Hub; the same tags are on
+> GitHub as `ghcr.io/jpizquierdo/bloom`. To build it yourself, run the app from
 > source, or hack on it, see [Development](#development).
 
 ## Configuration

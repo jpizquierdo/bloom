@@ -7,6 +7,9 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -21,6 +24,13 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Compute image tags
         id: tags
         run: |
@@ -28,12 +38,16 @@ jobs:
           # Always tag the exact version. A prerelease (e.g. v0.3.0-rc1) stops
           # there — it must not move the floating `latest` or minor tags that
           # point at the newest stable release.
-          TAGS="jpizquierdo/bloom:${VERSION}"
+          SUFFIXES="${VERSION}"
           if [ "${{ github.event.release.prerelease }}" != "true" ]; then
-            MINOR_VERSION=$(echo "$VERSION" | cut -d '.' -f1,2)
-            TAGS="${TAGS}"$'\n'"jpizquierdo/bloom:${MINOR_VERSION}"
-            TAGS="${TAGS}"$'\n'"jpizquierdo/bloom:latest"
+            SUFFIXES="${SUFFIXES} $(echo "$VERSION" | cut -d '.' -f1,2) latest"
           fi
+          TAGS=""
+          for IMAGE in jpizquierdo/bloom ghcr.io/jpizquierdo/bloom; do
+            for SUFFIX in $SUFFIXES; do
+              TAGS="${TAGS}${IMAGE}:${SUFFIX}"$'\n'
+            done
+          done
           {
             echo "tags<<EOF"
             echo "$TAGS"
@@ -47,3 +61,5 @@ jobs:
           file: Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
+          # Links the GHCR package to this repo (README, access inherited from the repo).
+          labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
